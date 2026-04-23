@@ -1,0 +1,15 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/phase1/phase1_run02_inverse_frequency_learned_seed2/config.json
+step=1 train_loss=4.7163 train_acc=0.0039 train_ppl=111.7557 train_bpc=6.8042 val_loss=4.5621 val_acc=0.0007 val_ppl=95.7852 val_bpc=6.5817
+step=50 train_loss=3.2953 train_acc=0.1621 train_ppl=26.9845 train_bpc=4.7541 val_loss=3.2089 val_acc=0.1642 val_ppl=24.7528 val_bpc=4.6295
+step=100 train_loss=2.8199 train_acc=0.2207 train_ppl=16.7758 train_bpc=4.0683 val_loss=2.8108 val_acc=0.2665 val_ppl=16.6236 val_bpc=4.0552
+step=150 train_loss=2.6863 train_acc=0.2773 train_ppl=14.6779 train_bpc=3.8756 val_loss=2.6521 val_acc=0.2871 val_ppl=14.1833 val_bpc=3.8261
+step=200 train_loss=2.4545 train_acc=0.3262 train_ppl=11.6403 train_bpc=3.5411 val_loss=2.5724 val_acc=0.3087 val_ppl=13.0967 val_bpc=3.7111
+step=250 train_loss=2.4539 train_acc=0.3203 train_ppl=11.6335 train_bpc=3.5402 val_loss=2.4929 val_acc=0.3226 val_ppl=12.0960 val_bpc=3.5965
+step=300 train_loss=2.4340 train_acc=0.3027 train_ppl=11.4046 train_bpc=3.5115 val_loss=2.4753 val_acc=0.3213 val_ppl=11.8853 val_bpc=3.5711
+step=350 train_loss=2.4586 train_acc=0.3652 train_ppl=11.6883 train_bpc=3.5470 val_loss=2.4152 val_acc=0.3280 val_ppl=11.1918 val_bpc=3.4844
+step=400 train_loss=2.3358 train_acc=0.3398 train_ppl=10.3381 train_bpc=3.3699 val_loss=2.3900 val_acc=0.3337 val_ppl=10.9133 val_bpc=3.4480
+step=450 train_loss=2.3711 train_acc=0.3477 train_ppl=10.7089 train_bpc=3.4207 val_loss=2.3522 val_acc=0.3495 val_ppl=10.5082 val_bpc=3.3934
+step=500 train_loss=2.3238 train_acc=0.3516 train_ppl=10.2148 train_bpc=3.3526 val_loss=2.3307 val_acc=0.3508 val_ppl=10.2848 val_bpc=3.3624
+training finished (device=cpu, corpus=plato_jowett, vocab=96, train_tokens=90000, val_tokens=10000)
+final train(step=500) loss=2.3238 acc=0.3516 ppl=10.2148 bpc=3.3526 last eval(step=500) val_loss=2.3307 val_acc=0.3508 val_ppl=10.2848 val_bpc=3.3624
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/phase1/phase1_run02_inverse_frequency_learned_seed2/checkpoint_step_000500.pt

@@ -1,0 +1,15 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/phase7/phase7_run72_schedule_only_seed1/config.json
+step=1 lr=2e-05 train_loss=4.9773 train_acc=0.0000 train_ppl=145.0791 train_bpc=7.1807 val_loss=4.9577 val_acc=0.0009 val_ppl=142.2674 val_bpc=7.1525
+step=50 lr=0.001 train_loss=3.6940 train_acc=0.0977 train_ppl=40.2064 train_bpc=5.3294 val_loss=3.6823 val_acc=0.1041 val_ppl=39.7380 val_bpc=5.3124
+step=100 lr=0.000972862 train_loss=3.2022 train_acc=0.1621 train_ppl=24.5875 train_bpc=4.6199 val_loss=3.1693 val_acc=0.1583 val_ppl=23.7898 val_bpc=4.5723
+step=150 lr=0.00089472 train_loss=3.0796 train_acc=0.1543 train_ppl=21.7503 train_bpc=4.4430 val_loss=3.0818 val_acc=0.1616 val_ppl=21.7966 val_bpc=4.4460
+step=200 lr=0.000775 train_loss=3.0344 train_acc=0.1680 train_ppl=20.7895 train_bpc=4.3778 val_loss=3.0858 val_acc=0.1591 val_ppl=21.8849 val_bpc=4.4519
+step=250 lr=0.000628142 train_loss=3.0702 train_acc=0.1523 train_ppl=21.5467 train_bpc=4.4294 val_loss=3.0823 val_acc=0.1587 val_ppl=21.8077 val_bpc=4.4468
+step=300 lr=0.000471858 train_loss=3.0563 train_acc=0.1738 train_ppl=21.2482 train_bpc=4.4093 val_loss=3.0617 val_acc=0.1593 val_ppl=21.3634 val_bpc=4.4171
+step=350 lr=0.000325 train_loss=2.9747 train_acc=0.1641 train_ppl=19.5836 train_bpc=4.2916 val_loss=3.0438 val_acc=0.1605 val_ppl=20.9855 val_bpc=4.3913
+step=400 lr=0.00020528 train_loss=3.1159 train_acc=0.1719 train_ppl=22.5534 train_bpc=4.4953 val_loss=3.0724 val_acc=0.1628 val_ppl=21.5940 val_bpc=4.4326
+step=450 lr=0.000127138 train_loss=2.9886 train_acc=0.1680 train_ppl=19.8577 train_bpc=4.3116 val_loss=3.0429 val_acc=0.1631 val_ppl=20.9658 val_bpc=4.3900
+step=500 lr=0.0001 train_loss=3.0098 train_acc=0.1816 train_ppl=20.2832 train_bpc=4.3422 val_loss=3.0519 val_acc=0.1595 val_ppl=21.1554 val_bpc=4.4030
+training finished (device=cpu, corpus=plato_jowett, vocab=96, train_tokens=90000, val_tokens=10000, state_shape=(2, 3, 4))
+final train(step=500) loss=3.0098 acc=0.1816 ppl=20.2832 bpc=4.3422 last eval(step=500) val_loss=3.0519 val_acc=0.1595 val_ppl=21.1554 val_bpc=4.4030
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/phase7/phase7_run72_schedule_only_seed1/checkpoint_step_000500.pt

@@ -47,13 +47,13 @@ def _corpora_root() -> Path:
 
 
 _CORPORA: Dict[str, BundledCorpus] = {
-    "greek_philosophy_classics": BundledCorpus(
-        name="greek_philosophy_classics",
-        combined_filename="greek_philosophy_classics_combined.txt",
+    "chinese_classics": BundledCorpus(
+        name="chinese_classics",
+        combined_filename="chinese_classics_combined.txt",
     ),
-    "plato_jowett": BundledCorpus(
-        name="plato_jowett",
-        combined_filename="plato_jowett_combined.txt",
+    "greek_classics": BundledCorpus(
+        name="greek_classics",
+        combined_filename="greek_classics_combined.txt",
     ),
 }
 

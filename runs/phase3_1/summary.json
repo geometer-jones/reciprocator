@@ -1,0 +1,542 @@
+[
+  {
+    "config_id": 31,
+    "label": "alpha01",
+    "residual_ema_alpha": 0.1,
+    "growth_residual_ema_decay": 0.9,
+    "seed": 0,
+    "run_name": "phase3_1_run31_alpha01_seed0",
+    "token_magnitude_type": "inverse_frequency_learned",
+    "phase_type": "rope",
+    "token_phase": "semantic",
+    "final_val_bpc": 3.055563926608117,
+    "final5_val_bpc_mean": 3.1131433999490814,
+    "final5_val_bpcs": [
+      3.123578206514471,
+      3.1402441208028375,
+      3.0895468170075224,
+      3.156783928812459,
+      3.055563926608117
+    ],
+    "diagnostic_steps": [
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      350,
+      400,
+      450,
+      500,
+      550,
+      600,
+      650,
+      700,
+      750,
+      800,
+      850,
+      900,
+      950,
+      1000
+    ],
+    "residual_snapshots": {
+      "50": [
+        0.24820327758789062,
+        6.622220638519138e-08,
+        6.40923190076137e-08
+      ],
+      "200": [
+        0.2114156037569046,
+        5.71663072435058e-08,
+        6.068165703254635e-08
+      ],
+      "500": [
+        0.1513928472995758,
+        6.6514303398435e-08,
+        5.7415924459292e-08
+      ],
+      "1000": [
+        0.0892035961151123,
+        5.98479488189696e-08,
+        4.496735428460852e-08
+      ]
+    },
+    "redundancy_snapshots": {
+      "50": [
+        0.28502142429351807,
+        0.2687496244907379,
+        0.23966403305530548
+      ],
+      "200": [
+        0.26756158471107483,
+        0.2544529438018799,
+        0.2272467166185379
+      ],
+      "500": [
+        0.22567157447338104,
+        0.21680815517902374,
+        0.1969415545463562
+      ],
+      "1000": [
+        0.16289575397968292,
+        0.16262105107307434,
+        0.14799343049526215
+      ]
+    },
+    "elapsed_seconds": 128.20832991600037,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_1/phase3_1_run31_alpha01_seed0.log",
+    "diagnostics_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_1/phase3_1_run31_alpha01_seed0/residual_diagnostics.json",
+    "returncode": 0
+  },
+  {
+    "config_id": 31,
+    "label": "alpha01",
+    "residual_ema_alpha": 0.1,
+    "growth_residual_ema_decay": 0.9,
+    "seed": 1,
+    "run_name": "phase3_1_run31_alpha01_seed1",
+    "token_magnitude_type": "inverse_frequency_learned",
+    "phase_type": "rope",
+    "token_phase": "semantic",
+    "final_val_bpc": 3.072548245276725,
+    "final5_val_bpc_mean": 3.1301398132976113,
+    "final5_val_bpcs": [
+      3.1751902645318943,
+      3.171053243363221,
+      3.1302403844522693,
+      3.101666928863946,
+      3.072548245276725
+    ],
+    "diagnostic_steps": [
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      350,
+      400,
+      450,
+      500,
+      550,
+      600,
+      650,
+      700,
+      750,
+      800,
+      850,
+      900,
+      950,
+      1000
+    ],
+    "residual_snapshots": {
+      "50": [
+        0.31447458267211914,
+        1.0188515631170958e-07,
+        1.0188515631170958e-07
+      ],
+      "200": [
+        0.25791388750076294,
+        9.779375176321992e-08,
+        8.660687456085725e-08
+      ],
+      "500": [
+        0.17764383554458618,
+        7.253716205468663e-08,
+        6.225133120096871e-08
+      ],
+      "1000": [
+        0.0956549420952797,
+        5.274576508895734e-08,
+        4.0066122863890996e-08
+      ]
+    },
+    "redundancy_snapshots": {
+      "50": [
+        0.30786269903182983,
+        0.29344442486763,
+        0.25055131316185
+      ],
+      "200": [
+        0.28556767106056213,
+        0.2699221670627594,
+        0.23521815240383148
+      ],
+      "500": [
+        0.2367396205663681,
+        0.21884673833847046,
+        0.19488275051116943
+      ],
+      "1000": [
+        0.16453512012958527,
+        0.15393857657909393,
+        0.1379222571849823
+      ]
+    },
+    "elapsed_seconds": 140.29477095603943,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_1/phase3_1_run31_alpha01_seed1.log",
+    "diagnostics_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_1/phase3_1_run31_alpha01_seed1/residual_diagnostics.json",
+    "returncode": 0
+  },
+  {
+    "config_id": 32,
+    "label": "alpha02",
+    "residual_ema_alpha": 0.2,
+    "growth_residual_ema_decay": 0.8,
+    "seed": 0,
+    "run_name": "phase3_1_run32_alpha02_seed0",
+    "token_magnitude_type": "inverse_frequency_learned",
+    "phase_type": "rope",
+    "token_phase": "semantic",
+    "final_val_bpc": 3.055563926608117,
+    "final5_val_bpc_mean": 3.1131433999490814,
+    "final5_val_bpcs": [
+      3.123578206514471,
+      3.1402441208028375,
+      3.0895468170075224,
+      3.156783928812459,
+      3.055563926608117
+    ],
+    "diagnostic_steps": [
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      350,
+      400,
+      450,
+      500,
+      550,
+      600,
+      650,
+      700,
+      750,
+      800,
+      850,
+      900,
+      950,
+      1000
+    ],
+    "residual_snapshots": {
+      "50": [
+        0.24820327758789062,
+        6.622220638519138e-08,
+        6.40923190076137e-08
+      ],
+      "200": [
+        0.18118970096111298,
+        4.9851884398322e-08,
+        5.727727980797681e-08
+      ],
+      "500": [
+        0.10797127336263657,
+        7.241364841092945e-08,
+        5.393105695361555e-08
+      ],
+      "1000": [
+        0.058162152767181396,
+        5.729825502953645e-08,
+        4.0037960502559145e-08
+      ]
+    },
+    "redundancy_snapshots": {
+      "50": [
+        0.28502142429351807,
+        0.2687496244907379,
+        0.23966403305530548
+      ],
+      "200": [
+        0.25341111421585083,
+        0.2430315613746643,
+        0.21717581152915955
+      ],
+      "500": [
+        0.1960427165031433,
+        0.19101105630397797,
+        0.17545969784259796
+      ],
+      "1000": [
+        0.13383421301841736,
+        0.13687863945960999,
+        0.12542524933815002
+      ]
+    },
+    "elapsed_seconds": 148.23665976524353,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_1/phase3_1_run32_alpha02_seed0.log",
+    "diagnostics_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_1/phase3_1_run32_alpha02_seed0/residual_diagnostics.json",
+    "returncode": 0
+  },
+  {
+    "config_id": 32,
+    "label": "alpha02",
+    "residual_ema_alpha": 0.2,
+    "growth_residual_ema_decay": 0.8,
+    "seed": 1,
+    "run_name": "phase3_1_run32_alpha02_seed1",
+    "token_magnitude_type": "inverse_frequency_learned",
+    "phase_type": "rope",
+    "token_phase": "semantic",
+    "final_val_bpc": 3.072548245276725,
+    "final5_val_bpc_mean": 3.1301398132976113,
+    "final5_val_bpcs": [
+      3.1751902645318943,
+      3.171053243363221,
+      3.1302403844522693,
+      3.101666928863946,
+      3.072548245276725
+    ],
+    "diagnostic_steps": [
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      350,
+      400,
+      450,
+      500,
+      550,
+      600,
+      650,
+      700,
+      750,
+      800,
+      850,
+      900,
+      950,
+      1000
+    ],
+    "residual_snapshots": {
+      "50": [
+        0.31447458267211914,
+        1.0188515631170958e-07,
+        1.0188515631170958e-07
+      ],
+      "200": [
+        0.21256044507026672,
+        9.417028934421978e-08,
+        7.496931431205667e-08
+      ],
+      "500": [
+        0.11824832111597061,
+        5.8576684835998094e-08,
+        4.301490363900484e-08
+      ],
+      "1000": [
+        0.055947259068489075,
+        4.3272706307107e-08,
+        3.009910187756759e-08
+      ]
+    },
+    "redundancy_snapshots": {
+      "50": [
+        0.30786269903182983,
+        0.29344442486763,
+        0.25055131316185
+      ],
+      "200": [
+        0.2672724723815918,
+        0.2508947253227234,
+        0.22259795665740967
+      ],
+      "500": [
+        0.20219597220420837,
+        0.18322522938251495,
+        0.16683141887187958
+      ],
+      "1000": [
+        0.1313457190990448,
+        0.12343131750822067,
+        0.11166179925203323
+      ]
+    },
+    "elapsed_seconds": 161.8757951259613,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_1/phase3_1_run32_alpha02_seed1.log",
+    "diagnostics_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_1/phase3_1_run32_alpha02_seed1/residual_diagnostics.json",
+    "returncode": 0
+  },
+  {
+    "config_id": 33,
+    "label": "alpha03",
+    "residual_ema_alpha": 0.3,
+    "growth_residual_ema_decay": 0.7,
+    "seed": 0,
+    "run_name": "phase3_1_run33_alpha03_seed0",
+    "token_magnitude_type": "inverse_frequency_learned",
+    "phase_type": "rope",
+    "token_phase": "semantic",
+    "final_val_bpc": 3.055563926608117,
+    "final5_val_bpc_mean": 3.1131433999490814,
+    "final5_val_bpcs": [
+      3.123578206514471,
+      3.1402441208028375,
+      3.0895468170075224,
+      3.156783928812459,
+      3.055563926608117
+    ],
+    "diagnostic_steps": [
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      350,
+      400,
+      450,
+      500,
+      550,
+      600,
+      650,
+      700,
+      750,
+      800,
+      850,
+      900,
+      950,
+      1000
+    ],
+    "residual_snapshots": {
+      "50": [
+        0.24820327758789062,
+        6.622220638519138e-08,
+        6.40923190076137e-08
+      ],
+      "200": [
+        0.15682384371757507,
+        4.412645182583219e-08,
+        5.397816593699645e-08
+      ],
+      "500": [
+        0.08939148485660553,
+        7.926603018404421e-08,
+        5.1932790512410065e-08
+      ],
+      "1000": [
+        0.05004283785820007,
+        5.490734622526361e-08,
+        3.897087808013566e-08
+      ]
+    },
+    "redundancy_snapshots": {
+      "50": [
+        0.28502142429351807,
+        0.2687496244907379,
+        0.23966403305530548
+      ],
+      "200": [
+        0.24216702580451965,
+        0.23414313793182373,
+        0.20917928218841553
+      ],
+      "500": [
+        0.1812681257724762,
+        0.17849776148796082,
+        0.16470657289028168
+      ],
+      "1000": [
+        0.12554718554019928,
+        0.12915495038032532,
+        0.1187504380941391
+      ]
+    },
+    "elapsed_seconds": 160.00889706611633,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_1/phase3_1_run33_alpha03_seed0.log",
+    "diagnostics_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_1/phase3_1_run33_alpha03_seed0/residual_diagnostics.json",
+    "returncode": 0
+  },
+  {
+    "config_id": 33,
+    "label": "alpha03",
+    "residual_ema_alpha": 0.3,
+    "growth_residual_ema_decay": 0.7,
+    "seed": 1,
+    "run_name": "phase3_1_run33_alpha03_seed1",
+    "token_magnitude_type": "inverse_frequency_learned",
+    "phase_type": "rope",
+    "token_phase": "semantic",
+    "final_val_bpc": 3.072548245276725,
+    "final5_val_bpc_mean": 3.1301398132976113,
+    "final5_val_bpcs": [
+      3.1751902645318943,
+      3.171053243363221,
+      3.1302403844522693,
+      3.101666928863946,
+      3.072548245276725
+    ],
+    "diagnostic_steps": [
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      350,
+      400,
+      450,
+      500,
+      550,
+      600,
+      650,
+      700,
+      750,
+      800,
+      850,
+      900,
+      950,
+      1000
+    ],
+    "residual_snapshots": {
+      "50": [
+        0.31447458267211914,
+        1.0188515631170958e-07,
+        1.0188515631170958e-07
+      ],
+      "200": [
+        0.17719201743602753,
+        9.108136822533197e-08,
+        6.648760120242514e-08
+      ],
+      "500": [
+        0.09381599724292755,
+        5.306827688400517e-08,
+        3.323733466231715e-08
+      ],
+      "1000": [
+        0.04709973186254501,
+        4.058547276031277e-08,
+        2.9224587194676133e-08
+      ]
+    },
+    "redundancy_snapshots": {
+      "50": [
+        0.30786269903182983,
+        0.29344442486763,
+        0.25055131316185
+      ],
+      "200": [
+        0.2525566518306732,
+        0.23584647476673126,
+        0.2123992145061493
+      ],
+      "500": [
+        0.18555396795272827,
+        0.16654807329177856,
+        0.1527392566204071
+      ],
+      "1000": [
+        0.12210175395011902,
+        0.11513318866491318,
+        0.10431545972824097
+      ]
+    },
+    "elapsed_seconds": 156.18896389007568,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_1/phase3_1_run33_alpha03_seed1.log",
+    "diagnostics_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_1/phase3_1_run33_alpha03_seed1/residual_diagnostics.json",
+    "returncode": 0
+  }
+]

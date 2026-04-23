@@ -15,9 +15,9 @@ language model built around complex-valued token lifting and a tensor-state recu
   - [src/reciprocator/model.py](/Users/peterwei/Desktop/wokspace/reciprocator/src/reciprocator/model.py): `TokenLift`, blocks, and `ReciprocatorLM`
   - [src/reciprocator/mixer.py](/Users/peterwei/Desktop/wokspace/reciprocator/src/reciprocator/mixer.py): sequential and spectral coupling backends plus state projection
   - [src/reciprocator/training.py](/Users/peterwei/Desktop/wokspace/reciprocator/src/reciprocator/training.py): dataset construction, training loop, evaluation, dynamic growth/pruning, generation, and benchmarking
-- Data flow: bundled corpus -> tokenizer/dataset -> `TokenLift` -> Reciprocator blocks/mixer -> readout/logits -> training summaries under `runs/lab-book/`
+- Data flow: bundled corpus -> tokenizer/dataset -> `TokenLift` -> Reciprocator blocks/mixer -> readout/logits -> training summaries under `runs/`
 
-This document is the retrospective companion to [test_plan.md](/Users/peterwei/Desktop/wokspace/reciprocator/test_plan.md). The plan is prospective. This lab book records what actually ran and what it means.
+This document is the retrospective companion to [docs/test-plan.md](/Users/peterwei/Desktop/wokspace/reciprocator/docs/test-plan.md). The plan is prospective. This lab book records what actually ran and what it means.
 
 ## Experimental Frame
 
@@ -44,27 +44,38 @@ not at the exact code-state level.
    `token_magnitude_type=inverse_frequency_learned`, `phase_type=rope`, `token_phase=semantic`,
    `coupling_type=sequential`, `normalization_type=frobenius`.
    Mean final-3 `val_bpc`: `3.3033`.
-2. The best 1000-step static continuation of that recipe reached mean final-5 `val_bpc = 3.1216`.
-3. Sequential coupling remains the best tested backend. The spectral screen was effectively null:
-   all non-sequential backends landed within `+0.004` to `+0.006` bpc of sequential and failed the
-   plan's `>0.02` win rule.
-4. Per-mode normalization preserved the same ranking seen under Frobenius normalization but did not
+2. Phase 4 promoted `readout_type=phase_aware`, and Phase 4C showed it composes with
+   `num_layers=2`. The current best static quality recipe is
+   `phase_aware + num_layers=2`, with mean final-3 `val_bpc = 3.2214` at 500 steps and
+   mean final-5 `val_bpc = 3.0795` at 1000 steps.
+3. The best 1000-step static continuation of the pre-Phase 4 recipe reached mean final-5 `val_bpc = 3.1216`.
+4. Sequential coupling remains the default backend. The original spectral screen was null, the
+   higher-dimensional `(8,8,8)` check did not overturn it, and the Phase 2D dynamic backend screen
+   also lost: `dwt` was `+0.0380` bpc and `fft` was `+0.0542` bpc worse than sequential under the
+   dynamic rank/mode recipe.
+5. Per-mode normalization preserved the same ranking seen under Frobenius normalization but did not
    improve the best combination. The best per-mode combo reached `3.3744`, worse than the Frobenius
    winner by `+0.0711`.
-5. Dynamic mode growth produced only marginal gains. The best observed follow-up reached
-   mean final-5 `val_bpc = 3.1081`, which is better than the static baseline by `0.0136`, below the
-   plan's promotion threshold.
-6. Rank growth is not ready. Late firing was achieved, but zero init slightly lost, mean init lost
-   more, and residual init destabilized badly.
-7. Pruning is also not ready. Calibrated settings never pruned anything; more aggressive settings
+6. Dynamic mode growth produced only marginal single-layer gains, and did not transfer
+   to the two-layer phase-aware recipe. Phase 4.2 mode growth lost to the matched
+   two-layer static control by `+0.0113` bpc and was slower.
+7. Rank growth is not ready as a default. Late firing was achieved, and Phase 2D made rank growth
+   fire in every seed, but the dynamic rank/mode sequential result (`3.1234`) did not improve the
+   1000-step static control (`3.1216`) and remained worse than the best mode-only dynamic result
+   (`3.1081`).
+8. Pruning is also not ready. Calibrated settings never pruned anything; more aggressive settings
    pruned late and damaged performance, sometimes collapsing state shape in a way that needs separate
    debugging.
+9. Phase 7 rejected the proposed warmup/cosine/clip/decay optimizer protocol for this 500-step
+   baseline. The legacy fixed-LR protocol won by `0.2924` to `0.3723` bpc, so new short-budget
+   phases should keep `lr=1e-3`, constant LR, no clipping, and no weight decay unless a later
+   longer-budget phase revalidates scheduling.
 
 ## Phase History
 
 ### Phase 0: Pilot
 
-From [test_plan.md](/Users/peterwei/Desktop/wokspace/reciprocator/test_plan.md):
+From [docs/test-plan.md](/Users/peterwei/Desktop/wokspace/reciprocator/docs/test-plan.md):
 
 - Stable at 500 steps with no NaN/Inf
 - Final `val_bpc`: `4.0774`
@@ -128,19 +139,118 @@ the new spectral couplings.
 | `dwt` | 3.3378 | +0.0061 |
 
 Result: no non-sequential backend beat sequential by the required `>0.02` margin.
-The spectral branch should therefore be treated as closed unless the higher-dimensional
-screen is finished.
+This made the higher-dimensional check the only remaining reason to keep the spectral
+branch open.
+
+### Phase 2S.2: FFT Filter Calibration
+
+This conditional branch was run post-hoc on `2026-04-23` for `coupling_type=fft` only.
+It used the historical Phase 2S stack rather than the newer Phase 4 defaults:
+`readout_type=magnitude`, `inverse_frequency_learned + rope + semantic`, Frobenius
+norm, `state_shape=(2,3,4)`, and no growth.
+
+| Run | Filter preset | Mean final-3 `val_bpc` | Delta vs 2S sequential | Delta vs 2S FFT default | Mean seconds/run | Mean train tokens/sec |
+|---|---|---:|---:|---:|---:|---:|
+| 2S.2a | gentle smoothing | 3.3380 | +0.0063 | +0.0012 | 38.2 | 6717.4 |
+| 2S.2b | low-frequency emphasis | 3.3379 | +0.0062 | +0.0011 | 40.4 | 6350.4 |
+| 2S.2c | aggressive low-pass | 3.3378 | +0.0061 | +0.0010 | 41.0 | 6248.8 |
+
+Decision: none of the FFT filter presets improved on the inherited FFT default, and
+all remained worse than the Phase 2S sequential baseline (`3.3317`). This keeps the
+spectral branch closed.
+
+Artifacts:
+
+- [summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s2_fft_20260423/summary.json)
+- [aggregate_summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s2_fft_20260423/aggregate_summary.json)
 
 ### Phase 2S.3: Higher-Dimensional Spectral Check
 
-This branch is incomplete. Only the `(8,8,8)` sequential baseline was run:
+This branch reran the Phase 2S backend screen at `state_shape=(8,8,8)` to test whether
+the original spectral null was only caused by tiny mode sizes.
 
-- `state_shape=(8,8,8)`, `coupling_type=sequential`
-- Mean final-3 `val_bpc = 3.2767`
-- `n=1` seed only
+| Coupling | Mean final-3 `val_bpc` | Delta vs sequential |
+|---|---:|---:|
+| `sequential` | 3.2882 | 0.0000 |
+| `wavelet_packet` | 3.2726 | -0.0156 |
+| `wavelet_packet_max_gauge` | 3.2726 | -0.0156 |
+| `dwt` | 3.2738 | -0.0144 |
+| `fft` | 3.2740 | -0.0142 |
 
-No spectral comparisons were run, so this branch is not yet evidence for or against
-the dimensionality-artifact hypothesis.
+Result: spectral backends did improve at the larger state shape, but not enough to
+clear the plan's `>0.02` rule. This closes the dimensionality-artifact hypothesis for
+now: larger state modes helped spectral coupling slightly, but did not make it the
+default.
+
+Implementation note: `wavelet_packet` and `wavelet_packet_max_gauge` are almost the
+same path in [src/reciprocator/mixer.py](/Users/peterwei/Desktop/wokspace/reciprocator/src/reciprocator/mixer.py). The max-gauge variant adds a phase-coherence term to the
+best-basis cost; it does not use a different packet transform. At `(8,8,8)`, both
+variants landed on the same mean metric.
+
+### Phase 2D: Dynamic Rank/Mode Backend Adaptation
+
+This phase tested the expanded dynamic recipe at `state_shape=(4,8,8,8)` across
+`sequential`, `fft`, and `dwt`. Both wavelet-packet variants were excluded.
+
+Dynamic settings:
+
+- `dynamic_mode_growth=True`
+- `dynamic_rank_growth=True`
+- `dynamic_mode_pruning=True`
+- `dynamic_rank_pruning=True`
+- `mode_init=mean`
+- `rank_init=zero`
+- `max_state_shape=(6,10,10,10)`
+- `max_rank=5`
+
+| Coupling | Mean final-5 `val_bpc` | Delta vs sequential | Mode growth seeds | Rank growth seeds | Prune seeds |
+|---|---:|---:|---:|---:|---:|
+| `sequential` | 3.1234 | 0.0000 | 3/3 | 3/3 | 0/3 |
+| `dwt` | 3.1614 | +0.0380 | 3/3 | 3/3 | 0/3 |
+| `fft` | 3.1776 | +0.0542 | 3/3 | 3/3 | 0/3 |
+
+Event pattern: every seed grew one mode at step `350`, then appended a rank axis at
+step `400`, ending at `state_shape=(5,8,8,8,2)`. Pruning was enabled but did not fire
+under the conservative thresholds.
+
+Decision: no spectral dynamic backend is promoted. The sequential dynamic rank/mode
+control also does not become the best dynamic recipe: it is effectively tied with, and
+slightly worse than, the 1000-step static baseline (`3.1216`) and worse than the best
+mode-only dynamic run (`3.1081`). Rank growth now fires reliably, but the current
+zero-initialized rank addition does not buy quality.
+
+Artifacts:
+
+- [summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2d_dynamic_backend_20260423/summary.json)
+- [aggregate_summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2d_dynamic_backend_20260423/aggregate_summary.json)
+
+### Phase 2D.X: Expanded Spectral-Only Rank-10 Rerun
+
+This follow-up reran only the spectral backends, `fft` and `dwt`, with more state
+capacity and a higher rank-growth ceiling:
+
+- `state_shape=(5,10,10,10,2)`
+- `max_state_shape=(6,12,12,12,3)`
+- `max_rank=10`
+- same Phase 2D dynamic settings otherwise
+
+| Coupling | Mean final-5 `val_bpc` | Delta vs FFT | Mean seconds/run | Mean train tokens/sec | Mode growth seeds | Rank growth seeds |
+|---|---:|---:|---:|---:|---:|---:|
+| `dwt` | 3.1664 | -0.0002 | 1135.6 | 460.9 | 3/3 | 0/3 |
+| `fft` | 3.1666 | 0.0000 | 1259.9 | 407.2 | 3/3 | 0/3 |
+
+Event pattern: every seed grew the last existing mode at step `350`, from
+`(5,10,10,10,2)` to `(5,10,10,10,3)`. No seed appended a new rank axis despite
+`max_rank=10`; the cap was higher, but the rank-growth trigger did not fire.
+
+Decision: expanded spectral capacity did not change the conclusion. DWT and FFT tied
+on quality, DWT was about 13% faster on this CPU run, and neither beat the Phase 2D
+sequential dynamic control (`3.1234`) or the best mode-only dynamic recipe (`3.1081`).
+
+Artifacts:
+
+- [summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2d_spectral_expanded_rank10_20260423/summary.json)
+- [aggregate_summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2d_spectral_expanded_rank10_20260423/aggregate_summary.json)
 
 ### Phase 3: 1000-Step Static Baseline
 
@@ -191,8 +301,8 @@ The original threshold sweep produced:
 
 Then two one-off follow-ups were run outside the original matrix:
 
-- [runs/lab-book/phase3_2e/summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase3_2e/summary.json): repeated the `threshold=0.12`, `mode_init=residual` case as a comparison artifact
-- [runs/lab-book/phase3_2f/summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase3_2f/summary.json): tested `threshold=0.12`, `mode_init=mean`
+- [runs/phase3_2e/summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_2e/summary.json): repeated the `threshold=0.12`, `mode_init=residual` case as a comparison artifact
+- [runs/phase3_2f/summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_2f/summary.json): tested `threshold=0.12`, `mode_init=mean`
 
 The mean-init follow-up did best:
 
@@ -242,7 +352,7 @@ Interpretation:
 - Under the thresholds that looked sensible from Phase 3.1, pruning never happened.
 - These runs therefore just reproduced the mode-growth baseline.
 
-More aggressive follow-ups in [runs/lab-book/phase3_4_hi/summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase3_4_hi/summary.json) did prune, but the result was clearly bad:
+More aggressive follow-ups in [runs/phase3_4_hi/summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_4_hi/summary.json) did prune, but the result was clearly bad:
 
 - `prune_threshold=0.16`, sustain 2: one seed pruned at step `1000` and collapsed to `[3,3]`; mean final-5 `3.2098`
 - `prune_threshold=0.18`, sustain 4: pruned to `[3,3]` late; mean final-5 `3.3239`
@@ -251,6 +361,108 @@ More aggressive follow-ups in [runs/lab-book/phase3_4_hi/summary.json](/Users/pe
 The shape transitions `[3,3,4] -> [3,3]` and `[3,3,4] -> [3,4]` are not obviously
 aligned with the phase intent and should be treated as a debugging target before any
 more pruning sweeps are run.
+
+### Phase 4: Static Ablations
+
+Phase 4 was run on `2026-04-23` as a two-seed static ablation matrix using the Phase 2
+sequential winner (`inverse_frequency_learned + rope + semantic`, Frobenius norm,
+sequential coupling). I added a same-phase control run because the current parser uses
+checkpoint `val_metrics` directly and gives cleaner same-seed deltas than the older
+Phase 2 summaries.
+
+| Run | Variant | Mean final-3 `val_bpc` | Delta vs control | Mean seconds/run | Mean train tokens/sec |
+|---|---|---:|---:|---:|---:|
+| 4.0 | control | 3.3553 | 0.0000 | 66.6 | 3844.3 |
+| 14 | `token_magnitude_type=inverse_frequency` | 3.3552 | -0.0001 | 69.0 | 3718.7 |
+| 15 | `readout_type=phase_aware` | 3.2905 | -0.0648 | 71.3 | 3588.9 |
+| 16 | `num_layers=2` | 3.2947 | -0.0606 | 140.2 | 1826.1 |
+| 17 | `token_phase=semantic_virtual_offset` | 3.3485 | -0.0068 | 75.1 | 3410.6 |
+| 18 | `enable_self_relation=True` | 3.3543 | -0.0010 | 78.6 | 3255.9 |
+| 18b | `enable_anticipator_relation=True` | 3.3540 | -0.0013 | 78.1 | 3278.2 |
+
+Decision:
+
+- Promote `readout_type=phase_aware` as the best single static ablation. It clears the
+  0.02 bpc threshold and keeps most of the control throughput.
+- `num_layers=2` also clears the quality threshold, but it is slightly worse than
+  phase-aware readout and roughly halves throughput. It is a real depth signal, not the
+  current best single change.
+- `inverse_frequency` without learned residual, `semantic_virtual_offset`,
+  `self_relation`, and `anticipator_relation` are null results at this budget.
+- Before Phase 4.2, run a small combination check for `phase_aware + num_layers=2`.
+  If that combination wins, it is the better static control for any multi-layer dynamic
+  sanity check.
+
+Artifacts:
+
+- [summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_static_ablations_20260423/summary.json)
+- [aggregate_summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_static_ablations_20260423/aggregate_summary.json)
+
+### Phase 4C: Phase-Aware Readout + Depth Combination
+
+This two-seed follow-up tested whether the two Phase 4 wins compose:
+`readout_type=phase_aware` and `num_layers=2`, with all other Phase 4 settings fixed.
+
+| Config | Mean final-3 `val_bpc` | Delta vs Phase 4 control | Delta vs phase-aware only | Delta vs depth-only | Mean seconds/run | Mean train tokens/sec |
+|---|---:|---:|---:|---:|---:|---:|
+| `phase_aware + num_layers=2` | 3.2214 | -0.1339 | -0.0691 | -0.0734 | 137.4 | 1863.2 |
+
+Per-seed final-3 `val_bpc`: `3.2012`, `3.2416`.
+
+Decision: the two improvements compose strongly. `phase_aware + num_layers=2` becomes
+the new best static control for quality-oriented experiments. The throughput cost is
+real, about half the single-layer control, so keep single-layer `phase_aware` as the
+efficient/default-small recipe when speed matters.
+
+Implication: Phase 4.2 is now warranted. The relevant question is no longer whether
+static depth helps; it does. The next dynamic sanity check should compare a 2-layer
+static control against the best single-layer dynamic-growth recipe, while logging
+per-layer residual traces before interpreting any growth result.
+
+Artifacts:
+
+- [summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_combo_phase_aware_depth2_20260423/summary.json)
+- [aggregate_summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_combo_phase_aware_depth2_20260423/aggregate_summary.json)
+
+### Phase 4.2: Multi-Layer Mode-Growth Sanity Check
+
+Phase 4.2 ran the two-layer phase-aware quality recipe for 1000 steps, with and without
+the best single-layer mode-growth recipe from Phase 3.2f. Rank growth and pruning were
+left disabled.
+
+Mode-growth settings for 4.2b:
+
+- `dynamic_mode_growth=True`
+- `growth_residual_threshold=0.12`
+- `growth_residual_ema_decay=0.8`
+- `min_checks_before_first_growth=7`
+- `mode_init=mean`
+- `max_state_shape=(6,6,6)`
+
+| Run | Config | Mean final-5 `val_bpc` | Delta vs static | Mean final `val_bpc` | Mean seconds/run | Mean train tokens/sec | Growth events |
+|---|---|---:|---:|---:|---:|---:|---|
+| 4.2a | `phase_aware + num_layers=2`, static | 3.0795 | 0.0000 | 3.0225 | 307.7 | 1667.9 | none |
+| 4.2b | 4.2a + mode growth | 3.0909 | +0.0113 | 3.0594 | 367.7 | 1394.7 | step `350` in both seeds |
+
+Per-layer residual telemetry:
+
+- Before growth, layer 2 had the larger mode-0 residual in both dynamic seeds. At step
+  `350`, seed 0 layer EMAs were roughly `[0.0825, 0, 0]` and `[0.1591, 0, 0]`; seed 1
+  was `[0.1399, 0, 0]` and `[0.2057, 0, 0]`.
+- The averaged trigger therefore hid a real layer difference, but not a contradictory
+  one: both layers pointed at the same mode.
+- After growth, residuals redistributed into the newly added mode and converged without
+  grow/prune churn. Final shapes were `(3,3,4)` for both dynamic seeds.
+
+Decision: do not promote mode growth for multi-layer phase-aware models. The event
+timing was structurally sane, but quality was worse than the matched static control and
+runtime was lower. Keep dynamic-growth claims scoped to the single-layer exploratory
+branch until a new trigger or init rule demonstrates a clear multi-layer gain.
+
+Artifacts:
+
+- [summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_2_multilayer_growth_20260423/summary.json)
+- [aggregate_summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_2_multilayer_growth_20260423/aggregate_summary.json)
 
 ### Phases 5-6: Per-Mode Normalization
 
@@ -279,6 +491,40 @@ Interpretation:
 - Per-mode normalization preserved the overall ordering.
 - It did not beat the Frobenius winner.
 - Frobenius should remain the default unless a later scaling experiment changes the picture.
+
+### Phase 7: Optimization Protocol Validation
+
+Phase 7 tested whether the fixed optimizer used in Phases 1-6 should be replaced by
+the proposed warmup + cosine schedule, with optional gradient clipping and weight
+decay. This phase used the Phase 1 baseline config: `token_magnitude_type=learned`,
+`phase_type=rope`, `token_phase=none`, Frobenius norm, sequential coupling.
+
+| Config | Protocol | Mean final-3 `val_bpc` | Delta vs 7.1 |
+|---|---|---:|---:|
+| 7.1 | legacy fixed LR | 4.0755 | 0.0000 |
+| 7.2 | warmup + cosine | 4.4162 | +0.3407 |
+| 7.3 | warmup + cosine + clipping | 4.3679 | +0.2924 |
+| 7.4 | warmup + cosine + weight decay | 4.4479 | +0.3723 |
+| 7.5 | warmup + cosine + clipping + weight decay | 4.4461 | +0.3706 |
+
+Stability notes:
+
+- No run showed NaN/Inf in the logs.
+- `7.5` was stable and seed-consistent, but much worse on loss.
+- The scheduled variants decayed the learning rate within a 500-step budget and
+  under-trained this small baseline.
+
+Decision: keep the legacy optimizer protocol for new short-budget runs:
+
+- `learning_rate=1e-3`
+- `lr_warmup_steps=0`
+- `lr_decay_style=constant`
+- `grad_clip_norm=None`
+- `weight_decay=0.0`
+
+The proposed full protocol should not become the default for the current 500-step
+matrix. A longer-budget phase can revisit scheduling, but Phase 7 is decisive for the
+existing short-run test plan.
 
 ## Best-Known Recipes
 
@@ -314,34 +560,48 @@ Outcome:
 - mean final-5 `val_bpc = 3.1081`
 - improvement over static: `0.0136`
 - below the plan's `0.02` promotion threshold
+- Phase 2D's expanded dynamic rank/mode recipe reached `3.1234`, so it does not replace this mode-only recipe.
+
+### Default short-budget optimizer
+
+- `learning_rate=1e-3`
+- `lr_warmup_steps=0`
+- `lr_decay_style=constant`
+- `grad_clip_norm=None`
+- `weight_decay=0.0`
+
+This is not just historical inertia. Phase 7 directly tested the proposed
+warmup/cosine/clip/decay protocol and found it worse by at least `0.2924` bpc on the
+Phase 1 baseline.
 
 ## Closed, Pending, and Incomplete Branches
 
 Closed by result:
 
 - Spectral backend promotion under the original state shape
+- Spectral backend promotion under the higher-dimensional `(8,8,8)` check
+- Dynamic spectral backend promotion under Phase 2D (`fft`, `dwt`)
 - `virtual_offset` token phase
 - Rank-growth promotion in its current form
 - Per-mode normalization as a default replacement for Frobenius
+- Warmup/cosine scheduling, gradient clipping, and weight decay as defaults for the current 500-step matrix
 
 Incomplete:
 
-- Phase 2S.3 higher-dimensional spectral screen
 - Phase 3.5 full-system dynamic run
 - Phase 4 / 4.1 / 4.2 ablations
-- Phase 7 optimizer validation
 - Phases 8-10 scaling and benchmarking branches
 - Post-hoc generation and streaming benchmarks as promotion gates
 
-## Recommended Revisions To `test_plan.md`
+## Recommended Revisions To `docs/test-plan.md`
 
-1. Split the plan from the record. Keep `test_plan.md` strictly prospective and treat this file as the retrospective lab notebook. Right now the plan contains completed results, pending branches, and ad hoc reruns in one place.
+1. Split the plan from the record. Keep `docs/test-plan.md` strictly prospective and treat this file as the retrospective lab notebook. Right now the plan contains completed results, pending branches, and ad hoc reruns in one place.
 2. Add provenance to every run artifact: git commit SHA, run date, config digest, and corpus hash. Without this, comparisons across reruns are weaker than they should be.
-3. Move optimizer validation earlier. The plan itself says the fixed `1e-3` protocol is legacy; Phase 7 should happen before more large sweeps.
+3. Update the optimizer protocol section. Phase 7 has now run and rejects the proposed warmup/cosine/clip/decay default for the current 500-step matrix.
 4. Tighten the promotion rule. A hard `>0.02` bpc cutoff is close to the scale of some rerun differences; require both a margin and a noise check.
-5. Mark the spectral branch as closed unless Phase 2S.3 is fully run. If the higher-dimensional check stays incomplete, remove it from the active critical path.
+5. Mark the spectral branch as closed. Phase 2S.3 and Phase 2D are now complete and did not clear the promotion rule.
 6. Record the current dynamic-mode recipe explicitly in the plan and downgrade it from "candidate winner" to "small-effect exploratory result." The best observed gain is real but below the promotion threshold.
-7. Remove rank growth from the active comparison matrix until the trigger/init path is redesigned. The late trigger is better, but the quality result is still negative.
+7. Remove rank growth from the active default recipe until the init path is redesigned. Phase 2D made rank growth fire consistently, but the quality result is still neutral-to-negative.
 8. Reframe pruning as a debugging task, not a sweep task. Add invariants: pruning must remove exactly one intended axis, preserve rank semantics, and log which axis was pruned. The observed shape collapses need explanation first.
 9. Update the run summary table so it matches reality. It should include `phase2_1`, `phase3_2e`, `phase3_2f`, `phase3_4_hi`, and `phase3_4_rerun_20260422`, plus real status markers for completed and closed branches.
 10. Make the generation and streaming gates real or mark them pending. The plan says promotion requires them, but the current result summaries do not include those artifacts.

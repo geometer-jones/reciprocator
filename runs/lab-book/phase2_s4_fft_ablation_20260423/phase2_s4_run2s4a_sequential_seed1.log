@@ -1,0 +1,15 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s4_fft_ablation_20260423/phase2_s4_run2s4a_sequential_seed1/config.json
+step=1 lr=0.001 train_loss=4.5041 train_acc=0.0020 train_ppl=90.3894 train_bpc=6.4981 val_loss=4.2038 val_acc=0.0316 val_ppl=66.9400 val_bpc=6.0648
+step=50 lr=0.001 train_loss=2.9793 train_acc=0.1621 train_ppl=19.6734 train_bpc=4.2982 val_loss=2.9748 val_acc=0.1808 val_ppl=19.5861 val_bpc=4.2918
+step=100 lr=0.001 train_loss=2.4515 train_acc=0.3398 train_ppl=11.6058 train_bpc=3.5368 val_loss=2.5387 val_acc=0.3182 val_ppl=12.6631 val_bpc=3.6626
+step=150 lr=0.001 train_loss=2.3173 train_acc=0.3281 train_ppl=10.1482 train_bpc=3.3431 val_loss=2.3972 val_acc=0.3306 val_ppl=10.9922 val_bpc=3.4584
+step=200 lr=0.001 train_loss=2.2545 train_acc=0.3750 train_ppl=9.5304 train_bpc=3.2525 val_loss=2.3598 val_acc=0.3464 val_ppl=10.5892 val_bpc=3.4045
+step=250 lr=0.001 train_loss=2.1435 train_acc=0.3887 train_ppl=8.5291 train_bpc=3.0924 val_loss=2.2638 val_acc=0.3613 val_ppl=9.6196 val_bpc=3.2660
+step=300 lr=0.001 train_loss=2.1935 train_acc=0.3730 train_ppl=8.9669 train_bpc=3.1646 val_loss=2.2094 val_acc=0.3723 val_ppl=9.1102 val_bpc=3.1875
+step=350 lr=0.001 train_loss=2.1686 train_acc=0.3887 train_ppl=8.7463 train_bpc=3.1287 val_loss=2.1344 val_acc=0.3948 val_ppl=8.4517 val_bpc=3.0792
+step=400 lr=0.001 train_loss=2.0414 train_acc=0.4004 train_ppl=7.7016 train_bpc=2.9452 val_loss=2.1269 val_acc=0.4017 val_ppl=8.3887 val_bpc=3.0685
+step=450 lr=0.001 train_loss=2.0093 train_acc=0.4336 train_ppl=7.4584 train_bpc=2.8989 val_loss=2.0793 val_acc=0.4084 val_ppl=7.9993 val_bpc=2.9999
+step=500 lr=0.001 train_loss=1.9942 train_acc=0.4316 train_ppl=7.3466 train_bpc=2.8771 val_loss=2.0493 val_acc=0.4254 val_ppl=7.7625 val_bpc=2.9565
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s4_fft_ablation_20260423/phase2_s4_run2s4a_sequential_seed1/checkpoint_step_000500.pt
+training finished (device=cpu, corpus=greek_classics, vocab=76, train_tokens=90000, val_tokens=10000, state_shape=(8, 8, 8))
+final train(step=500) loss=1.9942 acc=0.4316 ppl=7.3466 bpc=2.8771 last eval(step=500) val_loss=2.0493 val_acc=0.4254 val_ppl=7.7625 val_bpc=2.9565

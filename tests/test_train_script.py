@@ -16,12 +16,16 @@ def test_build_parser_exposes_phase_and_growth_defaults() -> None:
 
     args = train_script.build_parser().parse_args([])
 
-    assert args.token_phase == "none"
+    assert args.token_magnitude_type == "inverse_frequency_learned"
+    assert args.token_phase == "semantic"
+    assert args.readout_type == "phase_aware"
     assert args.coupling_type == "sequential"
     assert args.low_frequency_gain == 0.5
     assert args.low_frequency_sigma == 0.35
     assert args.high_frequency_gain == 0.5
     assert args.high_frequency_cutoff == 0.5
+    assert args.dynamic_spectral_gains is False
+    assert args.anisotropic_spectral_gains is False
     assert args.wavelet_levels is None
     assert args.chunk_size is None
     assert args.track_chunk_drift is False
@@ -82,6 +86,8 @@ def test_build_parser_parses_max_state_shape_like_state_shape() -> None:
             "0.4",
             "--high-frequency-cutoff",
             "0.65",
+            "--dynamic-spectral-gains",
+            "--anisotropic-spectral-gains",
             "--wavelet-levels",
             "3",
             "--chunk-size",
@@ -156,6 +162,8 @@ def test_build_parser_parses_max_state_shape_like_state_shape() -> None:
     assert args.low_frequency_sigma == 0.2
     assert args.high_frequency_gain == 0.4
     assert args.high_frequency_cutoff == 0.65
+    assert args.dynamic_spectral_gains is True
+    assert args.anisotropic_spectral_gains is True
     assert args.wavelet_levels == 3
     assert args.chunk_size == 16
     assert args.track_chunk_drift is True

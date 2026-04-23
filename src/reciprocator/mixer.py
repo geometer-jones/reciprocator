@@ -160,14 +160,21 @@ class _SpectralCouplingBase(nn.Module):
         low_frequency_sigma: float,
         high_frequency_gain: float,
         high_frequency_cutoff: float,
+        dynamic_spectral_gains: bool = False,
+        anisotropic_spectral_gains: bool = False,
+        gain_projector_rank: int = 8,
         eps: float = 1e-8,
     ) -> None:
         super().__init__()
         self.state_shape = tuple(int(dim) for dim in state_shape)
+        self.state_size = math.prod(self.state_shape)
         self.low_frequency_gain = float(low_frequency_gain)
         self.low_frequency_sigma = float(low_frequency_sigma)
         self.high_frequency_gain = float(high_frequency_gain)
         self.high_frequency_cutoff = float(high_frequency_cutoff)
+        self.dynamic_spectral_gains = dynamic_spectral_gains
+        self.anisotropic_spectral_gains = anisotropic_spectral_gains
+        self.gain_projector_rank = gain_projector_rank
         self.eps = eps
 
         if self.low_frequency_sigma <= 0.0:
@@ -178,8 +185,24 @@ class _SpectralCouplingBase(nn.Module):
             raise ValueError("low_frequency_gain must be non-negative.")
         if self.high_frequency_gain < 0.0:
             raise ValueError("high_frequency_gain must be non-negative.")
+        if self.dynamic_spectral_gains and self.gain_projector_rank <= 0:
+            raise ValueError("gain_projector_rank must be positive.")
 
-    def _spectral_gain(self, normalized_frequency: Tensor) -> Tensor:
+        if self.dynamic_spectral_gains:
+            r = self.gain_projector_rank
+            self.spectral_projector = nn.Sequential(
+                nn.Linear(2 * self.state_size, r),
+                nn.ReLU(),
+                nn.Linear(r, self.state_size),
+            )
+            nn.init.zeros_(self.spectral_projector[-1].weight)
+            nn.init.zeros_(self.spectral_projector[-1].bias)
+            self.alpha_spectral = nn.Parameter(torch.zeros(()))
+        else:
+            self.spectral_projector = None
+            self.register_parameter("alpha_spectral", None)
+
+    def _fixed_spectral_gain(self, normalized_frequency: Tensor) -> Tensor:
         low_boost = self.low_frequency_gain * torch.exp(
             -0.5 * (normalized_frequency / self.low_frequency_sigma).square()
         )
@@ -189,13 +212,92 @@ class _SpectralCouplingBase(nn.Module):
         )
         return (1.0 + low_boost - high_damp).clamp_min(0.0)
 
-    def _band_gain(self, *, low: float, high: float, device: torch.device, dtype: torch.dtype) -> Tensor:
+    def _dynamic_spectral_delta(self, signal: Tensor) -> Tensor:
+        if self.spectral_projector is None:
+            raise ValueError(
+                "Dynamic spectral gains are enabled, but spectral_projector is not initialized."
+            )
+
+        s_flat = signal.reshape(signal.shape[0], -1)
+        if s_flat.shape[-1] != self.state_size:
+            raise ValueError(
+                "Dynamic spectral gain signal has "
+                f"{s_flat.shape[-1]} elements, expected {self.state_size}."
+            )
+        gain_features = torch.cat([s_flat.real, s_flat.imag], dim=-1)
+        delta = self.spectral_projector(gain_features)
+        return delta.to(s_flat.real.dtype)
+
+    def _radial_spectral_delta(self, delta: Tensor, normalized_frequency: Tensor) -> Tensor:
+        radial_positions = normalized_frequency.to(delta.dtype).reshape(-1).clamp(0.0, 1.0)
+        if self.state_size == 1:
+            interpolated = delta[:, :1].expand(delta.shape[0], radial_positions.numel())
+            return interpolated.reshape(delta.shape[0], *normalized_frequency.shape)
+
+        scaled = radial_positions * (self.state_size - 1)
+        lower = scaled.floor().to(torch.long)
+        upper = scaled.ceil().to(torch.long)
+        fraction = (scaled - lower.to(scaled.dtype)).unsqueeze(0)
+        lower_delta = delta.index_select(dim=1, index=lower)
+        upper_delta = delta.index_select(dim=1, index=upper)
+        interpolated = lower_delta + (upper_delta - lower_delta) * fraction
+        return interpolated.reshape(delta.shape[0], *normalized_frequency.shape)
+
+    def _spectral_gain(self, normalized_frequency: Tensor, signal: Optional[Tensor] = None) -> Tensor:
+        base_gain = self._fixed_spectral_gain(normalized_frequency)
+        if not self.dynamic_spectral_gains or signal is None:
+            return base_gain
+
+        delta = self._dynamic_spectral_delta(signal)
+        if self.anisotropic_spectral_gains:
+            delta = delta.reshape(signal.shape[0], *self.state_shape)
+        else:
+            delta = self._radial_spectral_delta(delta, normalized_frequency)
+        gain = base_gain.unsqueeze(0) + self.alpha_spectral.to(delta.dtype) * delta
+        return gain.clamp_min(0.0)
+
+    def _band_delta(
+        self,
+        signal: Tensor,
+        *,
+        low: float,
+        high: float,
+    ) -> Tensor:
+        delta = self._dynamic_spectral_delta(signal)
+        positions = (
+            torch.arange(self.state_size, device=delta.device, dtype=delta.dtype) + 0.5
+        ) / self.state_size
+        if high >= 1.0:
+            band_mask = (positions >= low) & (positions <= high)
+        else:
+            band_mask = (positions >= low) & (positions < high)
+        if not band_mask.any().item():
+            center = 0.5 * (low + high)
+            nearest = torch.argmin((positions - center).abs()).reshape(1)
+            band_mask = torch.zeros_like(positions, dtype=torch.bool)
+            band_mask[nearest] = True
+        return delta[:, band_mask].mean(dim=-1, keepdim=True)
+
+    def _band_gain(
+        self,
+        *,
+        low: float,
+        high: float,
+        device: torch.device,
+        dtype: torch.dtype,
+        signal: Optional[Tensor] = None,
+    ) -> Tensor:
         center_frequency = torch.tensor(
             0.5 * (low + high),
             device=device,
             dtype=dtype,
         )
-        return self._spectral_gain(center_frequency)
+        base_gain = self._fixed_spectral_gain(center_frequency)
+        if not self.dynamic_spectral_gains or signal is None:
+            return base_gain
+
+        delta = self._band_delta(signal, low=low, high=high)
+        return (base_gain + self.alpha_spectral.to(delta.dtype) * delta).clamp_min(0.0)
 
 
 class FFTSpectralCoupling(_SpectralCouplingBase):
@@ -210,7 +312,11 @@ class FFTSpectralCoupling(_SpectralCouplingBase):
         max_radius = radius.max().clamp_min(self.eps)
         radial_frequency = radius / max_radius
 
-        filtered = torch.fft.fftn(tensor, dim=state_dims) * self._spectral_gain(radial_frequency)
+        signal_for_gain = tensor if self.dynamic_spectral_gains else None
+        filtered = torch.fft.fftn(tensor, dim=state_dims) * self._spectral_gain(
+            radial_frequency,
+            signal=signal_for_gain,
+        )
         return torch.fft.ifftn(filtered, dim=state_dims).to(tensor.dtype)
 
 
@@ -253,7 +359,7 @@ class _WaveletNode:
 
     @property
     def is_leaf(self) -> bool:
-        return self.approx is None or self.detail is None
+        return self.approx is None and self.detail is None
 
 
 class _WaveletCouplingBase(_SpectralCouplingBase):
@@ -266,6 +372,9 @@ class _WaveletCouplingBase(_SpectralCouplingBase):
         high_frequency_gain: float,
         high_frequency_cutoff: float,
         wavelet_levels: Optional[int],
+        dynamic_spectral_gains: bool = False,
+        anisotropic_spectral_gains: bool = False,
+        gain_projector_rank: int = 8,
         eps: float = 1e-8,
     ) -> None:
         super().__init__(
@@ -274,6 +383,9 @@ class _WaveletCouplingBase(_SpectralCouplingBase):
             low_frequency_sigma=low_frequency_sigma,
             high_frequency_gain=high_frequency_gain,
             high_frequency_cutoff=high_frequency_cutoff,
+            dynamic_spectral_gains=dynamic_spectral_gains,
+            anisotropic_spectral_gains=anisotropic_spectral_gains,
+            gain_projector_rank=gain_projector_rank,
             eps=eps,
         )
         if wavelet_levels is not None and wavelet_levels <= 0:
@@ -317,6 +429,7 @@ class DWTSpectralCoupling(_WaveletCouplingBase):
             high=2.0**-levels,
             device=flat.device,
             dtype=flat.real.dtype,
+            signal=flat if self.dynamic_spectral_gains else None,
         )
         reconstructed = approx * approx_gain.to(approx.dtype)
 
@@ -326,6 +439,7 @@ class DWTSpectralCoupling(_WaveletCouplingBase):
                 high=band_high,
                 device=detail.device,
                 dtype=detail.real.dtype,
+                signal=flat if self.dynamic_spectral_gains else None,
             )
             reconstructed = _haar_merge(reconstructed, detail * gain.to(detail.dtype), original_length)
 
@@ -343,6 +457,9 @@ class WaveletPacketSpectralCoupling(_WaveletCouplingBase):
         high_frequency_cutoff: float,
         wavelet_levels: Optional[int],
         phase_aware_best_basis: bool,
+        dynamic_spectral_gains: bool = False,
+        anisotropic_spectral_gains: bool = False,
+        gain_projector_rank: int = 8,
         eps: float = 1e-8,
     ) -> None:
         super().__init__(
@@ -352,6 +469,9 @@ class WaveletPacketSpectralCoupling(_WaveletCouplingBase):
             high_frequency_gain=high_frequency_gain,
             high_frequency_cutoff=high_frequency_cutoff,
             wavelet_levels=wavelet_levels,
+            dynamic_spectral_gains=dynamic_spectral_gains,
+            anisotropic_spectral_gains=anisotropic_spectral_gains,
+            gain_projector_rank=gain_projector_rank,
             eps=eps,
         )
         self.phase_aware_best_basis = phase_aware_best_basis
@@ -421,15 +541,22 @@ class WaveletPacketSpectralCoupling(_WaveletCouplingBase):
             return entropy
         return entropy + (1.0 - self._phase_coherence(coeffs, global_phase))
 
+    def _require_children(self, node: _WaveletNode, operation: str) -> Tuple[_WaveletNode, _WaveletNode]:
+        if node.approx is None or node.detail is None:
+            raise ValueError(
+                "Wavelet packet tree invariant violated during "
+                f"{operation}: non-leaf nodes must have both approx and detail children."
+            )
+        return node.approx, node.detail
+
     def _select_best_basis(self, node: _WaveletNode, global_phase: Tensor) -> Tensor:
         leaf_cost = self._leaf_cost(node.coeffs, global_phase)
         if node.is_leaf:
             return leaf_cost
 
-        assert node.approx is not None
-        assert node.detail is not None
-        split_cost = self._select_best_basis(node.approx, global_phase) + self._select_best_basis(
-            node.detail,
+        approx, detail = self._require_children(node, "best-basis selection")
+        split_cost = self._select_best_basis(approx, global_phase) + self._select_best_basis(
+            detail,
             global_phase,
         )
         if split_cost.item() < leaf_cost.item():
@@ -439,30 +566,29 @@ class WaveletPacketSpectralCoupling(_WaveletCouplingBase):
         node.detail = None
         return leaf_cost
 
-    def _filter_leaves(self, node: _WaveletNode) -> None:
+    def _filter_leaves(self, node: _WaveletNode, signal: Optional[Tensor] = None) -> None:
         if node.is_leaf:
             gain = self._band_gain(
                 low=node.band_low,
                 high=node.band_high,
                 device=node.coeffs.device,
                 dtype=node.coeffs.real.dtype,
+                signal=signal if self.dynamic_spectral_gains else None,
             )
             node.coeffs = node.coeffs * gain.to(node.coeffs.dtype)
             return
 
-        assert node.approx is not None
-        assert node.detail is not None
-        self._filter_leaves(node.approx)
-        self._filter_leaves(node.detail)
+        approx, detail = self._require_children(node, "leaf filtering")
+        self._filter_leaves(approx, signal)
+        self._filter_leaves(detail, signal)
 
     def _reconstruct(self, node: _WaveletNode) -> Tensor:
         if node.is_leaf:
             return node.coeffs
 
-        assert node.approx is not None
-        assert node.detail is not None
-        approx = self._reconstruct(node.approx)
-        detail = self._reconstruct(node.detail)
+        approx_node, detail_node = self._require_children(node, "reconstruction")
+        approx = self._reconstruct(approx_node)
+        detail = self._reconstruct(detail_node)
         return _haar_merge(approx, detail, node.original_length)
 
     def forward(self, tensor: Tensor) -> Tensor:
@@ -486,7 +612,7 @@ class WaveletPacketSpectralCoupling(_WaveletCouplingBase):
             band_high=1.0,
         )
         self._select_best_basis(tree, phase_reference)
-        self._filter_leaves(tree)
+        self._filter_leaves(tree, flat)
         reconstructed = self._reconstruct(tree)
         return self._reshape(reconstructed, original_shape).to(tensor.dtype)
 
@@ -504,6 +630,8 @@ class ReciprocatorMixer(nn.Module):
         low_frequency_sigma: float = 0.35,
         high_frequency_gain: float = 0.5,
         high_frequency_cutoff: float = 0.5,
+        dynamic_spectral_gains: bool = False,
+        anisotropic_spectral_gains: bool = False,
         wavelet_levels: Optional[int] = None,
         phase_scale: float = math.pi,
         normalization_type: str = "frobenius",
@@ -517,6 +645,8 @@ class ReciprocatorMixer(nn.Module):
         self.enable_dynamic_gains = enable_dynamic_gains
         self.gain_projector_rank = gain_projector_rank
         self.coupling_type = canonicalize_coupling_type(coupling_type)
+        self.dynamic_spectral_gains = dynamic_spectral_gains
+        self.anisotropic_spectral_gains = anisotropic_spectral_gains
         self.normalization_type = canonicalize_normalization_type(normalization_type)
         self.eps = eps
 
@@ -537,6 +667,9 @@ class ReciprocatorMixer(nn.Module):
                 low_frequency_sigma=low_frequency_sigma,
                 high_frequency_gain=high_frequency_gain,
                 high_frequency_cutoff=high_frequency_cutoff,
+                dynamic_spectral_gains=dynamic_spectral_gains,
+                anisotropic_spectral_gains=anisotropic_spectral_gains,
+                gain_projector_rank=gain_projector_rank,
                 eps=eps,
             )
         elif self.coupling_type == "dwt":
@@ -547,6 +680,9 @@ class ReciprocatorMixer(nn.Module):
                 high_frequency_gain=high_frequency_gain,
                 high_frequency_cutoff=high_frequency_cutoff,
                 wavelet_levels=wavelet_levels,
+                dynamic_spectral_gains=dynamic_spectral_gains,
+                anisotropic_spectral_gains=anisotropic_spectral_gains,
+                gain_projector_rank=gain_projector_rank,
                 eps=eps,
             )
         else:
@@ -558,6 +694,9 @@ class ReciprocatorMixer(nn.Module):
                 high_frequency_cutoff=high_frequency_cutoff,
                 wavelet_levels=wavelet_levels,
                 phase_aware_best_basis=self.coupling_type == "wavelet_packet_max_gauge",
+                dynamic_spectral_gains=dynamic_spectral_gains,
+                anisotropic_spectral_gains=anisotropic_spectral_gains,
+                gain_projector_rank=gain_projector_rank,
                 eps=eps,
             )
 
@@ -624,7 +763,10 @@ class ReciprocatorMixer(nn.Module):
             s_flat = signal.reshape(signal.shape[0], -1)
             gain_features = torch.cat([s_flat.real, s_flat.imag], dim=-1)
 
-            assert self.gain_projector is not None
+            if self.gain_projector is None:
+                raise ValueError(
+                    "Dynamic gains are enabled, but gain_projector is not initialized."
+                )
             delta = self.gain_projector(gain_features)
             delta = delta.reshape(-1, 3, *self.state_shape)
             delta_D, delta_A, delta_B = delta.unbind(dim=1)
@@ -775,7 +917,7 @@ class ReciprocatorMixer(nn.Module):
                             dims=tuple(range(1, proposal.ndim)),
                             eps=self.eps,
                         )
-                        state_delta = current_state - chunk_start_state
+                        state_delta = core_state - chunk_start_state
                         drifts.append(
                             state_delta.flatten(start_dim=1).norm(p=2, dim=1).mean().item()
                         )

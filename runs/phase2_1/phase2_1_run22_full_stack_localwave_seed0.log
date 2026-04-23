@@ -1,0 +1,15 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/phase2_1/phase2_1_run22_full_stack_localwave_seed0/config.json
+step=1 train_loss=4.5551 train_acc=0.0488 train_ppl=95.1206 train_bpc=6.5717 val_loss=4.3193 val_acc=0.0459 val_ppl=75.1389 val_bpc=6.2315
+step=50 train_loss=3.1600 train_acc=0.1523 train_ppl=23.5705 train_bpc=4.5589 val_loss=3.1730 val_acc=0.1594 val_ppl=23.8790 val_bpc=4.5777
+step=100 train_loss=2.8472 train_acc=0.2598 train_ppl=17.2399 train_bpc=4.1077 val_loss=2.8753 val_acc=0.2494 val_ppl=17.7302 val_bpc=4.1481
+step=150 train_loss=2.6789 train_acc=0.2676 train_ppl=14.5697 train_bpc=3.8649 val_loss=2.6908 val_acc=0.2832 val_ppl=14.7431 val_bpc=3.8820
+step=200 train_loss=2.6501 train_acc=0.3184 train_ppl=14.1550 train_bpc=3.8232 val_loss=2.6003 val_acc=0.3007 val_ppl=13.4672 val_bpc=3.7514
+step=250 train_loss=2.4387 train_acc=0.3340 train_ppl=11.4585 train_bpc=3.5183 val_loss=2.5367 val_acc=0.3068 val_ppl=12.6384 val_bpc=3.6597
+step=300 train_loss=2.5120 train_acc=0.3203 train_ppl=12.3301 train_bpc=3.6241 val_loss=2.5257 val_acc=0.3130 val_ppl=12.4998 val_bpc=3.6438
+step=350 train_loss=2.4683 train_acc=0.3242 train_ppl=11.8021 train_bpc=3.5610 val_loss=2.4691 val_acc=0.3190 val_ppl=11.8118 val_bpc=3.5622
+step=400 train_loss=2.9142 train_acc=0.2773 train_ppl=18.4334 train_bpc=4.2042 val_loss=2.4540 val_acc=0.3229 val_ppl=11.6352 val_bpc=3.5404
+step=450 train_loss=2.5864 train_acc=0.2988 train_ppl=13.2820 train_bpc=3.7314 val_loss=2.3977 val_acc=0.3372 val_ppl=10.9982 val_bpc=3.4592
+step=500 train_loss=2.5312 train_acc=0.3047 train_ppl=12.5689 train_bpc=3.6518 val_loss=2.3798 val_acc=0.3407 val_ppl=10.8025 val_bpc=3.4333
+training finished (device=cpu, corpus=plato_jowett, vocab=96, train_tokens=90000, val_tokens=10000)
+final train(step=500) loss=2.5312 acc=0.3047 ppl=12.5689 bpc=3.6518 last eval(step=500) val_loss=2.3798 val_acc=0.3407 val_ppl=10.8025 val_bpc=3.4333
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/phase2_1/phase2_1_run22_full_stack_localwave_seed0/checkpoint_step_000500.pt

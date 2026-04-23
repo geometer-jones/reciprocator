@@ -1,0 +1,15 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s2_fft_20260423/phase2_s2_run2s2a_fft_gentle_smoothing_seed0/config.json
+step=1 lr=0.001 train_loss=4.6243 train_acc=0.0312 train_ppl=101.9264 train_bpc=6.6714 val_loss=4.4740 val_acc=0.0311 val_ppl=87.7039 val_bpc=6.4546
+step=50 lr=0.001 train_loss=3.1876 train_acc=0.1758 train_ppl=24.2299 train_bpc=4.5987 val_loss=3.2002 val_acc=0.1624 val_ppl=24.5387 val_bpc=4.6170
+step=100 lr=0.001 train_loss=2.8054 train_acc=0.2637 train_ppl=16.5332 train_bpc=4.0473 val_loss=2.7869 val_acc=0.2742 val_ppl=16.2307 val_bpc=4.0206
+step=150 lr=0.001 train_loss=2.6026 train_acc=0.2949 train_ppl=13.4983 train_bpc=3.7547 val_loss=2.6166 val_acc=0.3009 val_ppl=13.6894 val_bpc=3.7750
+step=200 lr=0.001 train_loss=2.4781 train_acc=0.3340 train_ppl=11.9185 train_bpc=3.5751 val_loss=2.5243 val_acc=0.3159 val_ppl=12.4821 val_bpc=3.6418
+step=250 lr=0.001 train_loss=2.4581 train_acc=0.3223 train_ppl=11.6823 train_bpc=3.5463 val_loss=2.4309 val_acc=0.3445 val_ppl=11.3695 val_bpc=3.5071
+step=300 lr=0.001 train_loss=2.4094 train_acc=0.3145 train_ppl=11.1268 train_bpc=3.4760 val_loss=2.4379 val_acc=0.3334 val_ppl=11.4486 val_bpc=3.5171
+step=350 lr=0.001 train_loss=2.2700 train_acc=0.3477 train_ppl=9.6797 train_bpc=3.2750 val_loss=2.3482 val_acc=0.3535 val_ppl=10.4670 val_bpc=3.3878
+step=400 lr=0.001 train_loss=2.4239 train_acc=0.3379 train_ppl=11.2901 train_bpc=3.4970 val_loss=2.3175 val_acc=0.3566 val_ppl=10.1500 val_bpc=3.3434
+step=450 lr=0.001 train_loss=2.2449 train_acc=0.3496 train_ppl=9.4395 train_bpc=3.2387 val_loss=2.2953 val_acc=0.3595 val_ppl=9.9275 val_bpc=3.3114
+step=500 lr=0.001 train_loss=2.1564 train_acc=0.4199 train_ppl=8.6399 train_bpc=3.1110 val_loss=2.2946 val_acc=0.3663 val_ppl=9.9200 val_bpc=3.3103
+training finished (device=cpu, corpus=plato_jowett, vocab=96, train_tokens=90000, val_tokens=10000, state_shape=(2, 3, 4))
+final train(step=500) loss=2.1564 acc=0.4199 ppl=8.6399 bpc=3.1110 last eval(step=500) val_loss=2.2946 val_acc=0.3663 val_ppl=9.9200 val_bpc=3.3103
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s2_fft_20260423/phase2_s2_run2s2a_fft_gentle_smoothing_seed0/checkpoint_step_000500.pt

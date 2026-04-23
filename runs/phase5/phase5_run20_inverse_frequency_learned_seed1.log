@@ -1,0 +1,15 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/phase5/phase5_run20_inverse_frequency_learned_seed1/config.json
+step=1 lr=0.001 train_loss=5.0500 train_acc=0.0000 train_ppl=156.0206 train_bpc=7.2856 val_loss=4.8071 val_acc=0.0024 val_ppl=122.3805 val_bpc=6.9352
+step=50 lr=0.001 train_loss=3.3653 train_acc=0.1602 train_ppl=28.9425 train_bpc=4.8551 val_loss=3.3097 val_acc=0.1600 val_ppl=27.3761 val_bpc=4.7748
+step=100 lr=0.001 train_loss=2.7635 train_acc=0.2676 train_ppl=15.8549 train_bpc=3.9869 val_loss=2.8643 val_acc=0.2489 val_ppl=17.5368 val_bpc=4.1323
+step=150 lr=0.001 train_loss=2.6781 train_acc=0.2793 train_ppl=14.5572 train_bpc=3.8637 val_loss=2.7052 val_acc=0.2864 val_ppl=14.9569 val_bpc=3.9027
+step=200 lr=0.001 train_loss=2.6622 train_acc=0.3047 train_ppl=14.3277 train_bpc=3.8407 val_loss=2.5696 val_acc=0.3068 val_ppl=13.0602 val_bpc=3.7071
+step=250 lr=0.001 train_loss=2.5202 train_acc=0.3145 train_ppl=12.4316 train_bpc=3.6359 val_loss=2.4837 val_acc=0.3302 val_ppl=11.9857 val_bpc=3.5832
+step=300 lr=0.001 train_loss=2.8465 train_acc=0.2656 train_ppl=17.2268 train_bpc=4.1066 val_loss=2.4678 val_acc=0.3267 val_ppl=11.7967 val_bpc=3.5603
+step=350 lr=0.001 train_loss=2.3359 train_acc=0.3398 train_ppl=10.3391 train_bpc=3.3700 val_loss=2.4007 val_acc=0.3342 val_ppl=11.0307 val_bpc=3.4635
+step=400 lr=0.001 train_loss=2.4579 train_acc=0.3398 train_ppl=11.6805 train_bpc=3.5460 val_loss=2.3964 val_acc=0.3422 val_ppl=10.9834 val_bpc=3.4572
+step=450 lr=0.001 train_loss=2.2948 train_acc=0.3438 train_ppl=9.9227 train_bpc=3.3107 val_loss=2.3494 val_acc=0.3507 val_ppl=10.4789 val_bpc=3.3894
+step=500 lr=0.001 train_loss=2.2091 train_acc=0.3770 train_ppl=9.1075 train_bpc=3.1871 val_loss=2.3145 val_acc=0.3539 val_ppl=10.1199 val_bpc=3.3391
+training finished (device=cpu, corpus=plato_jowett, vocab=96, train_tokens=90000, val_tokens=10000, state_shape=(2, 3, 4))
+final train(step=500) loss=2.2091 acc=0.3770 ppl=9.1075 bpc=3.1871 last eval(step=500) val_loss=2.3145 val_acc=0.3539 val_ppl=10.1199 val_bpc=3.3391
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/phase5/phase5_run20_inverse_frequency_learned_seed1/checkpoint_step_000500.pt

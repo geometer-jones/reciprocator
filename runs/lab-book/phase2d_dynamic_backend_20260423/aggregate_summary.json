@@ -1,0 +1,140 @@
+[
+  {
+    "config_id": "2D.1",
+    "label": "sequential",
+    "coupling_type": "sequential",
+    "completed_seeds": 3,
+    "mean_final5_val_bpc": 3.123364711551256,
+    "per_seed_final5_val_bpc": [
+      3.1125637023273844,
+      3.1118377463598277,
+      3.1456926859665577
+    ],
+    "mean_final_val_bpc": 3.1283954907267453,
+    "per_seed_final_val_bpc": [
+      3.016685851021541,
+      3.1812678304437467,
+      3.187232790714947
+    ],
+    "mode_growth_seeds": 3,
+    "rank_growth_seeds": 3,
+    "mode_prune_seeds": 0,
+    "rank_prune_seeds": 0,
+    "final_state_shapes": [
+      [
+        5,
+        8,
+        8,
+        8,
+        2
+      ],
+      [
+        5,
+        8,
+        8,
+        8,
+        2
+      ],
+      [
+        5,
+        8,
+        8,
+        8,
+        2
+      ]
+    ],
+    "delta_vs_2d1": 0.0
+  },
+  {
+    "config_id": "2D.2",
+    "label": "fft",
+    "coupling_type": "fft",
+    "completed_seeds": 3,
+    "mean_final5_val_bpc": 3.177593206129749,
+    "per_seed_final5_val_bpc": [
+      3.2293730633200526,
+      3.10805150530542,
+      3.195355049763775
+    ],
+    "mean_final_val_bpc": 3.197719576170183,
+    "per_seed_final_val_bpc": [
+      3.416098531367979,
+      3.0133866218387144,
+      3.1636735753038545
+    ],
+    "mode_growth_seeds": 3,
+    "rank_growth_seeds": 3,
+    "mode_prune_seeds": 0,
+    "rank_prune_seeds": 0,
+    "final_state_shapes": [
+      [
+        5,
+        8,
+        8,
+        8,
+        2
+      ],
+      [
+        5,
+        8,
+        8,
+        8,
+        2
+      ],
+      [
+        5,
+        8,
+        8,
+        8,
+        2
+      ]
+    ],
+    "delta_vs_2d1": 0.05422849457849299
+  },
+  {
+    "config_id": "2D.3",
+    "label": "dwt",
+    "coupling_type": "dwt",
+    "completed_seeds": 3,
+    "mean_final5_val_bpc": 3.1613982047036546,
+    "per_seed_final5_val_bpc": [
+      3.187723904372751,
+      3.102824135628108,
+      3.1936465741101046
+    ],
+    "mean_final_val_bpc": 3.123642778833927,
+    "per_seed_final_val_bpc": [
+      3.203291154791309,
+      3.0112626361005588,
+      3.1563745456099115
+    ],
+    "mode_growth_seeds": 3,
+    "rank_growth_seeds": 3,
+    "mode_prune_seeds": 0,
+    "rank_prune_seeds": 0,
+    "final_state_shapes": [
+      [
+        5,
+        8,
+        8,
+        8,
+        2
+      ],
+      [
+        5,
+        8,
+        8,
+        8,
+        2
+      ],
+      [
+        5,
+        8,
+        8,
+        8,
+        2
+      ]
+    ],
+    "delta_vs_2d1": 0.038033493152398457
+  }
+]

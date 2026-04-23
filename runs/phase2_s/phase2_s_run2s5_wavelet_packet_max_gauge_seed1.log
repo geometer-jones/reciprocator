@@ -1,0 +1,15 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/phase2_s/phase2_s_run2s5_wavelet_packet_max_gauge_seed1/config.json
+step=1 lr=0.001 train_loss=4.7258 train_acc=0.0020 train_ppl=112.8187 train_bpc=6.8179 val_loss=4.5681 val_acc=0.0227 val_ppl=96.3582 val_bpc=6.5903
+step=50 lr=0.001 train_loss=3.1301 train_acc=0.2363 train_ppl=22.8771 train_bpc=4.5158 val_loss=3.1444 val_acc=0.2207 val_ppl=23.2049 val_bpc=4.5364
+step=100 lr=0.001 train_loss=2.7052 train_acc=0.2773 train_ppl=14.9568 train_bpc=3.9027 val_loss=2.7897 val_acc=0.2794 val_ppl=16.2765 val_bpc=4.0247
+step=150 lr=0.001 train_loss=2.5299 train_acc=0.2988 train_ppl=12.5518 train_bpc=3.6498 val_loss=2.6110 val_acc=0.3036 val_ppl=13.6121 val_bpc=3.7668
+step=200 lr=0.001 train_loss=2.4911 train_acc=0.2969 train_ppl=12.0750 train_bpc=3.5940 val_loss=2.5575 val_acc=0.3107 val_ppl=12.9040 val_bpc=3.6897
+step=250 lr=0.001 train_loss=2.3389 train_acc=0.3652 train_ppl=10.3693 train_bpc=3.3743 val_loss=2.4854 val_acc=0.3206 val_ppl=12.0056 val_bpc=3.5856
+step=300 lr=0.001 train_loss=2.3891 train_acc=0.3398 train_ppl=10.9037 train_bpc=3.4467 val_loss=2.3965 val_acc=0.3392 val_ppl=10.9842 val_bpc=3.4574
+step=350 lr=0.001 train_loss=2.4220 train_acc=0.3496 train_ppl=11.2685 train_bpc=3.4942 val_loss=2.3904 val_acc=0.3492 val_ppl=10.9181 val_bpc=3.4487
+step=400 lr=0.001 train_loss=2.2794 train_acc=0.3105 train_ppl=9.7706 train_bpc=3.2884 val_loss=2.3290 val_acc=0.3533 val_ppl=10.2681 val_bpc=3.3601
+step=450 lr=0.001 train_loss=2.1376 train_acc=0.3789 train_ppl=8.4789 train_bpc=3.0839 val_loss=2.2967 val_acc=0.3633 val_ppl=9.9414 val_bpc=3.3135
+step=500 lr=0.001 train_loss=2.2176 train_acc=0.3887 train_ppl=9.1851 train_bpc=3.1993 val_loss=2.2943 val_acc=0.3654 val_ppl=9.9172 val_bpc=3.3099
+training finished (device=cpu, corpus=plato_jowett, vocab=96, train_tokens=90000, val_tokens=10000, state_shape=(2, 3, 4))
+final train(step=500) loss=2.2176 acc=0.3887 ppl=9.1851 bpc=3.1993 last eval(step=500) val_loss=2.2943 val_acc=0.3654 val_ppl=9.9172 val_bpc=3.3099
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/phase2_s/phase2_s_run2s5_wavelet_packet_max_gauge_seed1/checkpoint_step_000500.pt

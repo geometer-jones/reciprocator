@@ -106,6 +106,8 @@ enter the reciprocator blocks.
 - `--low-frequency-sigma`
 - `--high-frequency-gain`
 - `--high-frequency-cutoff`
+- `--dynamic-spectral-gains`
+- `--anisotropic-spectral-gains`
 - `--wavelet-levels`
 - `--chunk-size`
 - `--track-chunk-drift`
@@ -117,6 +119,16 @@ Supported coupling backends today:
 - `dwt`
 - `wavelet_packet`
 - `wavelet_packet_max_gauge`
+
+`--dynamic-spectral-gains` applies only to spectral backends (`fft`, `dwt`,
+`wavelet_packet`, and `wavelet_packet_max_gauge`). It keeps the fixed spectral
+filter as the base envelope, then adds a zero-initialized low-rank projector
+conditioned on the current complex coupling signal. The projector width is
+`gain_projector_rank` in `TrainingConfig`.
+
+For FFT coupling, `--anisotropic-spectral-gains` makes that dynamic projector a
+full coordinatewise frequency-grid modulation instead of the default radial
+sampled modulation.
 
 ### Extra model paths
 
@@ -221,6 +233,21 @@ python3 scripts/train.py \
 
 Swap `fft` for `sequential`, `dwt`, `wavelet_packet`, or
 `wavelet_packet_max_gauge`.
+
+To compare adaptive spectral filters, keep the same backend and add
+`--dynamic-spectral-gains`:
+
+```bash
+python3 scripts/train.py \
+  --corpus plato_jowett \
+  --steps 500 \
+  --eval-every 50 \
+  --state-shape 2,3,4 \
+  --coupling-type fft \
+  --dynamic-spectral-gains \
+  --anisotropic-spectral-gains \
+  --run-name fft_dynamic_spectral_screen
+```
 
 ### 3. Growth/pruning experiment
 

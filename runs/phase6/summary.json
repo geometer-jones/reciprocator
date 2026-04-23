@@ -1,0 +1,191 @@
+[
+  {
+    "config_id": 25,
+    "label": "mag_phase",
+    "seed": 0,
+    "run_name": "phase6_run25_mag_phase_seed0",
+    "token_magnitude_type": "inverse_frequency_learned",
+    "phase_type": "locked_wave",
+    "token_phase": "none",
+    "normalization_type": "per_mode",
+    "final_val_bpc": 3.484,
+    "final3_val_bpc_mean": 3.5263333333,
+    "final3_val_bpcs": [
+      3.5518,
+      3.5432,
+      3.484
+    ],
+    "elapsed_seconds": 231.6328010559082,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase6/phase6_run25_mag_phase_seed0.log",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase6/phase6_run25_mag_phase_seed0/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": 25,
+    "label": "mag_phase",
+    "seed": 1,
+    "run_name": "phase6_run25_mag_phase_seed1",
+    "token_magnitude_type": "inverse_frequency_learned",
+    "phase_type": "locked_wave",
+    "token_phase": "none",
+    "normalization_type": "per_mode",
+    "final_val_bpc": 3.4693,
+    "final3_val_bpc_mean": 3.4782,
+    "final3_val_bpcs": [
+      3.508,
+      3.4573,
+      3.4693
+    ],
+    "elapsed_seconds": 260.26615810394287,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase6/phase6_run25_mag_phase_seed1.log",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase6/phase6_run25_mag_phase_seed1/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": 25,
+    "label": "mag_phase",
+    "seed": 2,
+    "run_name": "phase6_run25_mag_phase_seed2",
+    "token_magnitude_type": "inverse_frequency_learned",
+    "phase_type": "locked_wave",
+    "token_phase": "none",
+    "normalization_type": "per_mode",
+    "final_val_bpc": 3.4233,
+    "final3_val_bpc_mean": 3.4675333333,
+    "final3_val_bpcs": [
+      3.5076,
+      3.4717,
+      3.4233
+    ],
+    "elapsed_seconds": 255.54719614982605,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase6/phase6_run25_mag_phase_seed2.log",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase6/phase6_run25_mag_phase_seed2/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": 26,
+    "label": "mag_tokenphase",
+    "seed": 0,
+    "run_name": "phase6_run26_mag_tokenphase_seed0",
+    "token_magnitude_type": "inverse_frequency_learned",
+    "phase_type": "rope",
+    "token_phase": "semantic",
+    "normalization_type": "per_mode",
+    "final_val_bpc": 3.3742,
+    "final3_val_bpc_mean": 3.3769666667,
+    "final3_val_bpcs": [
+      3.3763,
+      3.3804,
+      3.3742
+    ],
+    "elapsed_seconds": 268.4624021053314,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase6/phase6_run26_mag_tokenphase_seed0.log",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase6/phase6_run26_mag_tokenphase_seed0/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": 26,
+    "label": "mag_tokenphase",
+    "seed": 1,
+    "run_name": "phase6_run26_mag_tokenphase_seed1",
+    "token_magnitude_type": "inverse_frequency_learned",
+    "phase_type": "rope",
+    "token_phase": "semantic",
+    "normalization_type": "per_mode",
+    "final_val_bpc": 3.3675,
+    "final3_val_bpc_mean": 3.3772666667,
+    "final3_val_bpcs": [
+      3.4243,
+      3.34,
+      3.3675
+    ],
+    "elapsed_seconds": 285.11980414390564,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase6/phase6_run26_mag_tokenphase_seed1.log",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase6/phase6_run26_mag_tokenphase_seed1/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": 26,
+    "label": "mag_tokenphase",
+    "seed": 2,
+    "run_name": "phase6_run26_mag_tokenphase_seed2",
+    "token_magnitude_type": "inverse_frequency_learned",
+    "phase_type": "rope",
+    "token_phase": "semantic",
+    "normalization_type": "per_mode",
+    "final_val_bpc": 3.3588,
+    "final3_val_bpc_mean": 3.369,
+    "final3_val_bpcs": [
+      3.3997,
+      3.3485,
+      3.3588
+    ],
+    "elapsed_seconds": 267.75320291519165,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase6/phase6_run26_mag_tokenphase_seed2.log",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase6/phase6_run26_mag_tokenphase_seed2/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": 27,
+    "label": "full_stack",
+    "seed": 0,
+    "run_name": "phase6_run27_full_stack_seed0",
+    "token_magnitude_type": "inverse_frequency_learned",
+    "phase_type": "locked_wave",
+    "token_phase": "semantic",
+    "normalization_type": "per_mode",
+    "final_val_bpc": 3.5253,
+    "final3_val_bpc_mean": 3.5332666667,
+    "final3_val_bpcs": [
+      3.5372,
+      3.5373,
+      3.5253
+    ],
+    "elapsed_seconds": 285.1102638244629,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase6/phase6_run27_full_stack_seed0.log",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase6/phase6_run27_full_stack_seed0/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": 27,
+    "label": "full_stack",
+    "seed": 1,
+    "run_name": "phase6_run27_full_stack_seed1",
+    "token_magnitude_type": "inverse_frequency_learned",
+    "phase_type": "locked_wave",
+    "token_phase": "semantic",
+    "normalization_type": "per_mode",
+    "final_val_bpc": 3.551,
+    "final3_val_bpc_mean": 3.5578333333,
+    "final3_val_bpcs": [
+      3.6093,
+      3.5132,
+      3.551
+    ],
+    "elapsed_seconds": 282.7019588947296,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase6/phase6_run27_full_stack_seed1.log",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase6/phase6_run27_full_stack_seed1/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": 27,
+    "label": "full_stack",
+    "seed": 2,
+    "run_name": "phase6_run27_full_stack_seed2",
+    "token_magnitude_type": "inverse_frequency_learned",
+    "phase_type": "locked_wave",
+    "token_phase": "semantic",
+    "normalization_type": "per_mode",
+    "final_val_bpc": 3.5335,
+    "final3_val_bpc_mean": 3.5443333333,
+    "final3_val_bpcs": [
+      3.5654,
+      3.5341,
+      3.5335
+    ],
+    "elapsed_seconds": 262.76976203918457,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase6/phase6_run27_full_stack_seed2.log",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase6/phase6_run27_full_stack_seed2/checkpoint_step_000500.pt",
+    "returncode": 0
+  }
+]

@@ -1,0 +1,15 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/phase2_1/phase2_1_run21_mag_localwave_seed0/config.json
+step=1 train_loss=4.8144 train_acc=0.0000 train_ppl=123.2673 train_bpc=6.9456 val_loss=4.6842 val_acc=0.0002 val_ppl=108.2286 val_bpc=6.7579
+step=50 train_loss=3.3299 train_acc=0.1055 train_ppl=27.9353 train_bpc=4.8040 val_loss=3.3286 val_acc=0.0706 val_ppl=27.9001 val_bpc=4.8022
+step=100 train_loss=2.9382 train_acc=0.2188 train_ppl=18.8825 train_bpc=4.2390 val_loss=2.9878 val_acc=0.2156 val_ppl=19.8427 val_bpc=4.3105
+step=150 train_loss=2.7313 train_acc=0.2891 train_ppl=15.3535 train_bpc=3.9405 val_loss=2.7726 val_acc=0.2751 val_ppl=16.0001 val_bpc=4.0000
+step=200 train_loss=2.5750 train_acc=0.3223 train_ppl=13.1316 train_bpc=3.7150 val_loss=2.6457 val_acc=0.3008 val_ppl=14.0933 val_bpc=3.8169
+step=250 train_loss=2.5483 train_acc=0.3203 train_ppl=12.7858 train_bpc=3.6765 val_loss=2.5637 val_acc=0.3066 val_ppl=12.9832 val_bpc=3.6986
+step=300 train_loss=2.4256 train_acc=0.3086 train_ppl=11.3094 train_bpc=3.4995 val_loss=2.5093 val_acc=0.3168 val_ppl=12.2961 val_bpc=3.6201
+step=350 train_loss=2.8512 train_acc=0.3125 train_ppl=17.3088 train_bpc=4.1134 val_loss=2.4588 val_acc=0.3247 val_ppl=11.6908 val_bpc=3.5473
+step=400 train_loss=2.3534 train_acc=0.3262 train_ppl=10.5216 train_bpc=3.3953 val_loss=2.4607 val_acc=0.3221 val_ppl=11.7129 val_bpc=3.5500
+step=450 train_loss=2.3830 train_acc=0.3398 train_ppl=10.8371 train_bpc=3.4379 val_loss=2.4005 val_acc=0.3320 val_ppl=11.0289 val_bpc=3.4632
+step=500 train_loss=2.4259 train_acc=0.3203 train_ppl=11.3127 train_bpc=3.4999 val_loss=2.4291 val_acc=0.3268 val_ppl=11.3485 val_bpc=3.5044
+training finished (device=cpu, corpus=plato_jowett, vocab=96, train_tokens=90000, val_tokens=10000)
+final train(step=500) loss=2.4259 acc=0.3203 ppl=11.3127 bpc=3.4999 last eval(step=500) val_loss=2.4291 val_acc=0.3268 val_ppl=11.3485 val_bpc=3.5044
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/phase2_1/phase2_1_run21_mag_localwave_seed0/checkpoint_step_000500.pt

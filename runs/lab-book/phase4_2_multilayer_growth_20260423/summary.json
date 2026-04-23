@@ -1,0 +1,1322 @@
+[
+  {
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_2_multilayer_growth_20260423/phase4_2_run42a_phase_aware_depth2_static_seed0/checkpoint_step_001000.pt",
+    "config": {
+      "attention_every_k": 0,
+      "attention_num_heads": 8,
+      "attention_position": "after",
+      "attention_window": 256,
+      "batch_size": 8,
+      "benchmark_new_tokens": 128,
+      "benchmark_prompt_lengths": [],
+      "chunk_size": null,
+      "corpus_name": "plato_jowett",
+      "coupling_type": "sequential",
+      "device": "cpu",
+      "dynamic_gains": false,
+      "dynamic_mode_growth": false,
+      "dynamic_mode_pruning": false,
+      "dynamic_rank_growth": false,
+      "dynamic_rank_pruning": false,
+      "dynamic_spectral_gains": false,
+      "enable_anticipator_relation": false,
+      "enable_cross_layer_state": false,
+      "enable_self_relation": false,
+      "eval_batches": 16,
+      "eval_every": 50,
+      "ffn_expansion_factor": 2,
+      "gain_projector_rank": 8,
+      "generation_eval_samples": 0,
+      "generation_new_tokens": 128,
+      "generation_prompt_len": 64,
+      "generation_temperature": 0.8,
+      "generation_top_k": 20,
+      "grad_clip_norm": null,
+      "growth_check_interval": 50,
+      "growth_residual_ema_decay": 0.95,
+      "growth_residual_threshold": 0.4,
+      "hidden_size": 32,
+      "high_frequency_cutoff": 0.5,
+      "high_frequency_gain": 0.5,
+      "learning_rate": 0.001,
+      "low_frequency_gain": 0.5,
+      "low_frequency_sigma": 0.35,
+      "lr_decay_style": "constant",
+      "lr_warmup_steps": 0,
+      "max_chars": 100000,
+      "max_rank": null,
+      "max_state_shape": null,
+      "min_checks_before_first_growth": 0,
+      "min_lr_scale": 0.1,
+      "mode_init": "zero",
+      "normalization_type": "frobenius",
+      "num_layers": 2,
+      "phase_type": "rope",
+      "prune_min_steps": 50,
+      "prune_sustain_steps": 1,
+      "prune_threshold": 0.4,
+      "rank_growth_loss_ceiling": 1.5,
+      "rank_init": "zero",
+      "readout_type": "phase_aware",
+      "record_residual_diagnostics": true,
+      "residual_saturate_threshold": 0.4,
+      "seed": 0,
+      "seq_len": 64,
+      "state_shape": [
+        2,
+        3,
+        4
+      ],
+      "stateful_training": true,
+      "steps": 1000,
+      "tensor_dynamic_growth": true,
+      "token_magnitude_type": "inverse_frequency_learned",
+      "token_phase": "semantic",
+      "track_chunk_drift": false,
+      "val_fraction": 0.1,
+      "wavelet_levels": null,
+      "weight_decay": 0.0
+    },
+    "config_id": "4.2a",
+    "description": "Two-layer phase-aware static baseline at 1000 steps",
+    "diagnostic_steps": [
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      350,
+      400,
+      450,
+      500,
+      550,
+      600,
+      650,
+      700,
+      750,
+      800,
+      850,
+      900,
+      950,
+      1000
+    ],
+    "diagnostics_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_2_multilayer_growth_20260423/phase4_2_run42a_phase_aware_depth2_static_seed0/residual_diagnostics.json",
+    "elapsed_seconds": 292.83003211021423,
+    "final5_steps": [
+      800,
+      850,
+      900,
+      950,
+      1000
+    ],
+    "final5_val_bpc_mean": 3.064073798005677,
+    "final5_val_bpcs": [
+      3.0855449742024272,
+      3.085732908244158,
+      3.0298819508352564,
+      3.10708921937818,
+      3.0121199373683627
+    ],
+    "final_state_shape": [
+      2,
+      3,
+      4
+    ],
+    "final_val_bpc": 3.0121199373683627,
+    "growth_events": [],
+    "label": "phase_aware_depth2_static",
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_2_multilayer_growth_20260423/phase4_2_run42a_phase_aware_depth2_static_seed0.log",
+    "residual_snapshots": {
+      "1000": {
+        "layer_mode_residual_ema": [
+          [
+            0.07819575071334839,
+            6.717879585949049e-08,
+            7.583563643720481e-08
+          ],
+          [
+            0.19852779805660248,
+            8.214274771489727e-08,
+            9.608180562281632e-08
+          ]
+        ],
+        "mode_residual_ema": [
+          0.13836179673671722,
+          7.466077533990756e-08,
+          8.595871037186953e-08
+        ],
+        "state_shape": [
+          2,
+          3,
+          4
+        ]
+      },
+      "200": {
+        "layer_mode_residual_ema": [
+          [
+            0.11886703968048096,
+            8.086240654847643e-08,
+            1.0667560701449474e-07
+          ],
+          [
+            0.3642285466194153,
+            1.1011949396788623e-07,
+            1.6542773551009304e-07
+          ]
+        ],
+        "mode_residual_ema": [
+          0.24154780805110931,
+          9.549095381089501e-08,
+          1.3605166770958022e-07
+        ],
+        "state_shape": [
+          2,
+          3,
+          4
+        ]
+      },
+      "350": {
+        "layer_mode_residual_ema": [
+          [
+            0.11073219776153564,
+            7.642075416924854e-08,
+            1.0125867788701726e-07
+          ],
+          [
+            0.3209461569786072,
+            1.011459360711342e-07,
+            1.4723835306540423e-07
+          ]
+        ],
+        "mode_residual_ema": [
+          0.2158391773700714,
+          8.878334512019137e-08,
+          1.2424850126535603e-07
+        ],
+        "state_shape": [
+          2,
+          3,
+          4
+        ]
+      },
+      "400": {
+        "layer_mode_residual_ema": [
+          [
+            0.10777837038040161,
+            7.681440195028699e-08,
+            9.944871237621555e-08
+          ],
+          [
+            0.3078388273715973,
+            9.738247541690725e-08,
+            1.4472647080765455e-07
+          ]
+        ],
+        "mode_residual_ema": [
+          0.20780859887599945,
+          8.70984422363108e-08,
+          1.220875844865077e-07
+        ],
+        "state_shape": [
+          2,
+          3,
+          4
+        ]
+      },
+      "50": {
+        "layer_mode_residual_ema": [
+          [
+            0.12552493810653687,
+            8.26309332069286e-08,
+            1.1518318387970794e-07
+          ],
+          [
+            0.40917494893074036,
+            1.1542390154772875e-07,
+            1.8730469264482963e-07
+          ]
+        ],
+        "mode_residual_ema": [
+          0.2673499584197998,
+          9.902741737732867e-08,
+          1.5124393826226878e-07
+        ],
+        "state_shape": [
+          2,
+          3,
+          4
+        ]
+      },
+      "500": {
+        "layer_mode_residual_ema": [
+          [
+            0.10339346528053284,
+            7.763791387560559e-08,
+            9.370690889909383e-08
+          ],
+          [
+            0.28427520394325256,
+            9.196203620831511e-08,
+            1.3542947385758453e-07
+          ]
+        ],
+        "mode_residual_ema": [
+          0.1938343495130539,
+          8.479997859467403e-08,
+          1.1456818072019814e-07
+        ],
+        "state_shape": [
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    "returncode": 0,
+    "run_name": "phase4_2_run42a_phase_aware_depth2_static_seed0",
+    "seed": 0,
+    "train_tokens_per_second": 1748.4545431026536,
+    "val_bpcs": [
+      6.3685774974036296,
+      4.3463458750723705,
+      3.7490592222085004,
+      3.662515230528548,
+      3.4948375418929807,
+      3.3865048102012434,
+      3.3114127562812814,
+      3.2660070361855444,
+      3.2495562076999134,
+      3.1984883027898205,
+      3.15541619378581,
+      3.1397975248542096,
+      3.151466483221757,
+      3.121818888489639,
+      3.131119129806853,
+      3.1668081096006486,
+      3.0855449742024272,
+      3.085732908244158,
+      3.0298819508352564,
+      3.10708921937818,
+      3.0121199373683627
+    ],
+    "val_steps": [
+      1,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      350,
+      400,
+      450,
+      500,
+      550,
+      600,
+      650,
+      700,
+      750,
+      800,
+      850,
+      900,
+      950,
+      1000
+    ]
+  },
+  {
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_2_multilayer_growth_20260423/phase4_2_run42a_phase_aware_depth2_static_seed1/checkpoint_step_001000.pt",
+    "config": {
+      "attention_every_k": 0,
+      "attention_num_heads": 8,
+      "attention_position": "after",
+      "attention_window": 256,
+      "batch_size": 8,
+      "benchmark_new_tokens": 128,
+      "benchmark_prompt_lengths": [],
+      "chunk_size": null,
+      "corpus_name": "plato_jowett",
+      "coupling_type": "sequential",
+      "device": "cpu",
+      "dynamic_gains": false,
+      "dynamic_mode_growth": false,
+      "dynamic_mode_pruning": false,
+      "dynamic_rank_growth": false,
+      "dynamic_rank_pruning": false,
+      "dynamic_spectral_gains": false,
+      "enable_anticipator_relation": false,
+      "enable_cross_layer_state": false,
+      "enable_self_relation": false,
+      "eval_batches": 16,
+      "eval_every": 50,
+      "ffn_expansion_factor": 2,
+      "gain_projector_rank": 8,
+      "generation_eval_samples": 0,
+      "generation_new_tokens": 128,
+      "generation_prompt_len": 64,
+      "generation_temperature": 0.8,
+      "generation_top_k": 20,
+      "grad_clip_norm": null,
+      "growth_check_interval": 50,
+      "growth_residual_ema_decay": 0.95,
+      "growth_residual_threshold": 0.4,
+      "hidden_size": 32,
+      "high_frequency_cutoff": 0.5,
+      "high_frequency_gain": 0.5,
+      "learning_rate": 0.001,
+      "low_frequency_gain": 0.5,
+      "low_frequency_sigma": 0.35,
+      "lr_decay_style": "constant",
+      "lr_warmup_steps": 0,
+      "max_chars": 100000,
+      "max_rank": null,
+      "max_state_shape": null,
+      "min_checks_before_first_growth": 0,
+      "min_lr_scale": 0.1,
+      "mode_init": "zero",
+      "normalization_type": "frobenius",
+      "num_layers": 2,
+      "phase_type": "rope",
+      "prune_min_steps": 50,
+      "prune_sustain_steps": 1,
+      "prune_threshold": 0.4,
+      "rank_growth_loss_ceiling": 1.5,
+      "rank_init": "zero",
+      "readout_type": "phase_aware",
+      "record_residual_diagnostics": true,
+      "residual_saturate_threshold": 0.4,
+      "seed": 1,
+      "seq_len": 64,
+      "state_shape": [
+        2,
+        3,
+        4
+      ],
+      "stateful_training": true,
+      "steps": 1000,
+      "tensor_dynamic_growth": true,
+      "token_magnitude_type": "inverse_frequency_learned",
+      "token_phase": "semantic",
+      "track_chunk_drift": false,
+      "val_fraction": 0.1,
+      "wavelet_levels": null,
+      "weight_decay": 0.0
+    },
+    "config_id": "4.2a",
+    "description": "Two-layer phase-aware static baseline at 1000 steps",
+    "diagnostic_steps": [
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      350,
+      400,
+      450,
+      500,
+      550,
+      600,
+      650,
+      700,
+      750,
+      800,
+      850,
+      900,
+      950,
+      1000
+    ],
+    "diagnostics_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_2_multilayer_growth_20260423/phase4_2_run42a_phase_aware_depth2_static_seed1/residual_diagnostics.json",
+    "elapsed_seconds": 322.55270504951477,
+    "final5_steps": [
+      800,
+      850,
+      900,
+      950,
+      1000
+    ],
+    "final5_val_bpc_mean": 3.095005916108607,
+    "final5_val_bpcs": [
+      3.13448295997291,
+      3.137791304236232,
+      3.064525351354216,
+      3.1053840543905378,
+      3.0328459105891414
+    ],
+    "final_state_shape": [
+      2,
+      3,
+      4
+    ],
+    "final_val_bpc": 3.0328459105891414,
+    "growth_events": [],
+    "label": "phase_aware_depth2_static",
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_2_multilayer_growth_20260423/phase4_2_run42a_phase_aware_depth2_static_seed1.log",
+    "residual_snapshots": {
+      "1000": {
+        "layer_mode_residual_ema": [
+          [
+            0.16687072813510895,
+            7.124849332740268e-08,
+            9.474787532326445e-08
+          ],
+          [
+            0.1971375048160553,
+            1.5817062148926198e-07,
+            5.3409706879392616e-08
+          ]
+        ],
+        "mode_residual_ema": [
+          0.18200406432151794,
+          1.1470957161918705e-07,
+          7.407876978504646e-08
+        ],
+        "state_shape": [
+          2,
+          3,
+          4
+        ]
+      },
+      "200": {
+        "layer_mode_residual_ema": [
+          [
+            0.2168577015399933,
+            8.31695672331989e-08,
+            1.410516148325769e-07
+          ],
+          [
+            0.3539600670337677,
+            2.8795449225071934e-07,
+            7.611310337551913e-08
+          ]
+        ],
+        "mode_residual_ema": [
+          0.2854088544845581,
+          1.855620155311044e-07,
+          1.0858234844590697e-07
+        ],
+        "state_shape": [
+          2,
+          3,
+          4
+        ]
+      },
+      "350": {
+        "layer_mode_residual_ema": [
+          [
+            0.20119863748550415,
+            8.03054760467603e-08,
+            1.2959931439127104e-07
+          ],
+          [
+            0.3210918605327606,
+            2.5428164462937275e-07,
+            7.029549919934652e-08
+          ]
+        ],
+        "mode_residual_ema": [
+          0.2611452043056488,
+          1.672935496799255e-07,
+          9.994738547902671e-08
+        ],
+        "state_shape": [
+          2,
+          3,
+          4
+        ]
+      },
+      "400": {
+        "layer_mode_residual_ema": [
+          [
+            0.19660620391368866,
+            7.892437992040868e-08,
+            1.2763602796894702e-07
+          ],
+          [
+            0.3095042407512665,
+            2.450472607051779e-07,
+            6.81869849472605e-08
+          ]
+        ],
+        "mode_residual_ema": [
+          0.2530551850795746,
+          1.6198580965465226e-07,
+          9.791148869453536e-08
+        ],
+        "state_shape": [
+          2,
+          3,
+          4
+        ]
+      },
+      "50": {
+        "layer_mode_residual_ema": [
+          [
+            0.23660597205162048,
+            8.909598392392581e-08,
+            1.519626238177807e-07
+          ],
+          [
+            0.3816074728965759,
+            3.157499577355338e-07,
+            8.161702425013573e-08
+          ]
+        ],
+        "mode_residual_ema": [
+          0.309106707572937,
+          2.0242296727701614e-07,
+          1.1678982048124453e-07
+        ],
+        "state_shape": [
+          2,
+          3,
+          4
+        ]
+      },
+      "500": {
+        "layer_mode_residual_ema": [
+          [
+            0.18684299290180206,
+            7.940676738371621e-08,
+            1.2001696347851976e-07
+          ],
+          [
+            0.28671613335609436,
+            2.2836626101252477e-07,
+            6.642626715347433e-08
+          ]
+        ],
+        "mode_residual_ema": [
+          0.23677952587604523,
+          1.5388651775083417e-07,
+          9.322159399971497e-08
+        ],
+        "state_shape": [
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    "returncode": 0,
+    "run_name": "phase4_2_run42a_phase_aware_depth2_static_seed1",
+    "seed": 1,
+    "train_tokens_per_second": 1587.3374861990487,
+    "val_bpcs": [
+      6.666747000883522,
+      4.382384517093201,
+      3.834472707430837,
+      3.643152456292002,
+      3.480773940090482,
+      3.411084764143038,
+      3.3520189995350522,
+      3.297317101212228,
+      3.2632265926690454,
+      3.268563192827487,
+      3.192952697206499,
+      3.1067309795164326,
+      3.1412754147687365,
+      3.129124775991785,
+      3.1097556168993257,
+      3.078297539303743,
+      3.13448295997291,
+      3.137791304236232,
+      3.064525351354216,
+      3.1053840543905378,
+      3.0328459105891414
+    ],
+    "val_steps": [
+      1,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      350,
+      400,
+      450,
+      500,
+      550,
+      600,
+      650,
+      700,
+      750,
+      800,
+      850,
+      900,
+      950,
+      1000
+    ]
+  },
+  {
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_2_multilayer_growth_20260423/phase4_2_run42b_phase_aware_depth2_mode_growth_seed0/checkpoint_step_001000.pt",
+    "config": {
+      "attention_every_k": 0,
+      "attention_num_heads": 8,
+      "attention_position": "after",
+      "attention_window": 256,
+      "batch_size": 8,
+      "benchmark_new_tokens": 128,
+      "benchmark_prompt_lengths": [],
+      "chunk_size": null,
+      "corpus_name": "plato_jowett",
+      "coupling_type": "sequential",
+      "device": "cpu",
+      "dynamic_gains": false,
+      "dynamic_mode_growth": true,
+      "dynamic_mode_pruning": false,
+      "dynamic_rank_growth": false,
+      "dynamic_rank_pruning": false,
+      "dynamic_spectral_gains": false,
+      "enable_anticipator_relation": false,
+      "enable_cross_layer_state": false,
+      "enable_self_relation": false,
+      "eval_batches": 16,
+      "eval_every": 50,
+      "ffn_expansion_factor": 2,
+      "gain_projector_rank": 8,
+      "generation_eval_samples": 0,
+      "generation_new_tokens": 128,
+      "generation_prompt_len": 64,
+      "generation_temperature": 0.8,
+      "generation_top_k": 20,
+      "grad_clip_norm": null,
+      "growth_check_interval": 50,
+      "growth_residual_ema_decay": 0.8,
+      "growth_residual_threshold": 0.12,
+      "hidden_size": 32,
+      "high_frequency_cutoff": 0.5,
+      "high_frequency_gain": 0.5,
+      "learning_rate": 0.001,
+      "low_frequency_gain": 0.5,
+      "low_frequency_sigma": 0.35,
+      "lr_decay_style": "constant",
+      "lr_warmup_steps": 0,
+      "max_chars": 100000,
+      "max_rank": null,
+      "max_state_shape": [
+        6,
+        6,
+        6
+      ],
+      "min_checks_before_first_growth": 7,
+      "min_lr_scale": 0.1,
+      "mode_init": "mean",
+      "normalization_type": "frobenius",
+      "num_layers": 2,
+      "phase_type": "rope",
+      "prune_min_steps": 50,
+      "prune_sustain_steps": 1,
+      "prune_threshold": 0.4,
+      "rank_growth_loss_ceiling": 1.5,
+      "rank_init": "zero",
+      "readout_type": "phase_aware",
+      "record_residual_diagnostics": true,
+      "residual_saturate_threshold": 0.4,
+      "seed": 0,
+      "seq_len": 64,
+      "state_shape": [
+        3,
+        3,
+        4
+      ],
+      "stateful_training": true,
+      "steps": 1000,
+      "tensor_dynamic_growth": true,
+      "token_magnitude_type": "inverse_frequency_learned",
+      "token_phase": "semantic",
+      "track_chunk_drift": false,
+      "val_fraction": 0.1,
+      "wavelet_levels": null,
+      "weight_decay": 0.0
+    },
+    "config_id": "4.2b",
+    "description": "Two-layer phase-aware with Phase 3.2f mode growth only",
+    "diagnostic_steps": [
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      350,
+      400,
+      450,
+      500,
+      550,
+      600,
+      650,
+      700,
+      750,
+      800,
+      850,
+      900,
+      950,
+      1000
+    ],
+    "diagnostics_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_2_multilayer_growth_20260423/phase4_2_run42b_phase_aware_depth2_mode_growth_seed0/residual_diagnostics.json",
+    "elapsed_seconds": 352.9286470413208,
+    "final5_steps": [
+      800,
+      850,
+      900,
+      950,
+      1000
+    ],
+    "final5_val_bpc_mean": 3.0835095509303327,
+    "final5_val_bpcs": [
+      3.0992118765228795,
+      3.0883349627560492,
+      3.079557591693121,
+      3.0638965505359144,
+      3.086546773143703
+    ],
+    "final_state_shape": [
+      3,
+      3,
+      4
+    ],
+    "final_val_bpc": 3.086546773143703,
+    "growth_events": [
+      {
+        "previous_state_shape": "(2, 3, 4)",
+        "state_shape": "(3, 3, 4)",
+        "step": 350
+      }
+    ],
+    "label": "phase_aware_depth2_mode_growth",
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_2_multilayer_growth_20260423/phase4_2_run42b_phase_aware_depth2_mode_growth_seed0.log",
+    "residual_snapshots": {
+      "1000": {
+        "layer_mode_residual_ema": [
+          [
+            0.02968895435333252,
+            0.03454724699258804,
+            5.533201985485903e-08
+          ],
+          [
+            0.03226340562105179,
+            0.03668379411101341,
+            4.662482311346139e-08
+          ]
+        ],
+        "mode_residual_ema": [
+          0.026326511055231094,
+          0.038458652794361115,
+          5.017033899434864e-08
+        ],
+        "state_shape": [
+          3,
+          3,
+          4
+        ]
+      },
+      "200": {
+        "layer_mode_residual_ema": [
+          [
+            0.10223884880542755,
+            7.753959607725847e-08,
+            8.649420379924777e-08
+          ],
+          [
+            0.25232547521591187,
+            9.503903442009687e-08,
+            1.1156832613323786e-07
+          ]
+        ],
+        "mode_residual_ema": [
+          0.1772821843624115,
+          8.628931880139135e-08,
+          9.90312685189565e-08
+        ],
+        "state_shape": [
+          2,
+          3,
+          4
+        ]
+      },
+      "350": {
+        "layer_mode_residual_ema": [
+          [
+            0.08254837989807129,
+            6.457410961502319e-08,
+            7.762299958358199e-08
+          ],
+          [
+            0.1591101884841919,
+            7.195841078555532e-08,
+            7.54935314262184e-08
+          ]
+        ],
+        "mode_residual_ema": [
+          0.12082929164171219,
+          6.826626730571661e-08,
+          7.655826550490019e-08
+        ],
+        "state_shape": [
+          2,
+          3,
+          4
+        ]
+      },
+      "400": {
+        "layer_mode_residual_ema": [
+          [
+            0.07219541072845459,
+            0.008740471675992012,
+            7.334853080465109e-08
+          ],
+          [
+            0.13563235104084015,
+            0.011946124956011772,
+            7.388840117528161e-08
+          ]
+        ],
+        "mode_residual_ema": [
+          0.036252256482839584,
+          0.051716215908527374,
+          6.1859267930231e-08
+        ],
+        "state_shape": [
+          3,
+          3,
+          4
+        ]
+      },
+      "50": {
+        "layer_mode_residual_ema": [
+          [
+            0.12552493810653687,
+            8.26309332069286e-08,
+            1.1518318387970794e-07
+          ],
+          [
+            0.40917494893074036,
+            1.1542390154772875e-07,
+            1.8730469264482963e-07
+          ]
+        ],
+        "mode_residual_ema": [
+          0.2673499584197998,
+          9.902741737732867e-08,
+          1.5124393826226878e-07
+        ],
+        "state_shape": [
+          2,
+          3,
+          4
+        ]
+      },
+      "500": {
+        "layer_mode_residual_ema": [
+          [
+            0.05991526320576668,
+            0.01540236547589302,
+            7.241953170478155e-08
+          ],
+          [
+            0.09782803058624268,
+            0.03455284982919693,
+            6.246433770229487e-08
+          ]
+        ],
+        "mode_residual_ema": [
+          0.03556820750236511,
+          0.0514562763273716,
+          5.991604723476485e-08
+        ],
+        "state_shape": [
+          3,
+          3,
+          4
+        ]
+      }
+    },
+    "returncode": 0,
+    "run_name": "phase4_2_run42b_phase_aware_depth2_mode_growth_seed0",
+    "seed": 0,
+    "train_tokens_per_second": 1450.7181672335462,
+    "val_bpcs": [
+      6.3685774974036296,
+      4.3463458750723705,
+      3.7490592222085004,
+      3.662515230528548,
+      3.4948375418929807,
+      3.3865048102012434,
+      3.3114127562812814,
+      3.3221790852036066,
+      3.2508616420112877,
+      3.2027744544146235,
+      3.138785127482074,
+      3.125314220890112,
+      3.2049616222791397,
+      3.126560579160915,
+      3.0827108935966905,
+      3.0844895811675763,
+      3.0992118765228795,
+      3.0883349627560492,
+      3.079557591693121,
+      3.0638965505359144,
+      3.086546773143703
+    ],
+    "val_steps": [
+      1,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      350,
+      400,
+      450,
+      500,
+      550,
+      600,
+      650,
+      700,
+      750,
+      800,
+      850,
+      900,
+      950,
+      1000
+    ]
+  },
+  {
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_2_multilayer_growth_20260423/phase4_2_run42b_phase_aware_depth2_mode_growth_seed1/checkpoint_step_001000.pt",
+    "config": {
+      "attention_every_k": 0,
+      "attention_num_heads": 8,
+      "attention_position": "after",
+      "attention_window": 256,
+      "batch_size": 8,
+      "benchmark_new_tokens": 128,
+      "benchmark_prompt_lengths": [],
+      "chunk_size": null,
+      "corpus_name": "plato_jowett",
+      "coupling_type": "sequential",
+      "device": "cpu",
+      "dynamic_gains": false,
+      "dynamic_mode_growth": true,
+      "dynamic_mode_pruning": false,
+      "dynamic_rank_growth": false,
+      "dynamic_rank_pruning": false,
+      "dynamic_spectral_gains": false,
+      "enable_anticipator_relation": false,
+      "enable_cross_layer_state": false,
+      "enable_self_relation": false,
+      "eval_batches": 16,
+      "eval_every": 50,
+      "ffn_expansion_factor": 2,
+      "gain_projector_rank": 8,
+      "generation_eval_samples": 0,
+      "generation_new_tokens": 128,
+      "generation_prompt_len": 64,
+      "generation_temperature": 0.8,
+      "generation_top_k": 20,
+      "grad_clip_norm": null,
+      "growth_check_interval": 50,
+      "growth_residual_ema_decay": 0.8,
+      "growth_residual_threshold": 0.12,
+      "hidden_size": 32,
+      "high_frequency_cutoff": 0.5,
+      "high_frequency_gain": 0.5,
+      "learning_rate": 0.001,
+      "low_frequency_gain": 0.5,
+      "low_frequency_sigma": 0.35,
+      "lr_decay_style": "constant",
+      "lr_warmup_steps": 0,
+      "max_chars": 100000,
+      "max_rank": null,
+      "max_state_shape": [
+        6,
+        6,
+        6
+      ],
+      "min_checks_before_first_growth": 7,
+      "min_lr_scale": 0.1,
+      "mode_init": "mean",
+      "normalization_type": "frobenius",
+      "num_layers": 2,
+      "phase_type": "rope",
+      "prune_min_steps": 50,
+      "prune_sustain_steps": 1,
+      "prune_threshold": 0.4,
+      "rank_growth_loss_ceiling": 1.5,
+      "rank_init": "zero",
+      "readout_type": "phase_aware",
+      "record_residual_diagnostics": true,
+      "residual_saturate_threshold": 0.4,
+      "seed": 1,
+      "seq_len": 64,
+      "state_shape": [
+        3,
+        3,
+        4
+      ],
+      "stateful_training": true,
+      "steps": 1000,
+      "tensor_dynamic_growth": true,
+      "token_magnitude_type": "inverse_frequency_learned",
+      "token_phase": "semantic",
+      "track_chunk_drift": false,
+      "val_fraction": 0.1,
+      "wavelet_levels": null,
+      "weight_decay": 0.0
+    },
+    "config_id": "4.2b",
+    "description": "Two-layer phase-aware with Phase 3.2f mode growth only",
+    "diagnostic_steps": [
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      350,
+      400,
+      450,
+      500,
+      550,
+      600,
+      650,
+      700,
+      750,
+      800,
+      850,
+      900,
+      950,
+      1000
+    ],
+    "diagnostics_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_2_multilayer_growth_20260423/phase4_2_run42b_phase_aware_depth2_mode_growth_seed1/residual_diagnostics.json",
+    "elapsed_seconds": 382.4603650569916,
+    "final5_steps": [
+      800,
+      850,
+      900,
+      950,
+      1000
+    ],
+    "final5_val_bpc_mean": 3.0982015902377835,
+    "final5_val_bpcs": [
+      3.124532366261458,
+      3.156453335161838,
+      3.114963939498055,
+      3.062816520986327,
+      3.032241789281239
+    ],
+    "final_state_shape": [
+      3,
+      3,
+      4
+    ],
+    "final_val_bpc": 3.032241789281239,
+    "growth_events": [
+      {
+        "previous_state_shape": "(2, 3, 4)",
+        "state_shape": "(3, 3, 4)",
+        "step": 350
+      }
+    ],
+    "label": "phase_aware_depth2_mode_growth",
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_2_multilayer_growth_20260423/phase4_2_run42b_phase_aware_depth2_mode_growth_seed1.log",
+    "residual_snapshots": {
+      "1000": {
+        "layer_mode_residual_ema": [
+          [
+            0.07841625064611435,
+            0.032256755977869034,
+            6.09895351999512e-08
+          ],
+          [
+            0.06553921103477478,
+            0.023784920573234558,
+            4.2334470151672576e-08
+          ]
+        ],
+        "mode_residual_ema": [
+          0.06605356186628342,
+          0.030492529273033142,
+          5.030457117527476e-08
+        ],
+        "state_shape": [
+          3,
+          3,
+          4
+        ]
+      },
+      "200": {
+        "layer_mode_residual_ema": [
+          [
+            0.17046456038951874,
+            6.8431909028277e-08,
+            1.1333620619780049e-07
+          ],
+          [
+            0.28444352746009827,
+            2.1871827016184398e-07,
+            6.27083522886096e-08
+          ]
+        ],
+        "mode_residual_ema": [
+          0.2274540513753891,
+          1.4357509314777417e-07,
+          8.802228279591873e-08
+        ],
+        "state_shape": [
+          2,
+          3,
+          4
+        ]
+      },
+      "350": {
+        "layer_mode_residual_ema": [
+          [
+            0.1399170458316803,
+            6.644166461455825e-08,
+            8.88576465740698e-08
+          ],
+          [
+            0.20570170879364014,
+            1.3752625704910315e-07,
+            4.940835651723319e-08
+          ]
+        ],
+        "mode_residual_ema": [
+          0.17280937731266022,
+          1.0198396438454438e-07,
+          6.91330015456515e-08
+        ],
+        "state_shape": [
+          2,
+          3,
+          4
+        ]
+      },
+      "400": {
+        "layer_mode_residual_ema": [
+          [
+            0.12270986288785934,
+            0.007940087467432022,
+            8.323765143813944e-08
+          ],
+          [
+            0.17980487644672394,
+            0.010044009424746037,
+            4.51517507826793e-08
+          ]
+        ],
+        "mode_residual_ema": [
+          0.06504931300878525,
+          0.04495983570814133,
+          4.444148515858615e-08
+        ],
+        "state_shape": [
+          3,
+          3,
+          4
+        ]
+      },
+      "50": {
+        "layer_mode_residual_ema": [
+          [
+            0.23660597205162048,
+            8.909598392392581e-08,
+            1.519626238177807e-07
+          ],
+          [
+            0.3816074728965759,
+            3.157499577355338e-07,
+            8.161702425013573e-08
+          ]
+        ],
+        "mode_residual_ema": [
+          0.309106707572937,
+          2.0242296727701614e-07,
+          1.1678982048124453e-07
+        ],
+        "state_shape": [
+          2,
+          3,
+          4
+        ]
+      },
+      "500": {
+        "layer_mode_residual_ema": [
+          [
+            0.11110429465770721,
+            0.014675865881145,
+            7.058996942532758e-08
+          ],
+          [
+            0.14417435228824615,
+            0.023723121732473373,
+            5.209786024806817e-08
+          ]
+        ],
+        "mode_residual_ema": [
+          0.0724661722779274,
+          0.042218878865242004,
+          4.870185676963956e-08
+        ],
+        "state_shape": [
+          3,
+          3,
+          4
+        ]
+      }
+    },
+    "returncode": 0,
+    "run_name": "phase4_2_run42b_phase_aware_depth2_mode_growth_seed1",
+    "seed": 1,
+    "train_tokens_per_second": 1338.7008087065578,
+    "val_bpcs": [
+      6.666747000883522,
+      4.382384517093201,
+      3.834472707430837,
+      3.643152456292002,
+      3.480773940090482,
+      3.411084764143038,
+      3.3520189995350522,
+      3.3343956363315015,
+      3.2381284979958638,
+      3.275438930221994,
+      3.152678724434195,
+      3.0866701706956974,
+      3.138414483371634,
+      3.13299647092584,
+      3.066330105045623,
+      3.0659098654382397,
+      3.124532366261458,
+      3.156453335161838,
+      3.114963939498055,
+      3.062816520986327,
+      3.032241789281239
+    ],
+    "val_steps": [
+      1,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      350,
+      400,
+      450,
+      500,
+      550,
+      600,
+      650,
+      700,
+      750,
+      800,
+      850,
+      900,
+      950,
+      1000
+    ]
+  }
+]

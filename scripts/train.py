@@ -68,7 +68,7 @@ def parse_coupling_type(raw: str) -> str:
 def build_parser() -> argparse.ArgumentParser:
     corpora = [corpus.name for corpus in available_corpora()]
     parser = argparse.ArgumentParser(description="Run a minimal character-level training loop.")
-    parser.add_argument("--corpus", choices=corpora, default="plato_jowett")
+    parser.add_argument("--corpus", choices=corpora, default="greek_classics")
     parser.add_argument("--max-chars", type=int, default=20000)
     parser.add_argument("--val-fraction", type=float, default=0.1)
     parser.add_argument("--batch-size", type=int, default=8)
@@ -97,17 +97,17 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--num-layers", type=int, default=1)
     parser.add_argument("--ffn-expansion-factor", type=int, default=2)
-    parser.add_argument("--readout-type", choices=("magnitude", "phase_aware"), default="magnitude")
+    parser.add_argument("--readout-type", choices=("magnitude", "phase_aware"), default="phase_aware")
     parser.add_argument(
         "--token-magnitude-type",
         choices=("learned", "inverse_frequency", "inverse_frequency_learned"),
-        default="learned",
+        default="inverse_frequency_learned",
     )
     parser.add_argument("--phase-type", choices=("rope", "locked_wave", "local_wave"), default="rope")
     parser.add_argument(
         "--token-phase",
         choices=("none", "semantic", "virtual_offset", "semantic_virtual_offset"),
-        default="none",
+        default="semantic",
     )
     parser.add_argument(
         "--normalization-type",
@@ -119,6 +119,18 @@ def build_parser() -> argparse.ArgumentParser:
         "--enable-self-relation",
         action="store_true",
         help="Add the optional prior-state × tentative-present Hadamard self-relation term.",
+    )
+    parser.add_argument(
+        "--dynamic-spectral-gains",
+        action="store_true",
+        default=False,
+        help="Use a zero-initialized signal-conditioned projector for spectral coupling gains.",
+    )
+    parser.add_argument(
+        "--anisotropic-spectral-gains",
+        action="store_true",
+        default=False,
+        help="Use full coordinatewise FFT dynamic spectral gains instead of radial sampled gains.",
     )
     parser.add_argument(
         "--enable-anticipator-relation",
@@ -337,6 +349,8 @@ def main() -> None:
         phase_type=args.phase_type,
         token_phase=args.token_phase,
         enable_self_relation=args.enable_self_relation,
+        dynamic_spectral_gains=args.dynamic_spectral_gains,
+        anisotropic_spectral_gains=args.anisotropic_spectral_gains,
         enable_anticipator_relation=args.enable_anticipator_relation,
         enable_cross_layer_state=args.enable_cross_layer_state,
         coupling_type=args.coupling_type,

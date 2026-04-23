@@ -1,0 +1,15 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/phase2/phase2_run07_mag_phase_seed1/config.json
+step=1 train_loss=4.9630 train_acc=0.0000 train_ppl=143.0162 train_bpc=7.1600 val_loss=4.7590 val_acc=0.0020 val_ppl=116.6286 val_bpc=6.8658
+step=50 train_loss=3.3822 train_acc=0.1582 train_ppl=29.4364 train_bpc=4.8795 val_loss=3.3284 val_acc=0.1595 val_ppl=27.8943 val_bpc=4.8019
+step=100 train_loss=2.8184 train_acc=0.2363 train_ppl=16.7495 train_bpc=4.0660 val_loss=2.9113 val_acc=0.2328 val_ppl=18.3811 val_bpc=4.2002
+step=150 train_loss=2.7318 train_acc=0.2832 train_ppl=15.3603 train_bpc=3.9411 val_loss=2.7397 val_acc=0.2859 val_ppl=15.4831 val_bpc=3.9526
+step=200 train_loss=2.7067 train_acc=0.2949 train_ppl=14.9805 train_bpc=3.9050 val_loss=2.6061 val_acc=0.2972 val_ppl=13.5456 val_bpc=3.7598
+step=250 train_loss=2.5630 train_acc=0.3125 train_ppl=12.9745 train_bpc=3.6976 val_loss=2.5335 val_acc=0.3136 val_ppl=12.5980 val_bpc=3.6551
+step=300 train_loss=2.8955 train_acc=0.2422 train_ppl=18.0928 train_bpc=4.1773 val_loss=2.5143 val_acc=0.3077 val_ppl=12.3577 val_bpc=3.6273
+step=350 train_loss=2.3691 train_acc=0.3340 train_ppl=10.6880 train_bpc=3.4179 val_loss=2.4606 val_acc=0.3230 val_ppl=11.7114 val_bpc=3.5498
+step=400 train_loss=2.5591 train_acc=0.3242 train_ppl=12.9241 train_bpc=3.6920 val_loss=2.4556 val_acc=0.3239 val_ppl=11.6539 val_bpc=3.5427
+step=450 train_loss=2.3662 train_acc=0.3535 train_ppl=10.6566 train_bpc=3.4137 val_loss=2.4221 val_acc=0.3312 val_ppl=11.2698 val_bpc=3.4944
+step=500 train_loss=2.2825 train_acc=0.3340 train_ppl=9.8016 train_bpc=3.2930 val_loss=2.3893 val_acc=0.3367 val_ppl=10.9056 val_bpc=3.4470
+training finished (device=cpu, corpus=plato_jowett, vocab=96, train_tokens=90000, val_tokens=10000)
+final train(step=500) loss=2.2825 acc=0.3340 ppl=9.8016 bpc=3.2930 last eval(step=500) val_loss=2.3893 val_acc=0.3367 val_ppl=10.9056 val_bpc=3.4470
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/phase2/phase2_run07_mag_phase_seed1/checkpoint_step_000500.pt

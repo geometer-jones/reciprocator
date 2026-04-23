@@ -1,0 +1,28 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2d_dynamic_backend_20260423/phase2d_run2d2_fft_seed2/config.json
+step=1 lr=0.001 train_loss=4.7386 train_acc=0.0020 train_ppl=114.2694 train_bpc=6.8363 val_loss=4.6548 val_acc=0.0020 val_ppl=105.0848 val_bpc=6.7154
+step=50 lr=0.001 train_loss=3.2520 train_acc=0.1738 train_ppl=25.8410 train_bpc=4.6916 val_loss=3.2489 val_acc=0.1621 val_ppl=25.7628 val_bpc=4.6872
+step=100 lr=0.001 train_loss=2.8440 train_acc=0.2793 train_ppl=17.1849 train_bpc=4.1031 val_loss=2.8515 val_acc=0.2598 val_ppl=17.3138 val_bpc=4.1139
+step=150 lr=0.001 train_loss=2.6777 train_acc=0.2793 train_ppl=14.5514 train_bpc=3.8631 val_loss=2.7082 val_acc=0.2793 val_ppl=15.0027 val_bpc=3.9071
+step=200 lr=0.001 train_loss=2.5408 train_acc=0.2969 train_ppl=12.6893 train_bpc=3.6655 val_loss=2.4999 val_acc=0.3159 val_ppl=12.1808 val_bpc=3.6065
+step=250 lr=0.001 train_loss=2.4626 train_acc=0.3086 train_ppl=11.7356 train_bpc=3.5528 val_loss=2.5096 val_acc=0.3267 val_ppl=12.2996 val_bpc=3.6205
+step=300 lr=0.001 train_loss=2.3911 train_acc=0.3203 train_ppl=10.9259 train_bpc=3.4497 val_loss=2.3970 val_acc=0.3374 val_ppl=10.9900 val_bpc=3.4581
+state_shape_event step=350 previous_state_shape=(4, 8, 8, 8) state_shape=(5, 8, 8, 8)
+step=350 lr=0.001 train_loss=2.2728 train_acc=0.3496 train_ppl=9.7062 train_bpc=3.2789 val_loss=2.5466 val_acc=0.2954 val_ppl=12.7638 val_bpc=3.6740
+state_shape_event step=400 previous_state_shape=(5, 8, 8, 8) state_shape=(5, 8, 8, 8, 2)
+step=400 lr=0.001 train_loss=2.4365 train_acc=0.3398 train_ppl=11.4331 train_bpc=3.5151 val_loss=2.9568 val_acc=0.1333 val_ppl=19.2366 val_bpc=4.2658
+step=450 lr=0.001 train_loss=2.3000 train_acc=0.3457 train_ppl=9.9739 train_bpc=3.3182 val_loss=2.3360 val_acc=0.3589 val_ppl=10.3398 val_bpc=3.3701
+step=500 lr=0.001 train_loss=2.1556 train_acc=0.4258 train_ppl=8.6332 train_bpc=3.1099 val_loss=2.3080 val_acc=0.3608 val_ppl=10.0545 val_bpc=3.3298
+step=550 lr=0.001 train_loss=2.2160 train_acc=0.3887 train_ppl=9.1706 train_bpc=3.1970 val_loss=2.2163 val_acc=0.3765 val_ppl=9.1734 val_bpc=3.1975
+step=600 lr=0.001 train_loss=2.1975 train_acc=0.3711 train_ppl=9.0021 train_bpc=3.1703 val_loss=2.2680 val_acc=0.3604 val_ppl=9.6600 val_bpc=3.2720
+step=650 lr=0.001 train_loss=2.3159 train_acc=0.3301 train_ppl=10.1338 train_bpc=3.3411 val_loss=2.1789 val_acc=0.3921 val_ppl=8.8364 val_bpc=3.1435
+step=700 lr=0.001 train_loss=2.1963 train_acc=0.3848 train_ppl=8.9915 train_bpc=3.1686 val_loss=2.1703 val_acc=0.3716 val_ppl=8.7613 val_bpc=3.1311
+step=750 lr=0.001 train_loss=2.1020 train_acc=0.4219 train_ppl=8.1829 train_bpc=3.0326 val_loss=2.2128 val_acc=0.3779 val_ppl=9.1409 val_bpc=3.1923
+step=800 lr=0.001 train_loss=2.0973 train_acc=0.4102 train_ppl=8.1444 train_bpc=3.0258 val_loss=2.2262 val_acc=0.3848 val_ppl=9.2648 val_bpc=3.2118
+step=850 lr=0.001 train_loss=2.1404 train_acc=0.4102 train_ppl=8.5030 train_bpc=3.0880 val_loss=2.2114 val_acc=0.3887 val_ppl=9.1284 val_bpc=3.1904
+step=900 lr=0.001 train_loss=2.1842 train_acc=0.4062 train_ppl=8.8834 train_bpc=3.1511 val_loss=2.2070 val_acc=0.3833 val_ppl=9.0881 val_bpc=3.1840
+step=950 lr=0.001 train_loss=2.1583 train_acc=0.3867 train_ppl=8.6561 train_bpc=3.1137 val_loss=2.2368 val_acc=0.3823 val_ppl=9.3632 val_bpc=3.2270
+step=1000 lr=0.001 train_loss=2.0917 train_acc=0.4238 train_ppl=8.0987 train_bpc=3.0177 val_loss=2.1929 val_acc=0.3779 val_ppl=8.9611 val_bpc=3.1637
+training finished (device=cpu, corpus=plato_jowett, vocab=96, train_tokens=90000, val_tokens=10000, state_shape=(5, 8, 8, 8, 2))
+final train(step=1000) loss=2.0917 acc=0.4238 ppl=8.0987 bpc=3.0177 last eval(step=1000) val_loss=2.1929 val_acc=0.3779 val_ppl=8.9611 val_bpc=3.1637
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2d_dynamic_backend_20260423/phase2d_run2d2_fft_seed2/checkpoint_step_001000.pt
+wrote residual diagnostics: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2d_dynamic_backend_20260423/phase2d_run2d2_fft_seed2/residual_diagnostics.json

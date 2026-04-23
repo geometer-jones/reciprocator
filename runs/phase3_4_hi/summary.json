@@ -1,0 +1,331 @@
+[
+  {
+    "phase_id": "3.4d",
+    "label": "prune_thresh16_tight",
+    "seed": 0,
+    "run_name": "phase3_4d_run_prune_thresh16_tight_seed0",
+    "prune_threshold": 0.16,
+    "prune_sustain_steps": 2,
+    "final_state_shape": [
+      3,
+      3,
+      4
+    ],
+    "final_val_bpc": 3.0671,
+    "final5_val_bpc_mean": 3.1035,
+    "final5_val_bpcs": [
+      3.1394,
+      3.135,
+      3.0842,
+      3.0918,
+      3.0671
+    ],
+    "growth_events": [
+      {
+        "step": 350,
+        "previous_state_shape": [
+          2,
+          3,
+          4
+        ],
+        "state_shape": [
+          3,
+          3,
+          4
+        ],
+        "event_kind": "mode_growth"
+      }
+    ],
+    "prune_events": [],
+    "net_growth_event_count": 1,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_4_hi/phase3_4d_run_prune_thresh16_tight_seed0.log",
+    "diagnostics_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_4_hi/phase3_4d_run_prune_thresh16_tight_seed0/residual_diagnostics.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_4_hi/phase3_4d_run_prune_thresh16_tight_seed0/checkpoint_step_001000.pt",
+    "returncode": 0
+  },
+  {
+    "phase_id": "3.4d",
+    "label": "prune_thresh16_tight",
+    "seed": 1,
+    "run_name": "phase3_4d_run_prune_thresh16_tight_seed1",
+    "prune_threshold": 0.16,
+    "prune_sustain_steps": 2,
+    "final_state_shape": [
+      3,
+      3
+    ],
+    "final_val_bpc": 4.0603,
+    "final5_val_bpc_mean": 3.31614,
+    "final5_val_bpcs": [
+      3.1618,
+      3.1225,
+      3.1313,
+      3.1048,
+      4.0603
+    ],
+    "growth_events": [
+      {
+        "step": 350,
+        "previous_state_shape": [
+          2,
+          3,
+          4
+        ],
+        "state_shape": [
+          3,
+          3,
+          4
+        ],
+        "event_kind": "mode_growth"
+      }
+    ],
+    "prune_events": [
+      {
+        "step": 1000,
+        "previous_state_shape": [
+          3,
+          3,
+          4
+        ],
+        "state_shape": [
+          3,
+          3
+        ],
+        "event_kind": "prune"
+      }
+    ],
+    "net_growth_event_count": 0,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_4_hi/phase3_4d_run_prune_thresh16_tight_seed1.log",
+    "diagnostics_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_4_hi/phase3_4d_run_prune_thresh16_tight_seed1/residual_diagnostics.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_4_hi/phase3_4d_run_prune_thresh16_tight_seed1/checkpoint_step_001000.pt",
+    "returncode": 0
+  },
+  {
+    "phase_id": "3.4e",
+    "label": "prune_thresh18_loose",
+    "seed": 0,
+    "run_name": "phase3_4e_run_prune_thresh18_loose_seed0",
+    "prune_threshold": 0.18,
+    "prune_sustain_steps": 4,
+    "final_state_shape": [
+      3,
+      3
+    ],
+    "final_val_bpc": 3.897,
+    "final5_val_bpc_mean": 3.26948,
+    "final5_val_bpcs": [
+      3.1394,
+      3.135,
+      3.0842,
+      3.0918,
+      3.897
+    ],
+    "growth_events": [
+      {
+        "step": 350,
+        "previous_state_shape": [
+          2,
+          3,
+          4
+        ],
+        "state_shape": [
+          3,
+          3,
+          4
+        ],
+        "event_kind": "mode_growth"
+      }
+    ],
+    "prune_events": [
+      {
+        "step": 1000,
+        "previous_state_shape": [
+          3,
+          3,
+          4
+        ],
+        "state_shape": [
+          3,
+          3
+        ],
+        "event_kind": "prune"
+      }
+    ],
+    "net_growth_event_count": 0,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_4_hi/phase3_4e_run_prune_thresh18_loose_seed0.log",
+    "diagnostics_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_4_hi/phase3_4e_run_prune_thresh18_loose_seed0/residual_diagnostics.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_4_hi/phase3_4e_run_prune_thresh18_loose_seed0/checkpoint_step_001000.pt",
+    "returncode": 0
+  },
+  {
+    "phase_id": "3.4e",
+    "label": "prune_thresh18_loose",
+    "seed": 1,
+    "run_name": "phase3_4e_run_prune_thresh18_loose_seed1",
+    "prune_threshold": 0.18,
+    "prune_sustain_steps": 4,
+    "final_state_shape": [
+      3,
+      3
+    ],
+    "final_val_bpc": 3.4007,
+    "final5_val_bpc_mean": 3.3784,
+    "final5_val_bpcs": [
+      3.1618,
+      3.1225,
+      3.1313,
+      4.0757,
+      3.4007
+    ],
+    "growth_events": [
+      {
+        "step": 350,
+        "previous_state_shape": [
+          2,
+          3,
+          4
+        ],
+        "state_shape": [
+          3,
+          3,
+          4
+        ],
+        "event_kind": "mode_growth"
+      }
+    ],
+    "prune_events": [
+      {
+        "step": 950,
+        "previous_state_shape": [
+          3,
+          3,
+          4
+        ],
+        "state_shape": [
+          3,
+          3
+        ],
+        "event_kind": "prune"
+      }
+    ],
+    "net_growth_event_count": 0,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_4_hi/phase3_4e_run_prune_thresh18_loose_seed1.log",
+    "diagnostics_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_4_hi/phase3_4e_run_prune_thresh18_loose_seed1/residual_diagnostics.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_4_hi/phase3_4e_run_prune_thresh18_loose_seed1/checkpoint_step_001000.pt",
+    "returncode": 0
+  },
+  {
+    "phase_id": "3.4f",
+    "label": "prune_thresh20_loose",
+    "seed": 0,
+    "run_name": "phase3_4f_run_prune_thresh20_loose_seed0",
+    "prune_threshold": 0.2,
+    "prune_sustain_steps": 4,
+    "final_state_shape": [
+      3,
+      3
+    ],
+    "final_val_bpc": 3.2314,
+    "final5_val_bpc_mean": 3.3845,
+    "final5_val_bpcs": [
+      3.1394,
+      3.839,
+      3.3836,
+      3.3291,
+      3.2314
+    ],
+    "growth_events": [
+      {
+        "step": 350,
+        "previous_state_shape": [
+          2,
+          3,
+          4
+        ],
+        "state_shape": [
+          3,
+          3,
+          4
+        ],
+        "event_kind": "mode_growth"
+      }
+    ],
+    "prune_events": [
+      {
+        "step": 850,
+        "previous_state_shape": [
+          3,
+          3,
+          4
+        ],
+        "state_shape": [
+          3,
+          3
+        ],
+        "event_kind": "prune"
+      }
+    ],
+    "net_growth_event_count": 0,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_4_hi/phase3_4f_run_prune_thresh20_loose_seed0.log",
+    "diagnostics_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_4_hi/phase3_4f_run_prune_thresh20_loose_seed0/residual_diagnostics.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_4_hi/phase3_4f_run_prune_thresh20_loose_seed0/checkpoint_step_001000.pt",
+    "returncode": 0
+  },
+  {
+    "phase_id": "3.4f",
+    "label": "prune_thresh20_loose",
+    "seed": 1,
+    "run_name": "phase3_4f_run_prune_thresh20_loose_seed1",
+    "prune_threshold": 0.2,
+    "prune_sustain_steps": 4,
+    "final_state_shape": [
+      3,
+      4
+    ],
+    "final_val_bpc": 3.2083,
+    "final5_val_bpc_mean": 3.26418,
+    "final5_val_bpcs": [
+      3.3961,
+      3.2642,
+      3.2666,
+      3.1857,
+      3.2083
+    ],
+    "growth_events": [
+      {
+        "step": 350,
+        "previous_state_shape": [
+          2,
+          3,
+          4
+        ],
+        "state_shape": [
+          3,
+          3,
+          4
+        ],
+        "event_kind": "mode_growth"
+      }
+    ],
+    "prune_events": [
+      {
+        "step": 750,
+        "previous_state_shape": [
+          3,
+          3,
+          4
+        ],
+        "state_shape": [
+          3,
+          4
+        ],
+        "event_kind": "prune"
+      }
+    ],
+    "net_growth_event_count": 0,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_4_hi/phase3_4f_run_prune_thresh20_loose_seed1.log",
+    "diagnostics_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_4_hi/phase3_4f_run_prune_thresh20_loose_seed1/residual_diagnostics.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_4_hi/phase3_4f_run_prune_thresh20_loose_seed1/checkpoint_step_001000.pt",
+    "returncode": 0
+  }
+]

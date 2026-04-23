@@ -1,0 +1,43 @@
+[
+  {
+    "completed_seeds": 2,
+    "config_id": "4C",
+    "delta_vs_phase4_control": -0.13392421234349783,
+    "delta_vs_phase4_depth2": -0.07335496465275426,
+    "delta_vs_phase4_phase_aware": -0.06909263979103919,
+    "description": "Phase 4 combination: readout_type=phase_aware and num_layers=2",
+    "final_state_shapes": [
+      [
+        2,
+        3,
+        4
+      ],
+      [
+        2,
+        3,
+        4
+      ]
+    ],
+    "label": "phase_aware_depth2",
+    "mean_elapsed_seconds": 137.4368213415146,
+    "mean_final3_val_bpc": 3.221367197829762,
+    "mean_final_val_bpc": 3.1741844454961545,
+    "mean_train_tokens_per_second": 1863.15131428415,
+    "per_seed_elapsed_seconds": [
+      135.237135887146,
+      139.63650679588318
+    ],
+    "per_seed_final3_val_bpc": [
+      3.2011535680918475,
+      3.2415808275676774
+    ],
+    "per_seed_final_val_bpc": [
+      3.15541619378581,
+      3.192952697206499
+    ],
+    "per_seed_train_tokens_per_second": [
+      1892.9711748230854,
+      1833.3314537452143
+    ]
+  }
+]

@@ -1,0 +1,15 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/phase5/phase5_run22_local_wave_seed2/config.json
+step=1 lr=0.001 train_loss=4.7000 train_acc=0.0078 train_ppl=109.9455 train_bpc=6.7806 val_loss=4.5735 val_acc=0.0060 val_ppl=96.8842 val_bpc=6.5982
+step=50 lr=0.001 train_loss=3.2356 train_acc=0.1738 train_ppl=25.4224 train_bpc=4.6680 val_loss=3.2247 val_acc=0.1625 val_ppl=25.1463 val_bpc=4.6523
+step=100 lr=0.001 train_loss=2.9304 train_acc=0.2441 train_ppl=18.7348 train_bpc=4.2276 val_loss=2.9316 val_acc=0.2316 val_ppl=18.7573 val_bpc=4.2294
+step=150 lr=0.001 train_loss=2.7297 train_acc=0.2637 train_ppl=15.3277 train_bpc=3.9381 val_loss=2.7431 val_acc=0.2742 val_ppl=15.5355 val_bpc=3.9575
+step=200 lr=0.001 train_loss=2.6118 train_acc=0.2949 train_ppl=13.6234 train_bpc=3.7680 val_loss=2.6251 val_acc=0.2947 val_ppl=13.8063 val_bpc=3.7873
+step=250 lr=0.001 train_loss=2.5666 train_acc=0.2910 train_ppl=13.0219 train_bpc=3.7029 val_loss=2.5551 val_acc=0.3076 val_ppl=12.8729 val_bpc=3.6863
+step=300 lr=0.001 train_loss=2.5128 train_acc=0.3184 train_ppl=12.3392 train_bpc=3.6252 val_loss=2.5241 val_acc=0.3047 val_ppl=12.4791 val_bpc=3.6414
+step=350 lr=0.001 train_loss=2.3579 train_acc=0.3496 train_ppl=10.5689 train_bpc=3.4018 val_loss=2.4847 val_acc=0.3164 val_ppl=11.9976 val_bpc=3.5847
+step=400 lr=0.001 train_loss=2.5444 train_acc=0.3008 train_ppl=12.7357 train_bpc=3.6708 val_loss=2.4553 val_acc=0.3243 val_ppl=11.6499 val_bpc=3.5422
+step=450 lr=0.001 train_loss=2.4087 train_acc=0.3203 train_ppl=11.1190 train_bpc=3.4750 val_loss=2.4238 val_acc=0.3281 val_ppl=11.2883 val_bpc=3.4968
+step=500 lr=0.001 train_loss=2.3133 train_acc=0.3945 train_ppl=10.1075 train_bpc=3.3374 val_loss=2.4179 val_acc=0.3383 val_ppl=11.2228 val_bpc=3.4884
+training finished (device=cpu, corpus=plato_jowett, vocab=96, train_tokens=90000, val_tokens=10000, state_shape=(2, 3, 4))
+final train(step=500) loss=2.3133 acc=0.3945 ppl=10.1075 bpc=3.3374 last eval(step=500) val_loss=2.4179 val_acc=0.3383 val_ppl=11.2228 val_bpc=3.4884
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/phase5/phase5_run22_local_wave_seed2/checkpoint_step_000500.pt

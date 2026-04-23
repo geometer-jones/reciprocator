@@ -19,6 +19,14 @@ from torch import Tensor
 from torch.optim import Optimizer
 
 from .corpora import read_corpus_text
+from .rl.training import (
+    LispGRPOConfig,
+    RLStepMetrics,
+    RLTrainingResult,
+    SampleRecord,
+    build_lisp_tokenizer,
+    train_lisp_grpo,
+)
 from .mixer import canonicalize_coupling_type, phase_aware_feature_map
 from .model import ReciprocatorLM
 
@@ -73,7 +81,7 @@ class TextDataset:
 
 @dataclass(frozen=True)
 class TrainingConfig:
-    corpus_name: str = "plato_jowett"
+    corpus_name: str = "greek_classics"
     max_chars: Optional[int] = 20000
     val_fraction: float = 0.1
     batch_size: int = 8
@@ -92,12 +100,14 @@ class TrainingConfig:
     max_state_shape: Optional[Tuple[int, ...]] = None
     num_layers: int = 1
     ffn_expansion_factor: int = 2
-    readout_type: str = "magnitude"
-    token_magnitude_type: str = "learned"
+    readout_type: str = "phase_aware"
+    token_magnitude_type: str = "inverse_frequency_learned"
     phase_type: str = "rope"
-    token_phase: str = "none"
+    token_phase: str = "semantic"
     enable_self_relation: bool = False
     dynamic_gains: bool = False
+    dynamic_spectral_gains: bool = False
+    anisotropic_spectral_gains: bool = False
     gain_projector_rank: int = 8
     enable_anticipator_relation: bool = False
     enable_cross_layer_state: bool = False
@@ -321,10 +331,8 @@ def _row_space_residual_norm(basis_rows: Tensor, candidate: Tensor, *, eps: floa
     return residual.norm().to(torch.float32)
 
 
-def _compute_mode_residual_norms(model: ReciprocatorLM, token_ids: Tensor) -> Tensor:
-    residual_norms = None
-    block_count = 0
-
+def _compute_layer_mode_residual_norms(model: ReciprocatorLM, token_ids: Tensor) -> Tensor:
+    layer_residual_norms = []
     model.eval()
     with torch.no_grad():
         hidden = model.token_lift(token_ids)
@@ -348,16 +356,17 @@ def _compute_mode_residual_norms(model: ReciprocatorLM, token_ids: Tensor) -> Te
                 block_norms.append(_row_space_residual_norm(basis_rows, candidate))
 
             block_norms_tensor = torch.stack(block_norms)
-            if residual_norms is None:
-                residual_norms = torch.zeros_like(block_norms_tensor)
-            residual_norms = residual_norms + block_norms_tensor
-            block_count += 1
+            layer_residual_norms.append(block_norms_tensor)
 
             hidden, _ = block(hidden, None)
 
-    if residual_norms is None or block_count == 0:
+    if not layer_residual_norms:
         raise ValueError("Cannot compute residual norms for a model with no blocks.")
-    return residual_norms / block_count
+    return torch.stack(layer_residual_norms, dim=0)
+
+
+def _compute_mode_residual_norms(model: ReciprocatorLM, token_ids: Tensor) -> Tensor:
+    return _compute_layer_mode_residual_norms(model, token_ids).mean(dim=0)
 
 
 def _compute_mode_pruning_residual_norms(model: ReciprocatorLM, token_ids: Tensor) -> Tensor:
@@ -956,6 +965,7 @@ def build_text_dataset(
     max_chars: Optional[int] = None,
     val_fraction: float = 0.1,
     min_split_tokens: int = 32,
+    tokenizer: Optional[CharTokenizer] = None,
 ) -> TextDataset:
     if not 0.0 < val_fraction < 1.0:
         raise ValueError("val_fraction must be strictly between 0 and 1.")
@@ -966,7 +976,8 @@ def build_text_dataset(
     if not truncated:
         raise ValueError("Text is empty after applying max_chars.")
 
-    tokenizer = CharTokenizer.from_text(truncated)
+    if tokenizer is None:
+        tokenizer = CharTokenizer.from_text(truncated)
     encoded = tokenizer.encode(truncated)
 
     min_total_tokens = max(2 * min_split_tokens, 4)
@@ -995,6 +1006,7 @@ def build_corpus_dataset(
     max_chars: Optional[int] = None,
     val_fraction: float = 0.1,
     min_split_tokens: int = 32,
+    tokenizer: Optional[CharTokenizer] = None,
 ) -> TextDataset:
     return build_text_dataset(
         read_corpus_text(corpus_name),
@@ -1002,6 +1014,7 @@ def build_corpus_dataset(
         max_chars=max_chars,
         val_fraction=val_fraction,
         min_split_tokens=min_split_tokens,
+        tokenizer=tokenizer,
     )
 
 
@@ -1152,6 +1165,235 @@ _BLOCK_MIXER_KEY_RE = re.compile(r"^blocks\.(\d+)\.mixer\.(.+)$")
 _MODE_WEIGHT_KEY_RE = re.compile(r"^coupling\.mode_weights\.(\d+)$")
 
 
+@dataclass(frozen=True)
+class _StateGrowthLayout:
+    old_state_shape: Tuple[int, ...]
+    new_state_shape: Tuple[int, ...]
+    growth_kind: str
+    grown_axis: int
+
+
+def _shape_tuple(shape: Sequence[int]) -> Tuple[int, ...]:
+    return tuple(int(dim) for dim in shape)
+
+
+def _assert_tensor_can_view_as(
+    tensor: Tensor,
+    view_shape: Tuple[int, ...],
+    *,
+    key: str,
+    role: str,
+) -> None:
+    expected_numel = math.prod(view_shape)
+    actual_numel = int(tensor.numel())
+    if actual_numel != expected_numel:
+        raise ValueError(
+            f"{key}: cannot view {role} tensor with shape {_shape_tuple(tensor.shape)} "
+            f"as {view_shape}; expected {expected_numel} elements, got {actual_numel}."
+        )
+
+
+def _assert_tensor_numel_matches(
+    tensor: Tensor,
+    reference: Tensor,
+    *,
+    key: str,
+    role: str,
+) -> None:
+    if tensor.numel() != reference.numel():
+        raise ValueError(
+            f"{key}: {role} has shape {_shape_tuple(tensor.shape)} but target slice "
+            f"has shape {_shape_tuple(reference.shape)}."
+        )
+
+
+def _copy_overlapping_tensor(old_param: Tensor, new_param: Tensor) -> Tensor:
+    grown = torch.zeros_like(new_param)
+    common_rank = min(old_param.ndim, new_param.ndim)
+    common_slices = tuple(
+        slice(0, min(old_param.shape[index], new_param.shape[index]))
+        for index in range(common_rank)
+    )
+    target_index = common_slices + (0,) * (new_param.ndim - common_rank)
+    source_index = common_slices + (0,) * (old_param.ndim - common_rank)
+    grown[target_index] = old_param[source_index]
+    return grown
+
+
+def _copy_with_grown_state_layout(
+    key: str,
+    old_param: Tensor,
+    new_param: Tensor,
+    *,
+    layout: _StateGrowthLayout,
+    prefix_shape: Tuple[int, ...],
+    suffix_shape: Tuple[int, ...],
+    init_strategy: str,
+    orthogonal_reference_slice: Optional[Tensor] = None,
+    residual_reference_slice: Optional[Tensor] = None,
+) -> Tensor:
+    old_view_shape = (*prefix_shape, *layout.old_state_shape, *suffix_shape)
+    new_view_shape = (*prefix_shape, *layout.new_state_shape, *suffix_shape)
+    _assert_tensor_can_view_as(old_param, old_view_shape, key=key, role="old")
+    _assert_tensor_can_view_as(new_param, new_view_shape, key=key, role="new")
+
+    old_view = old_param.reshape(*old_view_shape)
+    fresh_view = new_param.reshape(*new_view_shape).clone()
+    new_view = torch.zeros_like(fresh_view)
+    prefix_rank = len(prefix_shape)
+    suffix_rank = len(suffix_shape)
+
+    if layout.growth_kind == "mode":
+        copy_index = [slice(None)] * (prefix_rank + len(layout.old_state_shape) + suffix_rank)
+        copy_index[prefix_rank + layout.grown_axis] = slice(0, layout.old_state_shape[layout.grown_axis])
+        new_view[tuple(copy_index)] = old_view
+
+        new_slice_index = list(copy_index)
+        new_slice_index[prefix_rank + layout.grown_axis] = layout.old_state_shape[layout.grown_axis]
+        new_slice = new_view[tuple(new_slice_index)]
+        fresh_slice = fresh_view[tuple(new_slice_index)]
+
+        if init_strategy == "mean":
+            new_slice.copy_(old_view.mean(dim=prefix_rank + layout.grown_axis))
+        elif init_strategy == "orthogonal":
+            candidate = orthogonal_reference_slice
+            if candidate is None:
+                candidate = fresh_slice
+            _assert_tensor_numel_matches(
+                candidate,
+                fresh_slice,
+                key=key,
+                role="orthogonal reference slice",
+            )
+            old_rows = old_view.movedim(
+                prefix_rank + layout.grown_axis,
+                0,
+            ).reshape(layout.old_state_shape[layout.grown_axis], -1)
+            fill = _orthogonalize_candidate(
+                old_rows,
+                candidate.reshape(-1),
+                fresh_slice.reshape(-1),
+            )
+            new_slice.copy_(fill.reshape_as(fresh_slice).to(new_slice.dtype))
+        elif init_strategy == "residual":
+            candidate = residual_reference_slice
+            if candidate is None:
+                candidate = fresh_slice
+            _assert_tensor_numel_matches(
+                candidate,
+                fresh_slice,
+                key=key,
+                role="residual reference slice",
+            )
+            old_rows = old_view.movedim(
+                prefix_rank + layout.grown_axis,
+                0,
+            ).reshape(layout.old_state_shape[layout.grown_axis], -1)
+            fill = _scale_candidate_to_match_rows(
+                old_rows,
+                candidate.reshape(-1),
+                fresh_slice.reshape(-1),
+            )
+            new_slice.copy_(fill.reshape_as(fresh_slice).to(new_slice.dtype))
+    else:
+        copy_index = (
+            [slice(None)] * prefix_rank
+            + [slice(None)] * len(layout.old_state_shape)
+            + [0]
+            + [slice(None)] * suffix_rank
+        )
+        new_view[tuple(copy_index)] = old_view
+
+        new_slice_index = (
+            [slice(None)] * prefix_rank
+            + [slice(None)] * len(layout.old_state_shape)
+            + [1]
+            + [slice(None)] * suffix_rank
+        )
+        new_slice = new_view[tuple(new_slice_index)]
+        if init_strategy == "mean":
+            state_axes = tuple(range(prefix_rank, prefix_rank + len(layout.old_state_shape)))
+            fill = old_view.mean(dim=state_axes, keepdim=True)
+            new_slice.copy_(fill.expand_as(new_slice))
+        elif init_strategy == "orthogonal":
+            candidate = orthogonal_reference_slice
+            if candidate is None:
+                candidate = fresh_view[tuple(new_slice_index)]
+            _assert_tensor_numel_matches(
+                candidate,
+                new_slice,
+                key=key,
+                role="orthogonal reference slice",
+            )
+            old_rows = old_view.reshape(1, -1)
+            fill = _orthogonalize_candidate(
+                old_rows,
+                candidate.reshape(-1),
+                fresh_view[tuple(new_slice_index)].reshape(-1),
+            )
+            new_slice.copy_(fill.reshape_as(new_slice).to(new_slice.dtype))
+        elif init_strategy == "residual":
+            candidate = residual_reference_slice
+            if candidate is None:
+                candidate = fresh_view[tuple(new_slice_index)]
+            _assert_tensor_numel_matches(
+                candidate,
+                new_slice,
+                key=key,
+                role="residual reference slice",
+            )
+            old_rows = old_view.reshape(1, -1)
+            fill = _scale_candidate_to_match_rows(
+                old_rows,
+                candidate.reshape(-1),
+                fresh_view[tuple(new_slice_index)].reshape(-1),
+            )
+            new_slice.copy_(fill.reshape_as(new_slice).to(new_slice.dtype))
+
+    return new_view.reshape_as(new_param)
+
+
+def _copy_mode_weight_matrix_for_growth(
+    old_sd: Dict[str, Tensor],
+    old_param: Optional[Tensor],
+    new_param: Tensor,
+    *,
+    growth_kind: str,
+    init_strategy: str,
+    block_index: int,
+) -> Tensor:
+    if growth_kind == "rank" and old_param is None:
+        if init_strategy == "zero":
+            return torch.zeros_like(new_param)
+        means = [
+            tensor.mean()
+            for key, tensor in old_sd.items()
+            if key.startswith(f"blocks.{block_index}.mixer.coupling.mode_weights.")
+        ]
+        if not means:
+            return new_param
+        mean_value = torch.stack(means).mean().to(new_param.dtype)
+        if init_strategy in {"orthogonal", "residual"}:
+            seeded = torch.zeros_like(new_param)
+            seeded.diagonal().fill_(mean_value)
+            return seeded
+        return torch.full_like(new_param, mean_value)
+
+    assert old_param is not None
+    if old_param.shape == new_param.shape:
+        return old_param
+
+    grown = torch.zeros_like(new_param)
+    grown[: old_param.shape[0], : old_param.shape[1]] = old_param
+    if init_strategy == "mean":
+        grown[-1, : old_param.shape[1]] = old_param.mean(dim=0)
+        grown[: old_param.shape[0], -1] = old_param.mean(dim=1)
+        grown[-1, -1] = old_param.diagonal().mean()
+    elif init_strategy in {"orthogonal", "residual"}:
+        grown[-1, -1] = old_param.diagonal().mean()
+    return grown
+
+
 def _pad_copy_state_dict(
     old_sd: Dict[str, Tensor],
     new_sd: Dict[str, Tensor],
@@ -1179,135 +1421,15 @@ def _pad_copy_state_dict(
             if old_param.shape == new_param.shape:
                 merged[key] = old_param
                 continue
-            grown = torch.zeros_like(new_param)
-            common_rank = min(old_param.ndim, new_param.ndim)
-            common_slices = tuple(
-                slice(0, min(old_param.shape[index], new_param.shape[index]))
-                for index in range(common_rank)
-            )
-            target_index = common_slices + (0,) * (new_param.ndim - common_rank)
-            source_index = common_slices + (0,) * (old_param.ndim - common_rank)
-            grown[target_index] = old_param[source_index]
-            merged[key] = grown
+            merged[key] = _copy_overlapping_tensor(old_param, new_param)
         return merged
 
-    def copy_with_state_layout(
-        old_param: Tensor,
-        new_param: Tensor,
-        *,
-        prefix_shape: Tuple[int, ...],
-        suffix_shape: Tuple[int, ...],
-        init_strategy: str,
-        orthogonal_reference_slice: Optional[Tensor] = None,
-        residual_reference_slice: Optional[Tensor] = None,
-    ) -> Tensor:
-        old_view = old_param.reshape(*prefix_shape, *old_state_shape, *suffix_shape)
-        fresh_view = new_param.reshape(*prefix_shape, *new_state_shape, *suffix_shape).clone()
-        new_view = torch.zeros_like(fresh_view)
-        prefix_rank = len(prefix_shape)
-        suffix_rank = len(suffix_shape)
-
-        if growth_kind == "mode":
-            copy_index = [slice(None)] * (prefix_rank + len(old_state_shape) + suffix_rank)
-            copy_index[prefix_rank + grown_axis] = slice(0, old_state_shape[grown_axis])
-            new_view[tuple(copy_index)] = old_view
-
-            new_slice_index = list(copy_index)
-            new_slice_index[prefix_rank + grown_axis] = old_state_shape[grown_axis]
-            new_slice = new_view[tuple(new_slice_index)]
-            fresh_slice = fresh_view[tuple(new_slice_index)]
-
-            if init_strategy == "mean":
-                new_slice.copy_(old_view.mean(dim=prefix_rank + grown_axis))
-            elif init_strategy == "orthogonal":
-                candidate = orthogonal_reference_slice
-                if candidate is None:
-                    candidate = fresh_slice
-                old_rows = old_view.movedim(prefix_rank + grown_axis, 0).reshape(old_state_shape[grown_axis], -1)
-                fill = _orthogonalize_candidate(
-                    old_rows,
-                    candidate.reshape(-1),
-                    fresh_slice.reshape(-1),
-                )
-                new_slice.copy_(fill.reshape_as(fresh_slice).to(new_slice.dtype))
-            elif init_strategy == "residual":
-                candidate = residual_reference_slice
-                if candidate is None:
-                    candidate = fresh_slice
-                old_rows = old_view.movedim(prefix_rank + grown_axis, 0).reshape(old_state_shape[grown_axis], -1)
-                fill = _scale_candidate_to_match_rows(
-                    old_rows,
-                    candidate.reshape(-1),
-                    fresh_slice.reshape(-1),
-                )
-                new_slice.copy_(fill.reshape_as(fresh_slice).to(new_slice.dtype))
-        else:
-            copy_index = [slice(None)] * prefix_rank + [slice(None)] * len(old_state_shape) + [0] + [slice(None)] * suffix_rank
-            new_view[tuple(copy_index)] = old_view
-
-            new_slice_index = [slice(None)] * prefix_rank + [slice(None)] * len(old_state_shape) + [1] + [slice(None)] * suffix_rank
-            new_slice = new_view[tuple(new_slice_index)]
-            if init_strategy == "mean":
-                state_axes = tuple(range(prefix_rank, prefix_rank + len(old_state_shape)))
-                fill = old_view.mean(dim=state_axes, keepdim=True)
-                new_slice.copy_(fill.expand_as(new_slice))
-            elif init_strategy == "orthogonal":
-                candidate = orthogonal_reference_slice
-                if candidate is None:
-                    candidate = fresh_view[tuple(new_slice_index)]
-                old_rows = old_view.reshape(1, -1)
-                fill = _orthogonalize_candidate(
-                    old_rows,
-                    candidate.reshape(-1),
-                    fresh_view[tuple(new_slice_index)].reshape(-1),
-                )
-                new_slice.copy_(fill.reshape_as(new_slice).to(new_slice.dtype))
-            elif init_strategy == "residual":
-                candidate = residual_reference_slice
-                if candidate is None:
-                    candidate = fresh_view[tuple(new_slice_index)]
-                old_rows = old_view.reshape(1, -1)
-                fill = _scale_candidate_to_match_rows(
-                    old_rows,
-                    candidate.reshape(-1),
-                    fresh_view[tuple(new_slice_index)].reshape(-1),
-                )
-                new_slice.copy_(fill.reshape_as(new_slice).to(new_slice.dtype))
-
-        return new_view.reshape_as(new_param)
-
-    def copy_mode_weight_matrix(old_param: Optional[Tensor], new_param: Tensor, *, init_strategy: str, block_index: int) -> Tensor:
-        if growth_kind == "rank" and old_param is None:
-            if init_strategy == "zero":
-                return torch.zeros_like(new_param)
-            means = [
-                tensor.mean()
-                for key, tensor in old_sd.items()
-                if key.startswith(f"blocks.{block_index}.mixer.coupling.mode_weights.")
-            ]
-            if not means:
-                return new_param
-            mean_value = torch.stack(means).mean().to(new_param.dtype)
-            if init_strategy in {"orthogonal", "residual"}:
-                seeded = torch.zeros_like(new_param)
-                seeded.diagonal().fill_(mean_value)
-                return seeded
-            return torch.full_like(new_param, mean_value)
-
-        assert old_param is not None
-        if old_param.shape == new_param.shape:
-            return old_param
-
-        grown = torch.zeros_like(new_param)
-        grown[: old_param.shape[0], : old_param.shape[1]] = old_param
-        if init_strategy == "mean":
-            grown[-1, : old_param.shape[1]] = old_param.mean(dim=0)
-            grown[: old_param.shape[0], -1] = old_param.mean(dim=1)
-            grown[-1, -1] = old_param.diagonal().mean()
-        elif init_strategy in {"orthogonal", "residual"}:
-            grown[-1, -1] = old_param.diagonal().mean()
-        return grown
-
+    layout = _StateGrowthLayout(
+        old_state_shape=old_state_shape,
+        new_state_shape=new_state_shape,
+        growth_kind=growth_kind,
+        grown_axis=grown_axis,
+    )
     merged = {}
     for key, new_param in new_sd.items():
         block_match = _BLOCK_MIXER_KEY_RE.match(key)
@@ -1316,9 +1438,11 @@ def _pad_copy_state_dict(
                 block_index = int(block_match.group(1))
                 suffix = block_match.group(2)
                 if _MODE_WEIGHT_KEY_RE.match(suffix):
-                    merged[key] = copy_mode_weight_matrix(
+                    merged[key] = _copy_mode_weight_matrix_for_growth(
+                        old_sd,
                         None,
                         new_param,
+                        growth_kind=growth_kind,
                         init_strategy=rank_init,
                         block_index=block_index,
                     )
@@ -1334,9 +1458,11 @@ def _pad_copy_state_dict(
         init_strategy = mode_init if growth_kind == "mode" else rank_init
         if key.startswith("cross_layer_proj.") and key.endswith(".weight"):
             feature_channels = _cross_layer_feature_channels(old_param, old_state_shape)
-            merged[key] = copy_with_state_layout(
+            merged[key] = _copy_with_grown_state_layout(
+                key,
                 old_param,
                 new_param,
+                layout=layout,
                 prefix_shape=(old_param.shape[0], feature_channels),
                 suffix_shape=(),
                 init_strategy="zero",
@@ -1344,9 +1470,11 @@ def _pad_copy_state_dict(
             continue
 
         if block_match is None:
-            merged[key] = copy_with_state_layout(
+            merged[key] = _copy_with_grown_state_layout(
+                key,
                 old_param,
                 new_param,
+                layout=layout,
                 prefix_shape=(),
                 suffix_shape=(),
                 init_strategy=init_strategy,
@@ -1370,9 +1498,11 @@ def _pad_copy_state_dict(
                     residual_reference_slice = reference_context["state_signal"].abs().mean(dim=grown_axis)
                 else:
                     residual_reference_slice = reference_context["rank_residual_state_signal"].abs()
-            merged[key] = copy_with_state_layout(
+            merged[key] = _copy_with_grown_state_layout(
+                key,
                 old_param,
                 new_param,
+                layout=layout,
                 prefix_shape=(),
                 suffix_shape=(),
                 init_strategy=init_strategy,
@@ -1394,9 +1524,11 @@ def _pad_copy_state_dict(
                     residual_reference_slice = reference_context["state_signal"].abs().mean(dim=grown_axis)
                 else:
                     residual_reference_slice = reference_context["rank_residual_state_signal"].abs()
-            merged[key] = copy_with_state_layout(
+            merged[key] = _copy_with_grown_state_layout(
+                key,
                 old_param,
                 new_param,
+                layout=layout,
                 prefix_shape=(),
                 suffix_shape=(),
                 init_strategy=init_strategy,
@@ -1411,10 +1543,17 @@ def _pad_copy_state_dict(
             if init_strategy == "orthogonal" and reference_context is not None:
                 reference = reference_context["hidden_features"]
                 if growth_kind == "mode":
-                    expand_shape = (*new_state_shape[:grown_axis], *new_state_shape[grown_axis + 1 :], reference.shape[0])
+                    expand_shape = (
+                        *new_state_shape[:grown_axis],
+                        *new_state_shape[grown_axis + 1 :],
+                        reference.shape[0],
+                    )
                 else:
                     expand_shape = (*old_state_shape, reference.shape[0])
-                orthogonal_reference_slice = reference.reshape(*([1] * (len(expand_shape) - 1)), reference.shape[0]).expand(expand_shape)
+                orthogonal_reference_slice = reference.reshape(
+                    *([1] * (len(expand_shape) - 1)),
+                    reference.shape[0],
+                ).expand(expand_shape)
             elif init_strategy == "residual" and reference_context is not None:
                 if growth_kind == "mode":
                     reference = reference_context["hidden_features"]
@@ -1426,9 +1565,11 @@ def _pad_copy_state_dict(
                     residual_signal.unsqueeze(-1)
                     * reference.reshape(*([1] * residual_signal.ndim), reference.shape[0])
                 )
-            merged[key] = copy_with_state_layout(
+            merged[key] = _copy_with_grown_state_layout(
+                key,
                 old_param,
                 new_param,
+                layout=layout,
                 prefix_shape=(),
                 suffix_shape=(old_param.shape[1],),
                 init_strategy=init_strategy,
@@ -1438,9 +1579,11 @@ def _pad_copy_state_dict(
             continue
 
         if suffix == "gain_projector.0.weight":
-            merged[key] = copy_with_state_layout(
+            merged[key] = _copy_with_grown_state_layout(
+                key,
                 old_param,
                 new_param,
+                layout=layout,
                 prefix_shape=(old_param.shape[0], 2),
                 suffix_shape=(),
                 init_strategy="zero",
@@ -1448,9 +1591,11 @@ def _pad_copy_state_dict(
             continue
 
         if suffix == "gain_projector.2.weight":
-            merged[key] = copy_with_state_layout(
+            merged[key] = _copy_with_grown_state_layout(
+                key,
                 old_param,
                 new_param,
+                layout=layout,
                 prefix_shape=(3,),
                 suffix_shape=(old_param.shape[1],),
                 init_strategy="zero",
@@ -1458,9 +1603,11 @@ def _pad_copy_state_dict(
             continue
 
         if suffix == "gain_projector.2.bias":
-            merged[key] = copy_with_state_layout(
+            merged[key] = _copy_with_grown_state_layout(
+                key,
                 old_param,
                 new_param,
+                layout=layout,
                 prefix_shape=(3,),
                 suffix_shape=(),
                 init_strategy="zero",
@@ -1485,9 +1632,11 @@ def _pad_copy_state_dict(
                     )
                     * signal_features.unsqueeze(0)
                 )
-            merged[key] = copy_with_state_layout(
+            merged[key] = _copy_with_grown_state_layout(
+                key,
                 old_param,
                 new_param,
+                layout=layout,
                 prefix_shape=(old_param.shape[0], feature_channels),
                 suffix_shape=(),
                 init_strategy=effective_init,
@@ -1499,9 +1648,11 @@ def _pad_copy_state_dict(
         if mode_weight_match is not None:
             mode_index = int(mode_weight_match.group(1))
             if growth_kind == "mode" and mode_index == grown_axis:
-                merged[key] = copy_mode_weight_matrix(
+                merged[key] = _copy_mode_weight_matrix_for_growth(
+                    old_sd,
                     old_param,
                     new_param,
+                    growth_kind=growth_kind,
                     init_strategy=init_strategy,
                     block_index=block_index,
                 )
@@ -1509,16 +1660,7 @@ def _pad_copy_state_dict(
                 merged[key] = old_param
             continue
 
-        grown = torch.zeros_like(new_param)
-        common_rank = min(old_param.ndim, new_param.ndim)
-        common_slices = tuple(
-            slice(0, min(old_param.shape[index], new_param.shape[index]))
-            for index in range(common_rank)
-        )
-        target_index = common_slices + (0,) * (new_param.ndim - common_rank)
-        source_index = common_slices + (0,) * (old_param.ndim - common_rank)
-        grown[target_index] = old_param[source_index]
-        merged[key] = grown
+        merged[key] = _copy_overlapping_tensor(old_param, new_param)
     return merged
 
 
@@ -1852,6 +1994,8 @@ def _build_model_from_config(
         low_frequency_sigma=config.low_frequency_sigma,
         high_frequency_gain=config.high_frequency_gain,
         high_frequency_cutoff=config.high_frequency_cutoff,
+        dynamic_spectral_gains=config.dynamic_spectral_gains,
+        anisotropic_spectral_gains=config.anisotropic_spectral_gains,
         wavelet_levels=config.wavelet_levels,
         normalization_type=config.normalization_type,
         token_frequencies=dataset.token_frequencies(),
@@ -2196,12 +2340,7 @@ def evaluate_metrics(
     return _build_metrics(mean_loss, accuracy)
 
 
-def train_model(
-    config: TrainingConfig,
-    *,
-    dataset: Optional[TextDataset] = None,
-    step_callback: Optional[TrainingStepCallback] = None,
-) -> TrainingResult:
+def _normalize_training_config(config: TrainingConfig) -> TrainingConfig:
     normalized_lr_decay_style = config.lr_decay_style.strip().lower().replace("-", "_")
     normalized_generation_top_k = (
         None
@@ -2210,17 +2349,21 @@ def train_model(
     )
     normalized_benchmark_prompt_lengths = tuple(int(length) for length in config.benchmark_prompt_lengths)
     if (
-        normalized_lr_decay_style != config.lr_decay_style
-        or normalized_generation_top_k != config.generation_top_k
-        or normalized_benchmark_prompt_lengths != config.benchmark_prompt_lengths
+        normalized_lr_decay_style == config.lr_decay_style
+        and normalized_generation_top_k == config.generation_top_k
+        and normalized_benchmark_prompt_lengths == config.benchmark_prompt_lengths
     ):
-        config = replace(
-            config,
-            lr_decay_style=normalized_lr_decay_style,
-            generation_top_k=normalized_generation_top_k,
-            benchmark_prompt_lengths=normalized_benchmark_prompt_lengths,
-        )
-    normalized_coupling_type = canonicalize_coupling_type(config.coupling_type)
+        return config
+    return replace(
+        config,
+        lr_decay_style=normalized_lr_decay_style,
+        generation_top_k=normalized_generation_top_k,
+        benchmark_prompt_lengths=normalized_benchmark_prompt_lengths,
+    )
+
+
+def _validate_training_config(config: TrainingConfig) -> None:
+    canonicalize_coupling_type(config.coupling_type)
     if config.steps <= 0:
         raise ValueError("steps must be positive.")
     if config.eval_every <= 0:
@@ -2277,13 +2420,6 @@ def train_model(
         raise ValueError("benchmark_prompt_lengths must contain only positive integers.")
     if config.benchmark_prompt_lengths and config.benchmark_new_tokens <= 0:
         raise ValueError("benchmark_new_tokens must be positive when benchmarking is enabled.")
-    if normalized_coupling_type != "sequential" and (
-        config.dynamic_mode_growth
-        or config.dynamic_rank_growth
-        or config.dynamic_mode_pruning
-        or config.dynamic_rank_pruning
-    ):
-        raise ValueError("Dynamic growth and pruning are only supported with coupling_type='sequential'.")
     if config.attention_every_k > 0 and config.attention_position not in {"before", "after"}:
         raise ValueError("attention_position must be 'before' or 'after'.")
     if config.attention_every_k > 0 and config.hidden_size % config.attention_num_heads != 0:
@@ -2295,7 +2431,19 @@ def train_model(
         raise ValueError("attention_every_k must be non-negative.")
     if config.attention_window <= 0:
         raise ValueError("attention_window must be positive.")
-    if config.stateful_training and dataset is not None:
+
+
+def _validate_training_dataset(config: TrainingConfig, dataset: TextDataset) -> None:
+    if dataset.train_tokens.numel() <= config.seq_len:
+        raise ValueError(
+            f"Train split has {dataset.train_tokens.numel()} tokens, which is too small for seq_len={config.seq_len}."
+        )
+    if dataset.val_tokens.numel() <= config.seq_len:
+        raise ValueError(
+            f"Validation split has {dataset.val_tokens.numel()} tokens, "
+            f"which is too small for seq_len={config.seq_len}."
+        )
+    if config.stateful_training:
         _min_stream_tokens = dataset.train_tokens.numel() // config.batch_size
         if _min_stream_tokens <= config.seq_len:
             raise ValueError(
@@ -2304,6 +2452,18 @@ def train_model(
                 f"(corpus={dataset.train_tokens.numel()}, batch_size={config.batch_size})."
             )
 
+
+def train_model(
+    config: TrainingConfig,
+    *,
+    dataset: Optional[TextDataset] = None,
+    step_callback: Optional[TrainingStepCallback] = None,
+) -> TrainingResult:
+    config = _normalize_training_config(config)
+    _validate_training_config(config)
+
+    # Keep dataset-independent validation above dataset construction so
+    # stateful stream-size checks cannot mask incompatible option errors.
     torch.manual_seed(config.seed)
 
     if dataset is None:
@@ -2313,14 +2473,7 @@ def train_model(
             val_fraction=config.val_fraction,
         )
 
-    if dataset.train_tokens.numel() <= config.seq_len:
-        raise ValueError(
-            f"Train split has {dataset.train_tokens.numel()} tokens, which is too small for seq_len={config.seq_len}."
-        )
-    if dataset.val_tokens.numel() <= config.seq_len:
-        raise ValueError(
-            f"Validation split has {dataset.val_tokens.numel()} tokens, which is too small for seq_len={config.seq_len}."
-        )
+    _validate_training_dataset(config, dataset)
 
     device = _resolve_device(config.device)
     _configure_tensor_dynamic_growth(device, enabled=config.tensor_dynamic_growth)
@@ -2332,6 +2485,7 @@ def train_model(
     )
     _set_optimizer_learning_rate_scale(optimizer, _learning_rate_scale_for_step(config, 1))
     mode_residual_ema = None
+    layer_mode_residual_ema = None
     mode_pruning_residual_ema = None
     mode_slice_activation_variance_ema = None
     prune_candidate_streaks = [0] * len(config.state_shape)
@@ -2402,6 +2556,14 @@ def train_model(
                 current_mode_residual_norms,
                 config.growth_residual_ema_decay,
             )
+            current_layer_mode_residual_norms = None
+            if config.record_residual_diagnostics and config.num_layers > 1:
+                current_layer_mode_residual_norms = _compute_layer_mode_residual_norms(model, inputs)
+                layer_mode_residual_ema = _update_ema(
+                    layer_mode_residual_ema,
+                    current_layer_mode_residual_norms,
+                    config.growth_residual_ema_decay,
+                )
 
             current_mode_pruning_residual_norms = None
             current_mode_slice_activation_variances = None
@@ -2436,6 +2598,16 @@ def train_model(
                         "axis_kinds": list(state_axis_kinds),
                         "mode_residual_norms": current_mode_residual_norms.tolist(),
                         "mode_residual_ema": mode_residual_ema.tolist(),
+                        "layer_mode_residual_norms": (
+                            []
+                            if current_layer_mode_residual_norms is None
+                            else current_layer_mode_residual_norms.tolist()
+                        ),
+                        "layer_mode_residual_ema": (
+                            []
+                            if layer_mode_residual_ema is None
+                            else layer_mode_residual_ema.tolist()
+                        ),
                         "mode_redundancy_norms": (
                             []
                             if current_mode_pruning_residual_norms is None
@@ -2662,7 +2834,11 @@ def train_model(
 __all__ = [
     "CharTokenizer",
     "GenerationSample",
+    "LispGRPOConfig",
+    "RLStepMetrics",
+    "RLTrainingResult",
     "RuntimeBenchmark",
+    "SampleRecord",
     "TextDataset",
     "TrainingConfig",
     "TrainingMetrics",
@@ -2670,10 +2846,12 @@ __all__ = [
     "TrainingStepCallback",
     "benchmark_streaming_inference",
     "build_corpus_dataset",
+    "build_lisp_tokenizer",
     "build_text_dataset",
     "evaluate_generation_samples",
     "evaluate_loss",
     "evaluate_metrics",
     "sample_causal_lm_batch",
+    "train_lisp_grpo",
     "train_model",
 ]

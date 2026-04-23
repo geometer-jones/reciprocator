@@ -9,10 +9,14 @@ from reciprocator.training import (
     _learning_rate_scale_for_step,
     _mode_prune_copy_state_dict,
     _pad_copy_state_dict,
+    LispGRPOConfig,
+    RLTrainingResult,
     TrainingConfig,
+    build_lisp_tokenizer,
     build_corpus_dataset,
     build_text_dataset,
     sample_causal_lm_batch,
+    train_lisp_grpo,
     train_model,
 )
 
@@ -25,10 +29,34 @@ def test_build_text_dataset_round_trips_characters() -> None:
     assert decoded == "abca cab"
 
 
-def test_build_corpus_dataset_uses_bundled_corpus() -> None:
-    dataset = build_corpus_dataset("plato_jowett", max_chars=256, val_fraction=0.2)
+def test_training_module_exports_lisp_grpo_helpers() -> None:
+    tokenizer = build_lisp_tokenizer()
 
-    assert dataset.source_name == "plato_jowett"
+    assert tokenizer.vocab_size > 10
+    assert LispGRPOConfig().steps > 0
+    assert LispGRPOConfig().readout_type == "phase_aware"
+    assert RLTrainingResult.__name__ == "RLTrainingResult"
+    assert callable(train_lisp_grpo)
+
+
+def test_training_config_defaults_match_promoted_static_recipe() -> None:
+    config = TrainingConfig()
+
+    assert config.readout_type == "phase_aware"
+    assert config.token_magnitude_type == "inverse_frequency_learned"
+    assert config.phase_type == "rope"
+    assert config.token_phase == "semantic"
+    assert config.coupling_type == "sequential"
+    assert config.dynamic_spectral_gains is False
+    assert config.anisotropic_spectral_gains is False
+    assert config.normalization_type == "frobenius"
+    assert config.num_layers == 1
+
+
+def test_build_corpus_dataset_uses_bundled_corpus() -> None:
+    dataset = build_corpus_dataset("greek_classics", max_chars=256, val_fraction=0.2)
+
+    assert dataset.source_name == "greek_classics"
     assert dataset.train_tokens.numel() > dataset.val_tokens.numel()
     assert dataset.vocab_size > 10
 
@@ -260,6 +288,8 @@ def test_train_model_supports_fft_coupling() -> None:
         state_shape=(2, 2),
         num_layers=1,
         coupling_type="fft",
+        dynamic_spectral_gains=True,
+        anisotropic_spectral_gains=True,
         device="cpu",
         seed=0,
     )
@@ -267,7 +297,11 @@ def test_train_model_supports_fft_coupling() -> None:
     result = train_model(config, dataset=dataset)
 
     assert result.model.coupling_type == "fft"
+    assert result.model.dynamic_spectral_gains is True
+    assert result.model.anisotropic_spectral_gains is True
     assert all(block.mixer.coupling_type == "fft" for block in result.model.blocks)
+    assert all(block.mixer.coupling.dynamic_spectral_gains for block in result.model.blocks)
+    assert all(block.mixer.coupling.anisotropic_spectral_gains for block in result.model.blocks)
     assert torch.isfinite(torch.tensor(result.train_losses)).all()
 
 
@@ -362,15 +396,38 @@ def test_train_model_rejects_invalid_residual_growth_config(field_name: str, fie
         train_model(config, dataset=dataset)
 
 
-def test_train_model_rejects_dynamic_growth_for_spectral_coupling() -> None:
+def test_train_model_runs_config_validation_before_stateful_stream_validation() -> None:
+    dataset = build_text_dataset("abcde " * 24, val_fraction=0.2, min_split_tokens=16)
+    config = TrainingConfig(
+        batch_size=12,
+        seq_len=10,
+        attention_window=0,
+        stateful_training=True,
+    )
+
+    with pytest.raises(ValueError, match="attention_window"):
+        train_model(config, dataset=dataset)
+
+
+def test_train_model_allows_dynamic_growth_for_spectral_coupling() -> None:
     dataset = build_text_dataset("abcde " * 20, val_fraction=0.2, min_split_tokens=16)
     config = TrainingConfig(
+        steps=1,
+        eval_every=10,
+        eval_batches=1,
+        batch_size=4,
+        seq_len=8,
+        hidden_size=12,
+        state_shape=(2, 2),
+        num_layers=1,
+        device="cpu",
         coupling_type="dwt",
         dynamic_mode_growth=True,
     )
 
-    with pytest.raises(ValueError, match="Dynamic growth and pruning"):
-        train_model(config, dataset=dataset)
+    result = train_model(config, dataset=dataset)
+
+    assert result.config.coupling_type == "dwt"
 
 
 def test_train_model_respects_min_checks_before_first_growth_before_attempting_dynamic_growth(monkeypatch) -> None:
@@ -486,6 +543,51 @@ def test_train_model_records_residual_diagnostics_on_growth_check_cadence(monkey
     assert result.residual_diagnostics[1]["mode_slice_activation_variance_ema"][1] == pytest.approx([0.32, 0.42])
     assert result.residual_diagnostics[0]["prune_candidate_streaks"] == [1, 0]
     assert result.residual_diagnostics[1]["prune_candidate_streaks"] == [2, 0]
+
+
+def test_train_model_records_layer_mode_residual_diagnostics_for_multilayer_models(monkeypatch) -> None:
+    dataset = build_text_dataset("abcde " * 20, val_fraction=0.2, min_split_tokens=16)
+    config = TrainingConfig(
+        steps=4,
+        eval_every=10,
+        eval_batches=1,
+        batch_size=4,
+        seq_len=8,
+        hidden_size=12,
+        state_shape=(2, 2),
+        num_layers=2,
+        device="cpu",
+        growth_check_interval=2,
+        record_residual_diagnostics=True,
+        seed=0,
+    )
+
+    aggregate_sequence = iter(
+        [
+            torch.tensor([0.6, 0.4]),
+            torch.tensor([0.4, 0.8]),
+        ]
+    )
+    layer_sequence = iter(
+        [
+            torch.tensor([[1.0, 0.5], [0.2, 0.3]]),
+            torch.tensor([[0.0, 1.0], [0.8, 0.6]]),
+        ]
+    )
+
+    monkeypatch.setattr(training, "_compute_mode_residual_norms", lambda model, token_ids: next(aggregate_sequence))
+    monkeypatch.setattr(training, "_compute_layer_mode_residual_norms", lambda model, token_ids: next(layer_sequence))
+
+    result = train_model(config, dataset=dataset)
+
+    assert result.residual_diagnostics[0]["layer_mode_residual_norms"][0] == pytest.approx([1.0, 0.5])
+    assert result.residual_diagnostics[0]["layer_mode_residual_norms"][1] == pytest.approx([0.2, 0.3])
+    assert result.residual_diagnostics[0]["layer_mode_residual_ema"][0] == pytest.approx([1.0, 0.5])
+    assert result.residual_diagnostics[0]["layer_mode_residual_ema"][1] == pytest.approx([0.2, 0.3])
+    assert result.residual_diagnostics[1]["layer_mode_residual_norms"][0] == pytest.approx([0.0, 1.0])
+    assert result.residual_diagnostics[1]["layer_mode_residual_norms"][1] == pytest.approx([0.8, 0.6])
+    assert result.residual_diagnostics[1]["layer_mode_residual_ema"][0] == pytest.approx([0.95, 0.525])
+    assert result.residual_diagnostics[1]["layer_mode_residual_ema"][1] == pytest.approx([0.23, 0.315])
 
 
 def test_train_model_records_chunk_drift_history_when_requested() -> None:
@@ -733,6 +835,38 @@ def test_pad_copy_state_dict_supports_cross_layer_proj_weights() -> None:
     assert torch.count_nonzero(merged_view[:, :, 2]) == 0
 
 
+def test_pad_copy_state_dict_rejects_invalid_state_layout_shape() -> None:
+    with pytest.raises(ValueError, match=r"blocks\.0\.mixer\.decay_logit: cannot view old tensor"):
+        _pad_copy_state_dict(
+            {"blocks.0.mixer.decay_logit": torch.zeros(5, dtype=torch.float32)},
+            {"blocks.0.mixer.decay_logit": torch.zeros(3, 3, dtype=torch.float32)},
+            old_state_shape=(2, 3),
+            new_state_shape=(3, 3),
+            growth_kind="mode",
+            grown_axis=0,
+        )
+
+
+def test_pad_copy_state_dict_rejects_invalid_reference_slice_shape() -> None:
+    with pytest.raises(ValueError, match="residual reference slice"):
+        _pad_copy_state_dict(
+            {"blocks.0.mixer.decay_logit": torch.ones(2, 3, dtype=torch.float32)},
+            {"blocks.0.mixer.decay_logit": torch.zeros(3, 3, dtype=torch.float32)},
+            old_state_shape=(2, 3),
+            new_state_shape=(3, 3),
+            growth_kind="mode",
+            grown_axis=0,
+            mode_init="residual",
+            reference_contexts=[
+                {
+                    "state_signal": torch.ones(2, 3, 2, dtype=torch.cfloat),
+                    "state_signal_features": torch.ones(3, 2, 3, 2),
+                    "hidden_features": torch.ones(4),
+                }
+            ],
+        )
+
+
 def test_mode_prune_copy_state_dict_supports_cross_layer_proj_weights() -> None:
     old_weight = torch.arange(6 * 18, dtype=torch.float32).reshape(6, 18)
 
@@ -817,6 +951,62 @@ def test_try_dynamic_growth_supports_rank_growth_residual_init() -> None:
     assert new_config.state_shape == (2, 3, 4, 2)
     assert torch.count_nonzero(new_model.blocks[0].mixer.decay_logit[..., 1]) > 0
     assert float(new_model.blocks[0].mixer.decay_logit[..., 1].std().item()) > 0.0
+
+
+@pytest.mark.parametrize("coupling_type", ["fft", "dwt", "wavelet_packet"])
+@pytest.mark.parametrize(
+    ("growth_config", "smoothed_residuals", "expected_shape"),
+    [
+        (
+            {"dynamic_mode_growth": True, "max_state_shape": (3, 3, 4), "growth_residual_threshold": 0.2},
+            torch.tensor([0.3, 0.1, 0.1]),
+            (3, 3, 4),
+        ),
+        (
+            {
+                "dynamic_rank_growth": True,
+                "max_rank": 5,
+                "residual_saturate_threshold": 0.2,
+                "rank_growth_loss_ceiling": 2.5,
+            },
+            torch.tensor([0.1, 0.1, 0.1]),
+            (2, 3, 4, 2),
+        ),
+    ],
+)
+def test_try_dynamic_growth_supports_spectral_couplings(
+    coupling_type: str,
+    growth_config: dict,
+    smoothed_residuals: torch.Tensor,
+    expected_shape: tuple[int, ...],
+) -> None:
+    dataset = build_text_dataset("abcde " * 40, val_fraction=0.2, min_split_tokens=16)
+    config = TrainingConfig(
+        hidden_size=12,
+        state_shape=(2, 3, 4),
+        num_layers=1,
+        coupling_type=coupling_type,
+        growth_check_interval=50,
+        device="cpu",
+        seed=0,
+        **growth_config,
+    )
+    model = training._build_model_from_config(config, dataset, torch.device("cpu"))
+
+    new_model, new_config = training._try_dynamic_growth(
+        model,
+        config,
+        dataset,
+        torch.device("cpu"),
+        recent_losses=[3.0] * 50,
+        smoothed_mode_residual_norms=smoothed_residuals,
+    )
+
+    assert new_model is not None
+    assert new_config is not None
+    assert new_config.state_shape == expected_shape
+    assert new_model.blocks[0].mixer.decay_logit.shape == expected_shape
+    assert not hasattr(new_model.blocks[0].mixer.coupling, "mode_weights")
 
 
 def test_try_dynamic_growth_uses_mode_growth_reference_contexts_for_residual_init(monkeypatch) -> None:
@@ -1168,6 +1358,60 @@ def test_try_dynamic_mode_pruning_shrinks_selected_mode_dimension() -> None:
     )
 
 
+@pytest.mark.parametrize("coupling_type", ["fft", "dwt", "wavelet_packet"])
+def test_try_dynamic_mode_pruning_supports_spectral_couplings(coupling_type: str) -> None:
+    dataset = build_text_dataset("abcde " * 40, val_fraction=0.2, min_split_tokens=16)
+    config = TrainingConfig(
+        hidden_size=12,
+        state_shape=(2, 3, 4),
+        max_state_shape=(3, 5, 6),
+        num_layers=1,
+        coupling_type=coupling_type,
+        dynamic_mode_pruning=True,
+        growth_check_interval=50,
+        prune_threshold=0.2,
+        prune_sustain_steps=1,
+        prune_min_steps=0,
+        device="cpu",
+        seed=0,
+    )
+    model = training._build_model_from_config(config, dataset, torch.device("cpu"))
+    with torch.no_grad():
+        model.blocks[0].mixer.decay_logit.copy_(torch.arange(24, dtype=torch.float32).reshape(2, 3, 4))
+
+    new_model, new_config = training._try_dynamic_mode_pruning(
+        model,
+        config,
+        dataset,
+        torch.device("cpu"),
+        smoothed_mode_pruning_residual_norms=torch.tensor([0.3, 0.1, 0.4]),
+        smoothed_mode_slice_activation_variances=[
+            torch.tensor([0.3, 0.2]),
+            torch.tensor([0.4, 0.1, 0.3]),
+            torch.tensor([0.2, 0.2, 0.2, 0.2]),
+        ],
+        prune_candidate_streaks=[0, 1, 0],
+        mode_last_growth_steps=[0, 0, 0],
+        axis_kinds=["mode", "mode", "mode"],
+        step=50,
+    )
+
+    assert new_model is not None
+    assert new_config is not None
+    assert new_config.state_shape == (2, 2, 4)
+    assert torch.allclose(
+        new_model.blocks[0].mixer.decay_logit,
+        torch.stack(
+            [
+                model.blocks[0].mixer.decay_logit[:, 0, :],
+                model.blocks[0].mixer.decay_logit[:, 2, :],
+            ],
+            dim=1,
+        ),
+    )
+    assert not hasattr(new_model.blocks[0].mixer.coupling, "mode_weights")
+
+
 def test_select_dynamic_mode_pruning_action_respects_min_steps() -> None:
     config = TrainingConfig(
         state_shape=(2, 3, 4),
@@ -1308,6 +1552,49 @@ def test_try_dynamic_rank_pruning_supports_rank_axis_prune() -> None:
         new_model.blocks[0].mixer.decay_logit,
         model.blocks[0].mixer.decay_logit.mean(dim=3),
     )
+
+
+@pytest.mark.parametrize("coupling_type", ["fft", "dwt", "wavelet_packet"])
+def test_try_dynamic_rank_pruning_supports_spectral_couplings(coupling_type: str) -> None:
+    dataset = build_text_dataset("abcde " * 40, val_fraction=0.2, min_split_tokens=16)
+    config = TrainingConfig(
+        hidden_size=12,
+        state_shape=(2, 3, 4, 2),
+        max_state_shape=(3, 5, 6, 2),
+        num_layers=1,
+        coupling_type=coupling_type,
+        dynamic_rank_pruning=True,
+        growth_check_interval=50,
+        prune_threshold=0.2,
+        prune_sustain_steps=1,
+        prune_min_steps=0,
+        device="cpu",
+        seed=0,
+    )
+    model = training._build_model_from_config(config, dataset, torch.device("cpu"))
+    with torch.no_grad():
+        model.blocks[0].mixer.decay_logit.copy_(torch.arange(48, dtype=torch.float32).reshape(2, 3, 4, 2))
+
+    new_model, new_config = training._try_dynamic_rank_pruning(
+        model,
+        config,
+        dataset,
+        torch.device("cpu"),
+        smoothed_mode_pruning_residual_norms=torch.tensor([0.3, 0.4, 0.5, 0.1]),
+        prune_candidate_streaks=[0, 0, 0, 1],
+        mode_last_growth_steps=[0, 0, 0, 0],
+        axis_kinds=["mode", "mode", "mode", "rank"],
+        step=50,
+    )
+
+    assert new_model is not None
+    assert new_config is not None
+    assert new_config.state_shape == (2, 3, 4)
+    assert torch.allclose(
+        new_model.blocks[0].mixer.decay_logit,
+        model.blocks[0].mixer.decay_logit.mean(dim=3),
+    )
+    assert not hasattr(new_model.blocks[0].mixer.coupling, "mode_weights")
 
 
 def test_update_pruning_candidate_streaks_accumulates_below_threshold_checks() -> None:

@@ -1,0 +1,15 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_static_ablations_20260423/phase4_run17_semantic_virtual_offset_seed1/config.json
+step=1 lr=0.001 train_loss=4.6068 train_acc=0.0039 train_ppl=100.1602 train_bpc=6.6462 val_loss=4.4019 val_acc=0.0393 val_ppl=81.6050 val_bpc=6.3506
+step=50 lr=0.001 train_loss=3.1100 train_acc=0.2070 train_ppl=22.4208 train_bpc=4.4868 val_loss=3.1183 val_acc=0.2023 val_ppl=22.6073 val_bpc=4.4987
+step=100 lr=0.001 train_loss=2.8412 train_acc=0.2773 train_ppl=17.1356 train_bpc=4.0989 val_loss=2.8182 val_acc=0.2612 val_ppl=16.7471 val_bpc=4.0658
+step=150 lr=0.001 train_loss=2.6262 train_acc=0.3047 train_ppl=13.8218 train_bpc=3.7889 val_loss=2.6147 val_acc=0.2970 val_ppl=13.6629 val_bpc=3.7722
+step=200 lr=0.001 train_loss=2.5065 train_acc=0.3223 train_ppl=12.2618 train_bpc=3.6161 val_loss=2.5293 val_acc=0.3245 val_ppl=12.5451 val_bpc=3.6491
+step=250 lr=0.001 train_loss=2.4481 train_acc=0.3340 train_ppl=11.5662 train_bpc=3.5318 val_loss=2.4635 val_acc=0.3260 val_ppl=11.7454 val_bpc=3.5540
+step=300 lr=0.001 train_loss=2.3879 train_acc=0.3281 train_ppl=10.8904 train_bpc=3.4450 val_loss=2.3911 val_acc=0.3429 val_ppl=10.9250 val_bpc=3.4496
+step=350 lr=0.001 train_loss=2.2651 train_acc=0.3477 train_ppl=9.6319 train_bpc=3.2678 val_loss=2.3891 val_acc=0.3368 val_ppl=10.9036 val_bpc=3.4467
+step=400 lr=0.001 train_loss=2.4038 train_acc=0.3516 train_ppl=11.0649 train_bpc=3.4679 val_loss=2.3081 val_acc=0.3584 val_ppl=10.0555 val_bpc=3.3299
+step=450 lr=0.001 train_loss=2.2495 train_acc=0.3613 train_ppl=9.4827 train_bpc=3.2453 val_loss=2.3530 val_acc=0.3473 val_ppl=10.5169 val_bpc=3.3946
+step=500 lr=0.001 train_loss=2.1563 train_acc=0.4082 train_ppl=8.6387 train_bpc=3.1108 val_loss=2.2970 val_acc=0.3613 val_ppl=9.9447 val_bpc=3.3139
+training finished (device=cpu, corpus=plato_jowett, vocab=96, train_tokens=90000, val_tokens=10000, state_shape=(2, 3, 4))
+final train(step=500) loss=2.1563 acc=0.4082 ppl=8.6387 bpc=3.1108 last eval(step=500) val_loss=2.2970 val_acc=0.3613 val_ppl=9.9447 val_bpc=3.3139
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_static_ablations_20260423/phase4_run17_semantic_virtual_offset_seed1/checkpoint_step_000500.pt

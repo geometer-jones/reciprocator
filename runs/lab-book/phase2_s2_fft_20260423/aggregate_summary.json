@@ -1,0 +1,164 @@
+[
+  {
+    "completed_seeds": 3,
+    "config_id": "2S.2a",
+    "coupling_type": "fft",
+    "delta_vs_phase2s_fft_default": 0.0012439186361419274,
+    "delta_vs_phase2s_sequential": 0.006343918636142032,
+    "description": "Gentle smoothing, late high-frequency damping",
+    "final_state_shapes": [
+      [
+        2,
+        3,
+        4
+      ],
+      [
+        2,
+        3,
+        4
+      ],
+      [
+        2,
+        3,
+        4
+      ]
+    ],
+    "high_frequency_cutoff": 0.65,
+    "high_frequency_gain": 0.25,
+    "label": "fft_gentle_smoothing",
+    "low_frequency_gain": 0.25,
+    "low_frequency_sigma": 0.5,
+    "mean_elapsed_seconds": 38.20927667617798,
+    "mean_final3_val_bpc": 3.338043918636142,
+    "mean_final_val_bpc": 3.318454542925196,
+    "mean_train_tokens_per_second": 6717.4076504933255,
+    "per_seed_elapsed_seconds": [
+      35.732101917266846,
+      38.430386781692505,
+      40.465341329574585
+    ],
+    "per_seed_final3_val_bpc": [
+      3.3217227292395424,
+      3.333758476439774,
+      3.3586505502291093
+    ],
+    "per_seed_final_val_bpc": [
+      3.310336381363025,
+      3.3043771180171344,
+      3.340650129395429
+    ],
+    "per_seed_train_tokens_per_second": [
+      7164.425999700089,
+      6661.395355041117,
+      6326.40159673877
+    ]
+  },
+  {
+    "completed_seeds": 3,
+    "config_id": "2S.2b",
+    "coupling_type": "fft",
+    "delta_vs_phase2s_fft_default": 0.0011369502046005842,
+    "delta_vs_phase2s_sequential": 0.006236950204600689,
+    "description": "Strong low-frequency emphasis, permissive cutoff",
+    "final_state_shapes": [
+      [
+        2,
+        3,
+        4
+      ],
+      [
+        2,
+        3,
+        4
+      ],
+      [
+        2,
+        3,
+        4
+      ]
+    ],
+    "high_frequency_cutoff": 0.65,
+    "high_frequency_gain": 0.5,
+    "label": "fft_lowfreq_emphasis",
+    "low_frequency_gain": 0.75,
+    "low_frequency_sigma": 0.2,
+    "mean_elapsed_seconds": 40.36799748738607,
+    "mean_final3_val_bpc": 3.337936950204601,
+    "mean_final_val_bpc": 3.3184604619947637,
+    "mean_train_tokens_per_second": 6350.407682139817,
+    "per_seed_elapsed_seconds": [
+      41.40956425666809,
+      38.27644896507263,
+      41.41797924041748
+    ],
+    "per_seed_final3_val_bpc": [
+      3.3218991476096082,
+      3.333857180149481,
+      3.358054522854713
+    ],
+    "per_seed_final_val_bpc": [
+      3.3089793737542235,
+      3.306334087103471,
+      3.3400679251265957
+    ],
+    "per_seed_train_tokens_per_second": [
+      6182.1466754211715,
+      6688.18573618469,
+      6180.890634813588
+    ]
+  },
+  {
+    "completed_seeds": 3,
+    "config_id": "2S.2c",
+    "coupling_type": "fft",
+    "delta_vs_phase2s_fft_default": 0.0009737386689319116,
+    "delta_vs_phase2s_sequential": 0.006073738668932016,
+    "description": "Aggressive low-pass / hard damping",
+    "final_state_shapes": [
+      [
+        2,
+        3,
+        4
+      ],
+      [
+        2,
+        3,
+        4
+      ],
+      [
+        2,
+        3,
+        4
+      ]
+    ],
+    "high_frequency_cutoff": 0.35,
+    "high_frequency_gain": 0.75,
+    "label": "fft_aggressive_lowpass",
+    "low_frequency_gain": 0.75,
+    "low_frequency_sigma": 0.2,
+    "mean_elapsed_seconds": 40.96950960159302,
+    "mean_final3_val_bpc": 3.337773738668932,
+    "mean_final_val_bpc": 3.318075500328638,
+    "mean_train_tokens_per_second": 6248.815342662673,
+    "per_seed_elapsed_seconds": [
+      40.900681018829346,
+      40.68158578872681,
+      41.3262619972229
+    ],
+    "per_seed_final3_val_bpc": [
+      3.3216986445024776,
+      3.3332874804525545,
+      3.3583350910517638
+    ],
+    "per_seed_final_val_bpc": [
+      3.3099184205257655,
+      3.30425862197069,
+      3.3400494584894593
+    ],
+    "per_seed_train_tokens_per_second": [
+      6259.064485555777,
+      6292.773377357862,
+      6194.608165074379
+    ]
+  }
+]

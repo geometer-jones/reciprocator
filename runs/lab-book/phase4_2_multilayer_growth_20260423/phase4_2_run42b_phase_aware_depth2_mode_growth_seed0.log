@@ -1,0 +1,27 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_2_multilayer_growth_20260423/phase4_2_run42b_phase_aware_depth2_mode_growth_seed0/config.json
+step=1 lr=0.001 train_loss=4.6896 train_acc=0.0000 train_ppl=108.8140 train_bpc=6.7657 val_loss=4.4144 val_acc=0.0004 val_ppl=82.6291 val_bpc=6.3686
+step=50 lr=0.001 train_loss=2.9809 train_acc=0.1953 train_ppl=19.7049 train_bpc=4.3005 val_loss=3.0127 val_acc=0.1855 val_ppl=20.3414 val_bpc=4.3463
+step=100 lr=0.001 train_loss=2.6094 train_acc=0.3105 train_ppl=13.5910 train_bpc=3.7646 val_loss=2.5986 val_acc=0.2915 val_ppl=13.4456 val_bpc=3.7491
+step=150 lr=0.001 train_loss=2.4700 train_acc=0.3223 train_ppl=11.8222 train_bpc=3.5634 val_loss=2.5387 val_acc=0.3099 val_ppl=12.6627 val_bpc=3.6625
+step=200 lr=0.001 train_loss=2.3391 train_acc=0.3477 train_ppl=10.3717 train_bpc=3.3746 val_loss=2.4224 val_acc=0.3322 val_ppl=11.2733 val_bpc=3.4948
+step=250 lr=0.001 train_loss=2.3446 train_acc=0.3477 train_ppl=10.4288 train_bpc=3.3825 val_loss=2.3473 val_acc=0.3435 val_ppl=10.4578 val_bpc=3.3865
+step=300 lr=0.001 train_loss=2.3018 train_acc=0.3340 train_ppl=9.9923 train_bpc=3.3208 val_loss=2.2953 val_acc=0.3604 val_ppl=9.9274 val_bpc=3.3114
+state_shape_event step=350 previous_state_shape=(2, 3, 4) state_shape=(3, 3, 4)
+step=350 lr=0.001 train_loss=2.2116 train_acc=0.3496 train_ppl=9.1305 train_bpc=3.1907 val_loss=2.3028 val_acc=0.3431 val_ppl=10.0017 val_bpc=3.3222
+step=400 lr=0.001 train_loss=2.2460 train_acc=0.3770 train_ppl=9.4503 train_bpc=3.2404 val_loss=2.2533 val_acc=0.3677 val_ppl=9.5193 val_bpc=3.2509
+step=450 lr=0.001 train_loss=2.1462 train_acc=0.3633 train_ppl=8.5522 train_bpc=3.0963 val_loss=2.2200 val_acc=0.3726 val_ppl=9.2073 val_bpc=3.2028
+step=500 lr=0.001 train_loss=2.0179 train_acc=0.4375 train_ppl=7.5222 train_bpc=2.9112 val_loss=2.1756 val_acc=0.3826 val_ppl=8.8078 val_bpc=3.1388
+step=550 lr=0.001 train_loss=2.0493 train_acc=0.4258 train_ppl=7.7622 train_bpc=2.9565 val_loss=2.1663 val_acc=0.3794 val_ppl=8.7260 val_bpc=3.1253
+step=600 lr=0.001 train_loss=2.0865 train_acc=0.4043 train_ppl=8.0567 train_bpc=3.0102 val_loss=2.2215 val_acc=0.3711 val_ppl=9.2212 val_bpc=3.2050
+step=650 lr=0.001 train_loss=2.2169 train_acc=0.3477 train_ppl=9.1788 train_bpc=3.1983 val_loss=2.1672 val_acc=0.3850 val_ppl=8.7335 val_bpc=3.1266
+step=700 lr=0.001 train_loss=2.1392 train_acc=0.3945 train_ppl=8.4925 train_bpc=3.0862 val_loss=2.1368 val_acc=0.3915 val_ppl=8.4720 val_bpc=3.0827
+step=750 lr=0.001 train_loss=1.9222 train_acc=0.4434 train_ppl=6.8360 train_bpc=2.7731 val_loss=2.1380 val_acc=0.3898 val_ppl=8.4825 val_bpc=3.0845
+step=800 lr=0.001 train_loss=1.9957 train_acc=0.4199 train_ppl=7.3574 train_bpc=2.8792 val_loss=2.1482 val_acc=0.3883 val_ppl=8.5695 val_bpc=3.0992
+step=850 lr=0.001 train_loss=2.0068 train_acc=0.4434 train_ppl=7.4391 train_bpc=2.8951 val_loss=2.1407 val_acc=0.3954 val_ppl=8.5051 val_bpc=3.0883
+step=900 lr=0.001 train_loss=2.0612 train_acc=0.4199 train_ppl=7.8556 train_bpc=2.9737 val_loss=2.1346 val_acc=0.3909 val_ppl=8.4536 val_bpc=3.0796
+step=950 lr=0.001 train_loss=2.0916 train_acc=0.4004 train_ppl=8.0976 train_bpc=3.0175 val_loss=2.1237 val_acc=0.3932 val_ppl=8.3623 val_bpc=3.0639
+step=1000 lr=0.001 train_loss=1.9612 train_acc=0.4336 train_ppl=7.1081 train_bpc=2.8295 val_loss=2.1394 val_acc=0.3989 val_ppl=8.4946 val_bpc=3.0865
+training finished (device=cpu, corpus=plato_jowett, vocab=96, train_tokens=90000, val_tokens=10000, state_shape=(3, 3, 4))
+final train(step=1000) loss=1.9612 acc=0.4336 ppl=7.1081 bpc=2.8295 last eval(step=1000) val_loss=2.1394 val_acc=0.3989 val_ppl=8.4946 val_bpc=3.0865
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_2_multilayer_growth_20260423/phase4_2_run42b_phase_aware_depth2_mode_growth_seed0/checkpoint_step_001000.pt
+wrote residual diagnostics: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_2_multilayer_growth_20260423/phase4_2_run42b_phase_aware_depth2_mode_growth_seed0/residual_diagnostics.json

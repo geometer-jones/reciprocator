@@ -1,0 +1,156 @@
+{
+  "runs": [
+    {
+      "seed": 0,
+      "run_name": "phase3_3c_run_rank_mean_seed0",
+      "rank_init": "mean",
+      "residual_saturate_threshold": 0.07,
+      "rank_growth_loss_ceiling": 1.5,
+      "final_state_shape": [
+        2,
+        3,
+        4,
+        2
+      ],
+      "final_val_bpc": 3.083361052510446,
+      "final5_val_bpc_mean": 3.17923044441965,
+      "final5_val_bpcs": [
+        3.123578206514471,
+        3.1402441208028375,
+        3.491137915601114,
+        3.0578309266693813,
+        3.083361052510446
+      ],
+      "growth_events": [
+        {
+          "step": 900,
+          "previous_state_shape": "(2, 3, 4)",
+          "state_shape": "(2, 3, 4, 2)"
+        }
+      ],
+      "residual_snapshots": {
+        "50": [
+          0.24820327758789062,
+          6.622220638519138e-08,
+          6.40923190076137e-08
+        ],
+        "200": [
+          0.18118970096111298,
+          4.9851884398322e-08,
+          5.727727980797681e-08
+        ],
+        "500": [
+          0.10797127336263657,
+          7.241364841092945e-08,
+          5.393105695361555e-08
+        ],
+        "900": [
+          0.06709451228380203,
+          5.746758802160912e-08,
+          3.836237638665807e-08
+        ],
+        "1000": [
+          0.11842497438192368,
+          0.01245805062353611,
+          3.926341918258913e-08,
+          0.057811737060546875
+        ]
+      },
+      "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_3c/phase3_3c_run_rank_mean_seed0.log",
+      "diagnostics_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_3c/phase3_3c_run_rank_mean_seed0/residual_diagnostics.json",
+      "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_3c/phase3_3c_run_rank_mean_seed0/checkpoint_step_001000.pt"
+    },
+    {
+      "seed": 1,
+      "run_name": "phase3_3c_run_rank_mean_seed1",
+      "rank_init": "mean",
+      "residual_saturate_threshold": 0.07,
+      "rank_growth_loss_ceiling": 1.5,
+      "final_state_shape": [
+        2,
+        3,
+        4,
+        2
+      ],
+      "final_val_bpc": 3.035400637625299,
+      "final5_val_bpc_mean": 3.2182069284790495,
+      "final5_val_bpcs": [
+        3.1751902645318943,
+        3.171053243363221,
+        3.589541615906252,
+        3.1198488809685836,
+        3.035400637625299
+      ],
+      "growth_events": [
+        {
+          "step": 900,
+          "previous_state_shape": "(2, 3, 4)",
+          "state_shape": "(2, 3, 4, 2)"
+        }
+      ],
+      "residual_snapshots": {
+        "50": [
+          0.31447458267211914,
+          1.0188515631170958e-07,
+          1.0188515631170958e-07
+        ],
+        "200": [
+          0.21256044507026672,
+          9.417028934421978e-08,
+          7.496931431205667e-08
+        ],
+        "500": [
+          0.11824832111597061,
+          5.8576684835998094e-08,
+          4.301490363900484e-08
+        ],
+        "900": [
+          0.06358589231967926,
+          4.946044285247808e-08,
+          3.178131535719331e-08
+        ],
+        "1000": [
+          0.10639696568250656,
+          0.025353118777275085,
+          4.811984055663743e-08,
+          0.038550641387701035
+        ]
+      },
+      "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_3c/phase3_3c_run_rank_mean_seed1.log",
+      "diagnostics_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_3c/phase3_3c_run_rank_mean_seed1/residual_diagnostics.json",
+      "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/phase3_3c/phase3_3c_run_rank_mean_seed1/checkpoint_step_001000.pt"
+    }
+  ],
+  "aggregate": {
+    "label": "3.3c_rank_mean",
+    "rank_init": "mean",
+    "residual_saturate_threshold": 0.07,
+    "rank_growth_loss_ceiling": 1.5,
+    "mean_final5_val_bpc": 3.1987186864493498,
+    "mean_final_val_bpc": 3.0593808450678726,
+    "growth_steps_by_seed": [
+      [
+        900
+      ],
+      [
+        900
+      ]
+    ],
+    "final_state_shapes": [
+      [
+        2,
+        3,
+        4,
+        2
+      ],
+      [
+        2,
+        3,
+        4,
+        2
+      ]
+    ],
+    "vs_phase3_3a_zero_mean_final5_delta": 0.05834516482511143,
+    "vs_phase3_3b_residual_mean_final5_delta": -0.30075673953662907
+  }
+}

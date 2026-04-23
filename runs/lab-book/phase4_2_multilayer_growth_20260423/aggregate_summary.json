@@ -1,0 +1,92 @@
+[
+  {
+    "completed_seeds": 2,
+    "config_id": "4.2a",
+    "delta_vs_4_2a_static": 0.0,
+    "description": "Two-layer phase-aware static baseline at 1000 steps",
+    "final_state_shapes": [
+      [
+        2,
+        3,
+        4
+      ],
+      [
+        2,
+        3,
+        4
+      ]
+    ],
+    "growth_steps_by_seed": [
+      [],
+      []
+    ],
+    "label": "phase_aware_depth2_static",
+    "mean_elapsed_seconds": 307.6913685798645,
+    "mean_final5_val_bpc": 3.079539857057142,
+    "mean_final_val_bpc": 3.0224829239787523,
+    "mean_train_tokens_per_second": 1667.8960146508512,
+    "per_seed_elapsed_seconds": [
+      292.83003211021423,
+      322.55270504951477
+    ],
+    "per_seed_final5_val_bpc": [
+      3.064073798005677,
+      3.095005916108607
+    ],
+    "per_seed_final_val_bpc": [
+      3.0121199373683627,
+      3.0328459105891414
+    ],
+    "per_seed_train_tokens_per_second": [
+      1748.4545431026536,
+      1587.3374861990487
+    ]
+  },
+  {
+    "completed_seeds": 2,
+    "config_id": "4.2b",
+    "delta_vs_4_2a_static": 0.01131571352691596,
+    "description": "Two-layer phase-aware with Phase 3.2f mode growth only",
+    "final_state_shapes": [
+      [
+        3,
+        3,
+        4
+      ],
+      [
+        3,
+        3,
+        4
+      ]
+    ],
+    "growth_steps_by_seed": [
+      [
+        350
+      ],
+      [
+        350
+      ]
+    ],
+    "label": "phase_aware_depth2_mode_growth",
+    "mean_elapsed_seconds": 367.6945060491562,
+    "mean_final5_val_bpc": 3.090855570584058,
+    "mean_final_val_bpc": 3.0593942812124713,
+    "mean_train_tokens_per_second": 1394.7094879700521,
+    "per_seed_elapsed_seconds": [
+      352.9286470413208,
+      382.4603650569916
+    ],
+    "per_seed_final5_val_bpc": [
+      3.0835095509303327,
+      3.0982015902377835
+    ],
+    "per_seed_final_val_bpc": [
+      3.086546773143703,
+      3.032241789281239
+    ],
+    "per_seed_train_tokens_per_second": [
+      1450.7181672335462,
+      1338.7008087065578
+    ]
+  }
+]

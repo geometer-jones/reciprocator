@@ -1,0 +1,275 @@
+[
+  {
+    "completed_seeds": 2,
+    "config_id": "4.0",
+    "delta_vs_phase4_control": 0.0,
+    "description": "Phase 2 sequential winner rerun as same-phase control",
+    "final_state_shapes": [
+      [
+        2,
+        3,
+        4
+      ],
+      [
+        2,
+        3,
+        4
+      ]
+    ],
+    "label": "control_best_static",
+    "mean_elapsed_seconds": 66.59225142002106,
+    "mean_final3_val_bpc": 3.35529141017326,
+    "mean_final_val_bpc": 3.359606293649673,
+    "mean_train_tokens_per_second": 3844.319424551627,
+    "per_seed_elapsed_seconds": [
+      66.41152000427246,
+      66.77298283576965
+    ],
+    "per_seed_final3_val_bpc": [
+      3.36263052257377,
+      3.3479522977727503
+    ],
+    "per_seed_final_val_bpc": [
+      3.3781444540709944,
+      3.341068133228351
+    ],
+    "per_seed_train_tokens_per_second": [
+      3854.752910090459,
+      3833.8859390127955
+    ]
+  },
+  {
+    "completed_seeds": 2,
+    "config_id": "14",
+    "delta_vs_phase4_control": -8.793687916908155e-05,
+    "description": "token_magnitude_type=inverse_frequency",
+    "final_state_shapes": [
+      [
+        2,
+        3,
+        4
+      ],
+      [
+        2,
+        3,
+        4
+      ]
+    ],
+    "label": "inverse_frequency_no_learned_residual",
+    "mean_elapsed_seconds": 68.96066606044769,
+    "mean_final3_val_bpc": 3.355203473294091,
+    "mean_final_val_bpc": 3.3572572793617788,
+    "mean_train_tokens_per_second": 3718.715195182831,
+    "per_seed_elapsed_seconds": [
+      66.08775806427002,
+      71.83357405662537
+    ],
+    "per_seed_final3_val_bpc": [
+      3.365010576147173,
+      3.345396370441009
+    ],
+    "per_seed_final_val_bpc": [
+      3.3778181814844763,
+      3.336696377239081
+    ],
+    "per_seed_train_tokens_per_second": [
+      3873.6372287139966,
+      3563.7931616516657
+    ]
+  },
+  {
+    "completed_seeds": 2,
+    "config_id": "15",
+    "delta_vs_phase4_control": -0.06483157255245864,
+    "description": "readout_type=phase_aware",
+    "final_state_shapes": [
+      [
+        2,
+        3,
+        4
+      ],
+      [
+        2,
+        3,
+        4
+      ]
+    ],
+    "label": "phase_aware_readout",
+    "mean_elapsed_seconds": 71.34036839008331,
+    "mean_final3_val_bpc": 3.2904598376208014,
+    "mean_final_val_bpc": 3.2671165607597548,
+    "mean_train_tokens_per_second": 3588.9208845720777,
+    "per_seed_elapsed_seconds": [
+      72.17373275756836,
+      70.50700402259827
+    ],
+    "per_seed_final3_val_bpc": [
+      3.306248224765028,
+      3.274671450476575
+    ],
+    "per_seed_final_val_bpc": [
+      3.2610549032431067,
+      3.2731782182764024
+    ],
+    "per_seed_train_tokens_per_second": [
+      3546.9968119828895,
+      3630.844957161266
+    ]
+  },
+  {
+    "completed_seeds": 2,
+    "config_id": "16",
+    "delta_vs_phase4_control": -0.060569247690743566,
+    "description": "num_layers=2",
+    "final_state_shapes": [
+      [
+        2,
+        3,
+        4
+      ],
+      [
+        2,
+        3,
+        4
+      ]
+    ],
+    "label": "num_layers_2",
+    "mean_elapsed_seconds": 140.21926295757294,
+    "mean_final3_val_bpc": 3.2947221624825165,
+    "mean_final_val_bpc": 3.2739146479873966,
+    "mean_train_tokens_per_second": 1826.0606848016737,
+    "per_seed_elapsed_seconds": [
+      138.28183007240295,
+      142.15669584274292
+    ],
+    "per_seed_final3_val_bpc": [
+      3.2793502456592414,
+      3.310094079305791
+    ],
+    "per_seed_final_val_bpc": [
+      3.2589135902528765,
+      3.288915705721917
+    ],
+    "per_seed_train_tokens_per_second": [
+      1851.2916690931918,
+      1800.8297005101556
+    ]
+  },
+  {
+    "completed_seeds": 2,
+    "config_id": "17",
+    "delta_vs_phase4_control": -0.0068136480745732975,
+    "description": "token_phase=semantic_virtual_offset",
+    "final_state_shapes": [
+      [
+        2,
+        3,
+        4
+      ],
+      [
+        2,
+        3,
+        4
+      ]
+    ],
+    "label": "semantic_virtual_offset",
+    "mean_elapsed_seconds": 75.07647848129272,
+    "mean_final3_val_bpc": 3.3484777620986867,
+    "mean_final_val_bpc": 3.321889348181481,
+    "mean_train_tokens_per_second": 3410.6156638051916,
+    "per_seed_elapsed_seconds": [
+      73.9562041759491,
+      76.19675278663635
+    ],
+    "per_seed_final3_val_bpc": [
+      3.3507999291781867,
+      3.346155595019187
+    ],
+    "per_seed_final_val_bpc": [
+      3.3298562832489655,
+      3.3139224131139966
+    ],
+    "per_seed_train_tokens_per_second": [
+      3461.5081027002248,
+      3359.7232249101585
+    ]
+  },
+  {
+    "completed_seeds": 2,
+    "config_id": "18",
+    "delta_vs_phase4_control": -0.0010338414589146083,
+    "description": "enable_self_relation=True",
+    "final_state_shapes": [
+      [
+        2,
+        3,
+        4
+      ],
+      [
+        2,
+        3,
+        4
+      ]
+    ],
+    "label": "self_relation",
+    "mean_elapsed_seconds": 78.63048303127289,
+    "mean_final3_val_bpc": 3.3542575687143454,
+    "mean_final_val_bpc": 3.3595474218384993,
+    "mean_train_tokens_per_second": 3255.8819008403425,
+    "per_seed_elapsed_seconds": [
+      78.10196089744568,
+      79.1590051651001
+    ],
+    "per_seed_final3_val_bpc": [
+      3.362270261915875,
+      3.346244875512816
+    ],
+    "per_seed_final_val_bpc": [
+      3.3798116753862897,
+      3.339283168290709
+    ],
+    "per_seed_train_tokens_per_second": [
+      3277.7666150552755,
+      3233.99718662541
+    ]
+  },
+  {
+    "completed_seeds": 2,
+    "config_id": "18b",
+    "delta_vs_phase4_control": -0.0012819622625031002,
+    "description": "enable_anticipator_relation=True",
+    "final_state_shapes": [
+      [
+        2,
+        3,
+        4
+      ],
+      [
+        2,
+        3,
+        4
+      ]
+    ],
+    "label": "anticipator_relation",
+    "mean_elapsed_seconds": 78.12546527385712,
+    "mean_final3_val_bpc": 3.354009447910757,
+    "mean_final_val_bpc": 3.358393138779402,
+    "mean_train_tokens_per_second": 3278.239251845622,
+    "per_seed_elapsed_seconds": [
+      79.7734956741333,
+      76.47743487358093
+    ],
+    "per_seed_final3_val_bpc": [
+      3.3621226434738847,
+      3.345896252347629
+    ],
+    "per_seed_final_val_bpc": [
+      3.3778096683432586,
+      3.3389766092155457
+    ],
+    "per_seed_train_tokens_per_second": [
+      3209.0858979746135,
+      3347.392605716631
+    ]
+  }
+]

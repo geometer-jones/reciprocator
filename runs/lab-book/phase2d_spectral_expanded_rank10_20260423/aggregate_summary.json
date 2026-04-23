@@ -1,0 +1,120 @@
+[
+  {
+    "config_id": "2D.X1",
+    "label": "fft_expanded",
+    "coupling_type": "fft",
+    "completed_seeds": 3,
+    "mean_final5_val_bpc": 3.166591324036047,
+    "per_seed_final5_val_bpc": [
+      3.1389853109881125,
+      3.1395129193644293,
+      3.2212757417556
+    ],
+    "mean_final_val_bpc": 3.1295111995104423,
+    "per_seed_final_val_bpc": [
+      3.176503911014847,
+      3.059144669892575,
+      3.152885017623905
+    ],
+    "mean_elapsed_seconds": 1259.8551342487335,
+    "per_seed_elapsed_seconds": [
+      1339.5765240192413,
+      1218.4223279953003,
+      1221.566550731659
+    ],
+    "mean_train_tokens_per_second": 407.1866075688501,
+    "per_seed_train_tokens_per_second": [
+      382.21034096940156,
+      420.21554286714854,
+      419.13393887000007
+    ],
+    "mode_growth_seeds": 3,
+    "rank_growth_seeds": 0,
+    "mode_prune_seeds": 0,
+    "rank_prune_seeds": 0,
+    "final_state_shapes": [
+      [
+        5,
+        10,
+        10,
+        10,
+        3
+      ],
+      [
+        5,
+        10,
+        10,
+        10,
+        3
+      ],
+      [
+        5,
+        10,
+        10,
+        10,
+        3
+      ]
+    ],
+    "delta_vs_fft_expanded": 0.0,
+    "throughput_ratio_vs_fft_expanded": 1.0
+  },
+  {
+    "config_id": "2D.X2",
+    "label": "dwt_expanded",
+    "coupling_type": "dwt",
+    "completed_seeds": 3,
+    "mean_final5_val_bpc": 3.1663660783582124,
+    "per_seed_final5_val_bpc": [
+      3.1385706952134123,
+      3.1383650211612455,
+      3.222162518699979
+    ],
+    "mean_final_val_bpc": 3.1303161356440303,
+    "per_seed_final_val_bpc": [
+      3.1806045793506943,
+      3.0587832483517867,
+      3.1515605792296104
+    ],
+    "mean_elapsed_seconds": 1135.5728041330974,
+    "per_seed_elapsed_seconds": [
+      944.5051100254059,
+      1105.6757853031158,
+      1356.5375170707703
+    ],
+    "mean_train_tokens_per_second": 460.8598512000271,
+    "per_seed_train_tokens_per_second": [
+      542.0828268321682,
+      463.065219303539,
+      377.43150746437414
+    ],
+    "mode_growth_seeds": 3,
+    "rank_growth_seeds": 0,
+    "mode_prune_seeds": 0,
+    "rank_prune_seeds": 0,
+    "final_state_shapes": [
+      [
+        5,
+        10,
+        10,
+        10,
+        3
+      ],
+      [
+        5,
+        10,
+        10,
+        10,
+        3
+      ],
+      [
+        5,
+        10,
+        10,
+        10,
+        3
+      ]
+    ],
+    "delta_vs_fft_expanded": -0.00022524567783444027,
+    "throughput_ratio_vs_fft_expanded": 1.1318148549915201
+  }
+]

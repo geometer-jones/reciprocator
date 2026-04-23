@@ -31,7 +31,14 @@ reciprocator/
 │   ├── corpora.py            # Bundled corpus registry and file access helpers
 │   ├── mixer.py              # Reciprocator tensor-state mixer and coupling backends
 │   ├── model.py              # Token lift, blocks, attention, readouts, LM wrapper
-│   └── training.py           # Dataset building, training loop, eval, generation
+│   ├── training.py           # Dataset building, training loop, eval, generation
+│   └── rl/
+│       ├── lisp_eval.py      # Custom Lisp s-expression parser and evaluator
+│       ├── problem_gen.py    # Problem generator with staged difficulty
+│       ├── reward.py         # Reward function with partial credit
+│       ├── curriculum.py     # Competency-driven curriculum controller
+│       ├── phase_monitor.py  # Complex-valued state phase trajectory tracking
+│       └── training.py       # GRPO training loop for mathematical reasoning
 ├── tests/                    # Pytest coverage for model, training, corpora, CLI
 ├── pyproject.toml            # setuptools package config and pytest settings
 └── test_plan.md              # Experiment plan and run-tracking notes
@@ -77,6 +84,12 @@ The reciprocator mixer supports multiple coupling modes:
 
 It also supports chunked forward passes, optional self-relation terms, and
 different complex-state normalization modes (`frobenius` and `per_mode`).
+Spectral backends can opt into learned, signal-conditioned filter envelopes with
+`dynamic_spectral_gains` / `--dynamic-spectral-gains`; the scalar spectral
+parameters remain the fixed base envelope, and the learned path is inert at
+initialization. FFT coupling can further opt into full coordinatewise dynamic
+frequency-grid modulation with `anisotropic_spectral_gains` /
+`--anisotropic-spectral-gains`; otherwise dynamic FFT gains remain radial.
 
 ### Training and experiments
 
@@ -216,8 +229,9 @@ include:
 - [`docs/training.md`](./docs/training.md): practical training and experiment guide
 - [`docs/reciprocator.md`](./docs/reciprocator.md): formal architecture and math
 - [`docs/memory-engines.md`](./docs/memory-engines.md): conceptual background
+- [`docs/rl/`](./docs/rl/): RL mathematical reasoning — test plan, lab book, and design docs
 - [`lab-book.md`](./lab-book.md): experiment history and conclusions
-- [`test_plan.md`](./test_plan.md): experiment matrix and evaluation protocol
+- [`test-plan.md`](./test_plan.md): experiment matrix and evaluation protocol
 - [`corpora/plato_jowett/README.md`](./corpora/plato_jowett/README.md)
 - [`corpora/greek_philosophy_classics/README.md`](./corpora/greek_philosophy_classics/README.md)
 

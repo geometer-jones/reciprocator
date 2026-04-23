@@ -1,2 +1,0 @@
-{"config_id": 10, "label": "static_baseline", "seed": 0, "run_name": "phase3_run10_static_baseline_seed0", "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase3/phase3_run10_static_baseline_seed0.log", "elapsed_seconds": 174.83060598373413, "returncode": 0}
-{"config_id": 10, "label": "static_baseline", "seed": 1, "run_name": "phase3_run10_static_baseline_seed1", "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase3/phase3_run10_static_baseline_seed1.log", "elapsed_seconds": 177.08134078979492, "returncode": 0}

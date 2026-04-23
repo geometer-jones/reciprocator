@@ -1,0 +1,287 @@
+[
+  {
+    "config_id": "2S.4a",
+    "label": "sequential",
+    "coupling_type": "sequential",
+    "dynamic_spectral_gains": false,
+    "anisotropic_spectral_gains": false,
+    "description": "Direct recurrent baseline",
+    "completed_seeds": 3,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "mean_final3_val_bpc": 3.0373777777777775,
+    "std_final3_val_bpc": 0.05948411863993897,
+    "per_seed_final3_val_bpc": [
+      3.0554,
+      2.970966666666667,
+      3.0857666666666663
+    ],
+    "mean_final5_val_bpc": 3.0685266666666666,
+    "std_final5_val_bpc": 0.05118660111135824,
+    "per_seed_final5_val_bpc": [
+      3.0814399999999997,
+      3.0121200000000004,
+      3.11202
+    ],
+    "mean_final_val_bpc": 3.018933333333333,
+    "std_final_val_bpc": 0.05672356946925431,
+    "per_seed_final_val_bpc": [
+      3.033,
+      2.9565,
+      3.0673
+    ],
+    "mean_elapsed_seconds": 119.753098487854,
+    "mean_train_tokens_per_second": 376185.4578592726,
+    "final_state_shapes": [
+      [
+        8,
+        8,
+        8
+      ],
+      [
+        8,
+        8,
+        8
+      ],
+      [
+        8,
+        8,
+        8
+      ]
+    ],
+    "delta_final5_vs_sequential": 0.0,
+    "delta_final5_vs_fixed_fft": -0.011200000000000543,
+    "delta_final5_vs_learned_radial_fft": -0.013326666666666931
+  },
+  {
+    "config_id": "2S.4b",
+    "label": "fft_fixed_radial",
+    "coupling_type": "fft",
+    "dynamic_spectral_gains": false,
+    "anisotropic_spectral_gains": false,
+    "description": "Fixed radial FFT baseline",
+    "completed_seeds": 3,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "mean_final3_val_bpc": 3.037177777777778,
+    "std_final3_val_bpc": 0.018121881596362934,
+    "per_seed_final3_val_bpc": [
+      3.0211333333333332,
+      3.0335666666666667,
+      3.0568333333333335
+    ],
+    "mean_final5_val_bpc": 3.079726666666667,
+    "std_final5_val_bpc": 0.012834053659438151,
+    "per_seed_final5_val_bpc": [
+      3.0688,
+      3.07652,
+      3.0938600000000003
+    ],
+    "mean_final_val_bpc": 3.0150666666666672,
+    "std_final_val_bpc": 0.017116463809249124,
+    "per_seed_final_val_bpc": [
+      2.9954,
+      3.0232,
+      3.0266
+    ],
+    "mean_elapsed_seconds": 68.8313540617625,
+    "mean_train_tokens_per_second": 653918.262422451,
+    "final_state_shapes": [
+      [
+        8,
+        8,
+        8
+      ],
+      [
+        8,
+        8,
+        8
+      ],
+      [
+        8,
+        8,
+        8
+      ]
+    ],
+    "delta_final5_vs_sequential": 0.011200000000000543,
+    "delta_final5_vs_fixed_fft": 0.0,
+    "delta_final5_vs_learned_radial_fft": -0.002126666666666388
+  },
+  {
+    "config_id": "2S.4c",
+    "label": "fft_learned_radial",
+    "coupling_type": "fft",
+    "dynamic_spectral_gains": true,
+    "anisotropic_spectral_gains": false,
+    "description": "Learned radial FFT gains",
+    "completed_seeds": 3,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "mean_final3_val_bpc": 3.0461333333333336,
+    "std_final3_val_bpc": 0.03046289181574444,
+    "per_seed_final3_val_bpc": [
+      3.020633333333334,
+      3.0379,
+      3.0798666666666663
+    ],
+    "mean_final5_val_bpc": 3.0818533333333336,
+    "std_final5_val_bpc": 0.027622457047361375,
+    "per_seed_final5_val_bpc": [
+      3.0623400000000003,
+      3.06976,
+      3.11346
+    ],
+    "mean_final_val_bpc": 3.02,
+    "std_final_val_bpc": 0.03284569987075927,
+    "per_seed_final_val_bpc": [
+      2.9862,
+      3.022,
+      3.0518
+    ],
+    "mean_elapsed_seconds": 85.18308361371358,
+    "mean_train_tokens_per_second": 528396.0879147593,
+    "final_state_shapes": [
+      [
+        8,
+        8,
+        8
+      ],
+      [
+        8,
+        8,
+        8
+      ],
+      [
+        8,
+        8,
+        8
+      ]
+    ],
+    "delta_final5_vs_sequential": 0.013326666666666931,
+    "delta_final5_vs_fixed_fft": 0.002126666666666388,
+    "delta_final5_vs_learned_radial_fft": 0.0
+  },
+  {
+    "config_id": "2S.4d",
+    "label": "fft_anisotropic_control",
+    "coupling_type": "fft",
+    "dynamic_spectral_gains": false,
+    "anisotropic_spectral_gains": true,
+    "description": "Inert anisotropic-flag control",
+    "completed_seeds": 3,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "mean_final3_val_bpc": 3.037177777777778,
+    "std_final3_val_bpc": 0.018121881596362934,
+    "per_seed_final3_val_bpc": [
+      3.0211333333333332,
+      3.0335666666666667,
+      3.0568333333333335
+    ],
+    "mean_final5_val_bpc": 3.079726666666667,
+    "std_final5_val_bpc": 0.012834053659438151,
+    "per_seed_final5_val_bpc": [
+      3.0688,
+      3.07652,
+      3.0938600000000003
+    ],
+    "mean_final_val_bpc": 3.0150666666666672,
+    "std_final_val_bpc": 0.017116463809249124,
+    "per_seed_final_val_bpc": [
+      2.9954,
+      3.0232,
+      3.0266
+    ],
+    "mean_elapsed_seconds": 71.92861127853394,
+    "mean_train_tokens_per_second": 625901.1812294003,
+    "final_state_shapes": [
+      [
+        8,
+        8,
+        8
+      ],
+      [
+        8,
+        8,
+        8
+      ],
+      [
+        8,
+        8,
+        8
+      ]
+    ],
+    "delta_final5_vs_sequential": 0.011200000000000543,
+    "delta_final5_vs_fixed_fft": 0.0,
+    "delta_final5_vs_learned_radial_fft": -0.002126666666666388
+  },
+  {
+    "config_id": "2S.4e",
+    "label": "fft_learned_anisotropic",
+    "coupling_type": "fft",
+    "dynamic_spectral_gains": true,
+    "anisotropic_spectral_gains": true,
+    "description": "Learned full coordinatewise anisotropic FFT gains",
+    "completed_seeds": 3,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "mean_final3_val_bpc": 3.0461333333333336,
+    "std_final3_val_bpc": 0.03046289181574444,
+    "per_seed_final3_val_bpc": [
+      3.020633333333334,
+      3.0379,
+      3.0798666666666663
+    ],
+    "mean_final5_val_bpc": 3.0818533333333336,
+    "std_final5_val_bpc": 0.027622457047361375,
+    "per_seed_final5_val_bpc": [
+      3.0623400000000003,
+      3.06976,
+      3.11346
+    ],
+    "mean_final_val_bpc": 3.02,
+    "std_final_val_bpc": 0.03284569987075927,
+    "per_seed_final_val_bpc": [
+      2.9862,
+      3.022,
+      3.0518
+    ],
+    "mean_elapsed_seconds": 84.85701473553975,
+    "mean_train_tokens_per_second": 530730.3261495911,
+    "final_state_shapes": [
+      [
+        8,
+        8,
+        8
+      ],
+      [
+        8,
+        8,
+        8
+      ],
+      [
+        8,
+        8,
+        8
+      ]
+    ],
+    "delta_final5_vs_sequential": 0.013326666666666931,
+    "delta_final5_vs_fixed_fft": 0.002126666666666388,
+    "delta_final5_vs_learned_radial_fft": 0.0
+  }
+]

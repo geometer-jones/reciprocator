@@ -1,0 +1,18 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/phase2d_dynamic_backend_20260423/phase2d_run2d1_sequential_seed0/config.json
+step=1 lr=0.001 train_loss=4.8141 train_acc=0.0000 train_ppl=123.2322 train_bpc=6.9452 val_loss=4.9263 val_acc=0.0000 val_ppl=137.8749 val_bpc=7.1072
+step=50 lr=0.001 train_loss=3.2900 train_acc=0.1758 train_ppl=26.8431 train_bpc=4.7465 val_loss=3.2749 val_acc=0.1562 val_ppl=26.4401 val_bpc=4.7247
+step=100 lr=0.001 train_loss=2.9381 train_acc=0.2441 train_ppl=18.8795 train_bpc=4.2387 val_loss=2.9234 val_acc=0.2119 val_ppl=18.6045 val_bpc=4.2176
+step=150 lr=0.001 train_loss=2.6869 train_acc=0.2871 train_ppl=14.6867 train_bpc=3.8764 val_loss=2.6660 val_acc=0.3008 val_ppl=14.3821 val_bpc=3.8462
+step=200 lr=0.001 train_loss=2.5347 train_acc=0.3086 train_ppl=12.6133 train_bpc=3.6569 val_loss=2.5373 val_acc=0.3237 val_ppl=12.6450 val_bpc=3.6605
+step=250 lr=0.001 train_loss=2.4431 train_acc=0.3125 train_ppl=11.5086 train_bpc=3.5246 val_loss=2.4401 val_acc=0.3291 val_ppl=11.4745 val_bpc=3.5204
+step=300 lr=0.001 train_loss=2.4045 train_acc=0.3184 train_ppl=11.0726 train_bpc=3.4689 val_loss=2.4489 val_acc=0.3306 val_ppl=11.5755 val_bpc=3.5330
+state_shape_event step=350 previous_state_shape=(4, 8, 8, 8) state_shape=(5, 8, 8, 8)
+step=350 lr=0.001 train_loss=2.2617 train_acc=0.3398 train_ppl=9.5997 train_bpc=3.2630 val_loss=2.4982 val_acc=0.3135 val_ppl=12.1610 val_bpc=3.6042
+state_shape_event step=400 previous_state_shape=(5, 8, 8, 8) state_shape=(5, 8, 8, 8, 2)
+step=400 lr=0.001 train_loss=2.4033 train_acc=0.3438 train_ppl=11.0594 train_bpc=3.4672 val_loss=2.9488 val_acc=0.1572 val_ppl=19.0831 val_bpc=4.2542
+step=450 lr=0.001 train_loss=2.3052 train_acc=0.3535 train_ppl=10.0262 train_bpc=3.3257 val_loss=2.3745 val_acc=0.3521 val_ppl=10.7452 val_bpc=3.4256
+step=500 lr=0.001 train_loss=2.1414 train_acc=0.4453 train_ppl=8.5113 train_bpc=3.0894 val_loss=2.2732 val_acc=0.3716 val_ppl=9.7104 val_bpc=3.2795
+step=550 lr=0.001 train_loss=2.2310 train_acc=0.3906 train_ppl=9.3088 train_bpc=3.2186 val_loss=2.2756 val_acc=0.3628 val_ppl=9.7336 val_bpc=3.2830
+step=600 lr=0.001 train_loss=2.1812 train_acc=0.3770 train_ppl=8.8569 train_bpc=3.1468 val_loss=2.2525 val_acc=0.3594 val_ppl=9.5114 val_bpc=3.2497
+step=650 lr=0.001 train_loss=2.3175 train_acc=0.3301 train_ppl=10.1498 train_bpc=3.3434 val_loss=2.2248 val_acc=0.3682 val_ppl=9.2513 val_bpc=3.2097
+step=700 lr=0.001 train_loss=2.1766 train_acc=0.3926 train_ppl=8.8164 train_bpc=3.1402 val_loss=2.2361 val_acc=0.3584 val_ppl=9.3570 val_bpc=3.2260

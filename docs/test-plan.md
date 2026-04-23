@@ -50,13 +50,15 @@ decode-state usage; the plan must check that directly rather than infer it from 
 | hidden_size           | 32       |                                                                   |
 | phase_scale           | π        | TensorSignalProjector default; varied in Phase 4.1               |
 | ffn_expansion_factor  | 2        | Standard capacity knob; varied in Phase 4.1                      |
-| readout_type          | magnitude | except run 14                                                   |
+| readout_type          | phase_aware | Phase 4 promoted over `magnitude`; historical phases before Phase 4 used `magnitude` |
 | state_shape           | (2,3,4)  | phases 1–2                                                       |
-| coupling_type         | sequential | phases 0–2 and all dynamic phases; screened in Phase 2S and fixed to the tuned spectral winner in Phases 2T–2U if triggered |
+| coupling_type         | sequential | default for phases 0–2 and Phase 3; screened statically in Phase 2S and dynamically in Phase 2D |
 | low_frequency_gain    | 0.5      | spectral screen default when `coupling_type != sequential`; varied in Phase 2S.2 |
 | low_frequency_sigma   | 0.35     | spectral screen default when `coupling_type != sequential`; varied in Phase 2S.2 |
 | high_frequency_gain   | 0.5      | spectral screen default when `coupling_type != sequential`; varied in Phase 2S.2 |
 | high_frequency_cutoff | 0.5      | spectral screen default when `coupling_type != sequential`; varied in Phase 2S.2 |
+| dynamic_spectral_gains | False   | adaptive spectral envelope flag; enable only for explicit learned-filter ablations |
+| anisotropic_spectral_gains | False | FFT dynamic-gain opt-in for full coordinatewise frequency-grid modulation |
 | wavelet_levels        | None     | spectral screen default; wavelet depth swept in Phase 2S.1      |
 | dynamic_mode_growth    | False   | phases 1–2                                                       |
 | dynamic_rank_growth    | False   | phases 1–2                                                       |
@@ -205,9 +207,10 @@ carry the strongest non-sequential spectral candidate forward into Phase 2S.2. D
 finalize the best static winner yet; that decision is made only after depth and filter
 calibration in Phase 2S.2.
 
-**Important constraint:** even if a spectral backend wins this phase, Phases 3–3.5 stay
-on the Phase 2 sequential winner because dynamic growth and pruning are currently
-unsupported for non-sequential couplings.
+**Continuity constraint:** even if a spectral backend wins this phase, Phases 3–3.5
+stay on the Phase 2 sequential winner so the original dynamic-growth baseline remains
+comparable. Phase 2D is the dynamic backend screen for sequential and spectral
+couplings.
 
 ---
 
@@ -287,6 +290,99 @@ winner as the best static winner for Phases 4 and 9.
 | 2S.3e | wavelet_packet_max_gauge    | Packet tree with entropy + phase-coherence best-basis        |
 
 **Decision rule:** compare each spectral run against 2S.3a. If no spectral backend beats sequential by > 0.02 bpc: the Phase 2S null is confirmed — sequential coupling is the correct inductive bias for this architecture regardless of state dimensionality; close the spectral investigation. If a spectral backend wins: the Phase 2S null was a dimensionality artifact; further depth and filter calibration at `state_shape=(8,8,8)` is warranted before adopting spectral as a default.
+
+---
+
+## Phase 2S.4: FFT learned/anisotropic gain ablation
+
+**Follow-up phase:** run after Phase 2S.3 when testing the isotropic-filter critique
+directly. This is a focused FFT ablation, not a renewed wavelet screen.
+
+**15 runs** (5 configs × 3 seeds). Steps = 500. No growth. Uses the Phase 2 sequential
+winner TokenLift stack and `state_shape=(8,8,8)` so the FFT grid has enough frequency
+coordinates for anisotropy to matter.
+
+Keep the fixed spectral envelope at the defaults:
+`low_frequency_gain=0.5`, `low_frequency_sigma=0.35`,
+`high_frequency_gain=0.5`, `high_frequency_cutoff=0.5`.
+
+| Run    | coupling_type | dynamic_spectral_gains | anisotropic_spectral_gains | What it tests |
+|--------|---------------|------------------------|----------------------------|---------------|
+| 2S.4a | sequential    | False                  | False                      | Direct recurrent baseline |
+| 2S.4b | fft           | False                  | False                      | Fixed radial FFT baseline |
+| 2S.4c | fft           | True                   | False                      | Learned radial FFT gains |
+| 2S.4d | fft           | False                  | True                       | Inert anisotropic-flag control; should match 2S.4b |
+| 2S.4e | fft           | True                   | True                       | Learned full coordinatewise anisotropic FFT gains |
+
+**Decision rule:** first confirm 2S.4d matches 2S.4b within same-seed noise; any
+meaningful difference means the anisotropic flag is affecting fixed FFT and should be
+treated as a bug. Then compare 2S.4c against 2S.4b to measure the value of learned
+radial gains, and 2S.4e against 2S.4c to isolate anisotropy. Promote the anisotropic
+FFT path only if 2S.4e beats both 2S.4a and 2S.4c by > 0.02 bpc on final5 `val_bpc`.
+
+---
+
+## Phase 2D: Dynamic rank/mode backend adaptation screen
+
+**Follow-up phase:** run after Phase 2S.4 if we want to test expanded tensor capacity
+with dynamic adaptation rather than another static spectral backend screen.
+
+**9 runs** (3 configs × 3 seeds). Steps = 1000. Uses the Phase 2 sequential winner
+TokenLift stack.
+
+This phase explicitly checks dynamic adaptation across `sequential`, `fft`, and `dwt`.
+Both `wavelet_packet` and `wavelet_packet_max_gauge` are excluded by request.
+
+**State shape:** start from `state_shape=(4,8,8,8)`.
+
+This expands both:
+- rank: `3 -> 4`
+- state elements: `512 -> 2048` relative to Phase 2S.3's `(8,8,8)` screen
+
+**Dynamic settings for all 2D runs:**
+
+| Parameter | Value |
+|---|---|
+| dynamic_mode_growth | True |
+| dynamic_rank_growth | True |
+| dynamic_mode_pruning | True |
+| dynamic_rank_pruning | True |
+| max_state_shape | `(6,10,10,10)` |
+| max_rank | 5 |
+| growth_check_interval | 50 |
+| growth_residual_ema_decay | 0.8 |
+| min_checks_before_first_growth | 7 |
+| growth_residual_threshold | 0.12 |
+| residual_saturate_threshold | 0.07 |
+| prune_threshold | 0.03 |
+| prune_sustain_steps | 3 |
+| prune_min_steps | 150 |
+| mode_init | mean |
+| rank_init | zero |
+| rank_growth_loss_ceiling | 1.5 |
+
+Pruning is deliberately conservative because Phase 3.4 showed that aggressive pruning
+can damage performance. This phase still enables pruning so spectral dynamic adaptation
+is tested end-to-end, but promotion requires non-pathological state-shape event logs.
+
+| Run | Coupling | What it tests |
+|-----|----------|---------------|
+| 2D.1 | sequential | Dynamic rank/mode adaptation control |
+| 2D.2 | fft | Fourier spectral coupling under dynamic adaptation |
+| 2D.3 | dwt | Haar DWT spectral coupling under dynamic adaptation |
+
+**Reporting metric:** mean `val_bpc` over the final 5 eval checkpoints
+(steps 800, 850, 900, 950, 1000).
+
+**Reporting:** include full state-shape event logs, final `state_shape`, whether mode
+growth fired, whether rank growth fired, whether mode/rank pruning fired, and residual
+diagnostics for every dynamic run.
+
+**Decision rule:** compare spectral dynamic runs against 2D.1. Promote a spectral
+dynamic backend only if it improves by > 0.02 bpc, rank growth fires in at least one
+seed, and pruning does not cause obvious grow/prune churn or an early quality collapse.
+If rank growth never fires, report the result as "mode-only in practice" and do not
+claim rank adaptation worked.
 
 ---
 
@@ -613,12 +709,24 @@ backend and filter settings fixed during all Phase 4 ablations.
 
 ## Phase 4.2: Multi-layer growth sanity check
 
-**Conditional:** run only if Phase 4 run 16 (`num_layers=2`) improves over the best
-single-layer static winner by > 0.02 bpc, or if downstream scaling work requires depth.
+**Conditional:** run because Phase 4C showed that `readout_type=phase_aware` and
+`num_layers=2` compose strongly, improving over the single-layer phase-aware recipe by
+`0.0691` bpc.
 
 **4 runs** (2 configs × 2 seeds). Steps = 1000. Sequential coupling only. Uses the
-Phase 2 sequential winner TokenLift stack together with the best dynamic-growth recipe
-from Phases 3.2–3.5, but sets `num_layers=2`.
+Phase 4C static quality recipe:
+
+- `readout_type=phase_aware`
+- `num_layers=2`
+- `token_magnitude_type=inverse_frequency_learned`
+- `phase_type=rope`
+- `token_phase=semantic`
+- `normalization_type=frobenius`
+
+The dynamic arm transfers only the best single-layer mode-growth recipe from Phase
+3.2f. Do not enable rank growth or pruning here: rank growth and pruning are not
+promoted, and this phase is isolating whether mode-growth triggers remain interpretable
+with multiple layers.
 
 **Purpose:** validate whether EMA-driven growth/pruning still works when residual norms
 are aggregated across multiple layers. Today `_compute_mode_residual_norms` and the
@@ -631,8 +739,8 @@ Without per-layer telemetry, a multi-layer failure is not diagnosable.
 
 | Run  | num_layers | growth / pruning config             | What it tests                                  |
 |------|------------|-------------------------------------|------------------------------------------------|
-| 4.2a | 2          | none                                | Two-layer static baseline at 1000 steps        |
-| 4.2b | 2          | [best Phase 3.2–3.5 dynamic config] | Does the best single-layer growth recipe transfer to depth? |
+| 4.2a | 2          | none                                | Two-layer phase-aware static baseline at 1000 steps |
+| 4.2b | 2          | Phase 3.2f mode growth only         | Does the best single-layer mode-growth recipe transfer to depth? |
 
 **Reporting:** final5 val_bpc, full event log, final `state_shape`, layer-aggregated EMA
 trace used by the trigger, and the per-layer EMA residual traces. Specifically check:
@@ -762,8 +870,19 @@ new phases and any reruns of promoted checkpoints.
 
 ## Phase 8: State shape exploration
 
-**12 runs** (6 configs × 2 seeds). Steps = 500. No growth. Uses Phase 1 baseline
-TokenLift config.
+**Current run design:** **20 runs** (5 non-duplicate state shapes × 2 couplings × 2
+seeds). Steps = 500. No growth. Uses the Phase 4C static quality recipe:
+
+- `readout_type=phase_aware`
+- `num_layers=2`
+- `token_magnitude_type=inverse_frequency_learned`
+- `phase_type=rope`
+- `token_phase=semantic`
+- `normalization_type=frobenius`
+
+Run each shape under both `coupling_type=sequential` and `coupling_type=fft`. The FFT
+arm is included as a backend stress check for shape geometry; prior spectral branches
+remain closed unless FFT clears the same-shape sequential result by > 0.02 bpc.
 
 Tests two independent questions about the tensor state structure.
 
@@ -787,12 +906,15 @@ count.
 
 | Run  | state_shape | Rank | Elements | What it tests                        |
 |------|-------------|------|----------|--------------------------------------|
-| 8.B1 | (2,3,4)     | 3    | 24       | Current — rank-3 reference           |
+| 8.B1 | (2,3,4)     | 3    | 24       | Current — rank-3 reference; covered by 8.A1 |
 | 8.B2 | (4,6)       | 2    | 24       | Same capacity, one fewer mode        |
 | 8.B3 | (24,)       | 1    | 24       | Degenerate vector state — rank-1 floor |
 
 Run 8.B3 is especially informative: if a flat vector state at the same parameter count
 matches or beats the rank-3 tensor, the multi-mode structure is not contributing.
+
+For the current run, skip the duplicate 8.B1 execution because 8.A1 is the same
+`state_shape=(2,3,4)`.
 
 ---
 
@@ -901,6 +1023,8 @@ range.
 | 2S.1  | Wavelet depth calibration            | 3       | 3     | 9     |            |
 | 2S.2  | Spectral filter calibration          | 3       | 3     | 9     |            |
 | 2S.3  | Spectral screen at higher state dim  | 5       | 3     | 15    |            |
+| 2S.4  | FFT learned/anisotropic gain ablation | 5      | 3     | 15    |            |
+| 2D    | Dynamic rank/mode backend adaptation | 3       | 3     | 9     |            |
 | 2T    | Axis isolation under tuned spectral backend | 6 | 3 | 18 |            |
 | 2U    | Combination under tuned spectral backend | ≤3 | 3 | ≤9 |            |
 | 3     | Static baseline at 1000 steps        | 1       | 2     | 2     |            |
@@ -920,7 +1044,7 @@ range.
 | 9.1   | Streaming benchmark (post-hoc)       | promoted checkpoints | n/a | 0 |     |
 | 9.2   | Generation quality eval (post-hoc)   | promoted checkpoints | n/a | 0 |     |
 | 10    | Hidden size scaling                  | 6       | 3     | 18    |            |
-| **Total** |                                  |         |       | **≤227** |         |
+| **Total** |                                  |         |       | **≤251** |         |
 
 ---
 
@@ -1153,6 +1277,8 @@ Mamba is the key competitor for efficiency claims. If Mamba matches the Reciproc
 | 2S.1  | Wavelet depth calibration            | 3       | 3     | 9     |            |
 | 2S.2  | Spectral filter calibration          | 3       | 3     | 9     |            |
 | 2S.3  | Spectral screen at higher state dim  | 5       | 3     | 15    |            |
+| 2S.4  | FFT learned/anisotropic gain ablation | 5      | 3     | 15    |            |
+| 2D    | Dynamic rank/mode backend adaptation | 3       | 3     | 9     |            |
 | 2T    | Axis isolation under tuned spectral backend | 6 | 3 | 18 |            |
 | 2U    | Combination under tuned spectral backend | ≤3 | 3 | ≤9 |            |
 | 3     | Static baseline at 1000 steps        | 1       | 2     | 2     |            |
@@ -1176,7 +1302,7 @@ Mamba is the key competitor for efficiency claims. If Mamba matches the Reciproc
 | 12    | Small production scale (hidden=512)  | 1       | 2     | 2     |            |
 | 13    | Medium scale check (18 layers)       | 2       | 2     | 4     |            |
 | B     | Baseline comparisons (Transformer, Mamba) | 6  | 2     | 12    |            |
-| **Total** |                                  |         |       | **≤248** |         |
+| **Total** |                                  |         |       | **≤272** |         |
 
 ---
 
@@ -1194,9 +1320,9 @@ Mamba is the key competitor for efficiency claims. If Mamba matches the Reciproc
   four-parameter spectral filter envelope on the strongest spectral candidates; Phases
   2T and 2U rerun the TokenLift search under the tuned spectral backend before
   declaring the best static winner.
-- Dynamic growth and pruning currently assume `coupling_type="sequential"`. Even if a
-  spectral backend wins the static screen, Phases 3–3.5 remain on the Phase 2
-  sequential winner until spectral growth support exists.
+- Dynamic growth and pruning support both sequential and spectral coupling backends.
+  Phases 3–3.5 remain on the Phase 2 sequential winner for baseline continuity; Phase
+  2D is the cross-backend dynamic adaptation check.
 - Dynamic growth conclusions are currently scoped to `num_layers=1`. If static depth
   helps, Phase 4.2 is the gate for deciding whether layer-aggregated residual triggers
   also work with depth.
@@ -1215,3 +1341,15 @@ Mamba is the key competitor for efficiency claims. If Mamba matches the Reciproc
   Phase 2 and Phase 6 winners is the key norm decision. If per-mode wins by > 0.02 bpc,
   re-run Phases 3–4 under per-mode. If not, Frobenius stands and Phases 5–6 are
   informative but not action-forcing.
+
+## Downstream: RL mathematical reasoning
+
+A separate experimental track — [`docs/rl/test-plan.md`](./rl/test-plan.md) — uses the
+architecture produced by this plan as the backbone for RL training on a custom Lisp
+dialect. That plan teaches mathematical reasoning (arithmetic → symbolic algebra → proof
+construction) using GRPO-style policy gradient updates with a staged curriculum.
+
+The RL plan consumes the best architecture from this plan's phases. If later phases
+(11-13) produce a significantly different architecture, the RL plan's base configuration
+should be updated to match. The two plans share `ReciprocatorLM` and `training.py` but
+use different training objectives, data sources, and evaluation metrics.

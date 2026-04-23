@@ -17,9 +17,9 @@ class TokenLift(nn.Module):
         vocab_size: int,
         hidden_size: int,
         base: float = 10000.0,
-        magnitude_type: str = "learned",
+        magnitude_type: str = "inverse_frequency_learned",
         phase_type: str = "rope",
-        token_phase: str = "none",
+        token_phase: str = "semantic",
         token_frequencies: Optional[Tensor] = None,
         eps: float = 1e-8,
     ) -> None:
@@ -230,7 +230,7 @@ class ReciprocatorBlock(nn.Module):
         self,
         hidden_size: int,
         state_shape: Sequence[int],
-        ffn_expansion_factor: int = 4,
+        ffn_expansion_factor: int = 2,
         enable_self_relation: bool = False,
         dynamic_gains: bool = False,
         gain_projector_rank: int = 8,
@@ -239,6 +239,8 @@ class ReciprocatorBlock(nn.Module):
         low_frequency_sigma: float = 0.35,
         high_frequency_gain: float = 0.5,
         high_frequency_cutoff: float = 0.5,
+        dynamic_spectral_gains: bool = False,
+        anisotropic_spectral_gains: bool = False,
         wavelet_levels: Optional[int] = None,
         normalization_type: str = "frobenius",
     ) -> None:
@@ -254,6 +256,8 @@ class ReciprocatorBlock(nn.Module):
             low_frequency_sigma=low_frequency_sigma,
             high_frequency_gain=high_frequency_gain,
             high_frequency_cutoff=high_frequency_cutoff,
+            dynamic_spectral_gains=dynamic_spectral_gains,
+            anisotropic_spectral_gains=anisotropic_spectral_gains,
             wavelet_levels=wavelet_levels,
             normalization_type=normalization_type,
         )
@@ -417,11 +421,11 @@ class ReciprocatorLM(nn.Module):
         hidden_size: int,
         state_shape: Sequence[int],
         num_layers: int = 1,
-        ffn_expansion_factor: int = 4,
-        readout_type: str = "magnitude",
-        token_magnitude_type: str = "learned",
+        ffn_expansion_factor: int = 2,
+        readout_type: str = "phase_aware",
+        token_magnitude_type: str = "inverse_frequency_learned",
         phase_type: str = "rope",
-        token_phase: str = "none",
+        token_phase: str = "semantic",
         enable_self_relation: bool = False,
         dynamic_gains: bool = False,
         gain_projector_rank: int = 8,
@@ -432,6 +436,8 @@ class ReciprocatorLM(nn.Module):
         low_frequency_sigma: float = 0.35,
         high_frequency_gain: float = 0.5,
         high_frequency_cutoff: float = 0.5,
+        dynamic_spectral_gains: bool = False,
+        anisotropic_spectral_gains: bool = False,
         wavelet_levels: Optional[int] = None,
         normalization_type: str = "frobenius",
         token_frequencies: Optional[Tensor] = None,
@@ -453,6 +459,8 @@ class ReciprocatorLM(nn.Module):
         self.enable_anticipator_relation = enable_anticipator_relation
         self.enable_cross_layer_state = enable_cross_layer_state
         self.coupling_type = canonicalize_coupling_type(coupling_type)
+        self.dynamic_spectral_gains = dynamic_spectral_gains
+        self.anisotropic_spectral_gains = anisotropic_spectral_gains
         self.normalization_type = canonicalize_normalization_type(normalization_type)
 
         self.token_lift = TokenLift(
@@ -483,6 +491,8 @@ class ReciprocatorLM(nn.Module):
                     low_frequency_sigma=low_frequency_sigma,
                     high_frequency_gain=high_frequency_gain,
                     high_frequency_cutoff=high_frequency_cutoff,
+                    dynamic_spectral_gains=dynamic_spectral_gains,
+                    anisotropic_spectral_gains=anisotropic_spectral_gains,
                     wavelet_levels=wavelet_levels,
                     normalization_type=self.normalization_type,
                 )

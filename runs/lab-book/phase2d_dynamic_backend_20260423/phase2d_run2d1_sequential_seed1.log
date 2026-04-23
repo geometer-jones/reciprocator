@@ -1,0 +1,28 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2d_dynamic_backend_20260423/phase2d_run2d1_sequential_seed1/config.json
+step=1 lr=0.001 train_loss=4.7801 train_acc=0.0039 train_ppl=119.1131 train_bpc=6.8962 val_loss=4.6625 val_acc=0.0498 val_ppl=105.8958 val_bpc=6.7265
+step=50 lr=0.001 train_loss=3.2515 train_acc=0.1738 train_ppl=25.8285 train_bpc=4.6909 val_loss=3.2603 val_acc=0.1606 val_ppl=26.0585 val_bpc=4.7037
+step=100 lr=0.001 train_loss=2.9713 train_acc=0.2637 train_ppl=19.5173 train_bpc=4.2867 val_loss=2.9170 val_acc=0.2471 val_ppl=18.4848 val_bpc=4.2083
+step=150 lr=0.001 train_loss=2.7045 train_acc=0.2754 train_ppl=14.9463 train_bpc=3.9017 val_loss=2.7141 val_acc=0.2949 val_ppl=15.0907 val_bpc=3.9156
+step=200 lr=0.001 train_loss=2.5182 train_acc=0.3125 train_ppl=12.4060 train_bpc=3.6330 val_loss=2.5340 val_acc=0.2964 val_ppl=12.6041 val_bpc=3.6558
+step=250 lr=0.001 train_loss=2.4423 train_acc=0.3262 train_ppl=11.4993 train_bpc=3.5235 val_loss=2.4583 val_acc=0.3374 val_ppl=11.6844 val_bpc=3.5465
+step=300 lr=0.001 train_loss=2.3717 train_acc=0.3398 train_ppl=10.7158 train_bpc=3.4217 val_loss=2.4297 val_acc=0.3247 val_ppl=11.3556 val_bpc=3.5053
+state_shape_event step=350 previous_state_shape=(4, 8, 8, 8) state_shape=(5, 8, 8, 8)
+step=350 lr=0.001 train_loss=2.2330 train_acc=0.3535 train_ppl=9.3275 train_bpc=3.2215 val_loss=2.5129 val_acc=0.3076 val_ppl=12.3408 val_bpc=3.6254
+state_shape_event step=400 previous_state_shape=(5, 8, 8, 8) state_shape=(5, 8, 8, 8, 2)
+step=400 lr=0.001 train_loss=2.4122 train_acc=0.3594 train_ppl=11.1583 train_bpc=3.4800 val_loss=2.7612 val_acc=0.1807 val_ppl=15.8191 val_bpc=3.9836
+step=450 lr=0.001 train_loss=2.2688 train_acc=0.3496 train_ppl=9.6681 train_bpc=3.2732 val_loss=2.2824 val_acc=0.3608 val_ppl=9.8002 val_bpc=3.2928
+step=500 lr=0.001 train_loss=2.1105 train_acc=0.4434 train_ppl=8.2523 train_bpc=3.0448 val_loss=2.3165 val_acc=0.3486 val_ppl=10.1402 val_bpc=3.3420
+step=550 lr=0.001 train_loss=2.1878 train_acc=0.3789 train_ppl=8.9157 train_bpc=3.1564 val_loss=2.3045 val_acc=0.3516 val_ppl=10.0187 val_bpc=3.3246
+step=600 lr=0.001 train_loss=2.1762 train_acc=0.3809 train_ppl=8.8131 train_bpc=3.1396 val_loss=2.2738 val_acc=0.3691 val_ppl=9.7159 val_bpc=3.2803
+step=650 lr=0.001 train_loss=2.2984 train_acc=0.3477 train_ppl=9.9587 train_bpc=3.3160 val_loss=2.2488 val_acc=0.3721 val_ppl=9.4767 val_bpc=3.2444
+step=700 lr=0.001 train_loss=2.1859 train_acc=0.3945 train_ppl=8.8989 train_bpc=3.1536 val_loss=2.2232 val_acc=0.3730 val_ppl=9.2369 val_bpc=3.2074
+step=750 lr=0.001 train_loss=2.0657 train_acc=0.4297 train_ppl=7.8905 train_bpc=2.9801 val_loss=2.1963 val_acc=0.3774 val_ppl=8.9920 val_bpc=3.1686
+step=800 lr=0.001 train_loss=2.0885 train_acc=0.4102 train_ppl=8.0731 train_bpc=3.0131 val_loss=2.1196 val_acc=0.3945 val_ppl=8.3274 val_bpc=3.0579
+step=850 lr=0.001 train_loss=2.0742 train_acc=0.4551 train_ppl=7.9585 train_bpc=2.9925 val_loss=2.1853 val_acc=0.3833 val_ppl=8.8930 val_bpc=3.1527
+step=900 lr=0.001 train_loss=2.1676 train_acc=0.4062 train_ppl=8.7375 train_bpc=3.1272 val_loss=2.1412 val_acc=0.4019 val_ppl=8.5098 val_bpc=3.0891
+step=950 lr=0.001 train_loss=2.1253 train_acc=0.4297 train_ppl=8.3754 train_bpc=3.0662 val_loss=2.1337 val_acc=0.3965 val_ppl=8.4460 val_bpc=3.0783
+step=1000 lr=0.001 train_loss=2.0397 train_acc=0.4395 train_ppl=7.6880 train_bpc=2.9426 val_loss=2.2051 val_acc=0.3882 val_ppl=9.0710 val_bpc=3.1813
+training finished (device=cpu, corpus=plato_jowett, vocab=96, train_tokens=90000, val_tokens=10000, state_shape=(5, 8, 8, 8, 2))
+final train(step=1000) loss=2.0397 acc=0.4395 ppl=7.6880 bpc=2.9426 last eval(step=1000) val_loss=2.2051 val_acc=0.3882 val_ppl=9.0710 val_bpc=3.1813
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2d_dynamic_backend_20260423/phase2d_run2d1_sequential_seed1/checkpoint_step_001000.pt
+wrote residual diagnostics: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2d_dynamic_backend_20260423/phase2d_run2d1_sequential_seed1/residual_diagnostics.json

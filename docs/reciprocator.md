@@ -422,8 +422,71 @@ G(nu) = (1 + g_low * exp(-nu^2 / (2 sigma^2)) - g_high * sigma((nu - c_high) / w
 
 where `g_low` is the low-frequency gain, `sigma` is the low-frequency width,
 `g_high` is the high-frequency gain, `c_high` is the high-frequency cutoff, and
-`w` is a transition width. The filter operates on radial frequency only
-(isotropic in the N-dimensional frequency domain).
+`w` is a transition width derived from the cutoff as
+`w = max(0.05, 0.25 * max(0.05, 1 - c_high))` (widening the sigmoid when the
+cutoff is low, clamped to a minimum of 0.05). The filter operates on radial
+frequency only (isotropic in the N-dimensional frequency domain).
+
+### Dynamic spectral gain modulation
+
+Spectral backends can replace the fixed-only envelope with a learned
+signal-conditioned envelope by setting `dynamic_spectral_gains=True`. The fixed
+gain `G(nu)` remains the base envelope and is still controlled by
+`low_frequency_gain`, `low_frequency_sigma`, `high_frequency_gain`, and
+`high_frequency_cutoff`.
+
+For the current coupling signal `Z_t`, flatten the complex state, split it into
+real and imaginary coordinates, and pass it through the same low-rank projector
+shape used by dynamic mixer gains:
+
+```math
+h_t = [Re(vec(Z_t)), Im(vec(Z_t))]                         in R^{2 M_state}
+delta g_t = W_2 * ReLU(W_1 * h_t)                          in R^{M_state}
+```
+
+For FFT coupling, `delta g_t` is interpreted as learned samples of a radial
+one-dimensional envelope by default. The samples are interpolated at each
+coordinate's normalized radius and added to the radial base map per batch item:
+
+```math
+G_t = (G + alpha_spectral * radial(delta g_t, nu))_+
+R_t = IFFT_n( FFT_n(Z_t) * G_t )
+```
+
+Setting `anisotropic_spectral_gains=True` switches FFT dynamic modulation from
+radial samples to a full coordinatewise frequency-grid map:
+
+```math
+G_t = (G + alpha_spectral * reshape(delta g_t))_+
+R_t = IFFT_n( FFT_n(Z_t) * G_t )
+```
+
+For DWT and wavelet-packet coupling, the same projected `delta g_t` is averaged
+over the flattened frequency interval for each Haar band or selected packet
+leaf, then added to that band's fixed gain. This preserves the existing banded
+spectral structure while making the band gains depend on the current signal.
+
+The dynamic path is inert at initialization: the projector's final linear layer
+is zero-initialized and `alpha_spectral` starts at zero. With
+`dynamic_spectral_gains=False`, or at initialization when it is enabled, all
+spectral backends therefore match the fixed-filter behavior exactly. The
+anisotropic flag is also inert unless `dynamic_spectral_gains=True`; static
+`fft` and static `fft + anisotropic_spectral_gains` should produce the same
+result for the same seed and fixed envelope.
+
+The planned FFT gain ablation isolates these effects with five arms:
+
+| coupling_type | dynamic_spectral_gains | anisotropic_spectral_gains | Purpose |
+|---------------|------------------------|----------------------------|---------|
+| `sequential`  | `False`                | `False`                    | Direct recurrent baseline |
+| `fft`         | `False`                | `False`                    | Fixed radial FFT baseline |
+| `fft`         | `True`                 | `False`                    | Learned radial FFT gains |
+| `fft`         | `False`                | `True`                     | Inert anisotropic-flag control |
+| `fft`         | `True`                 | `True`                     | Learned full coordinatewise anisotropic FFT gains |
+
+This comparison separates three questions: whether FFT helps at all, whether
+the learned radial projector helps beyond the fixed envelope, and whether
+coordinatewise anisotropy helps beyond learned radial modulation.
 
 ### DWT spectral coupling
 
@@ -469,8 +532,9 @@ Delta_t^{(\ell)} = g_t^{(\ell)} odot d_t^{(\ell)}
 
 The gate is real and broadcast elementwise over both real and imaginary
 components of `d_t`. `W_ret` maps real features to complex outputs via a
-`RealToComplexLinear` map. This uses the same U(1)-invariant geometry as the
-phase-aware final readout (§10) rather than a separate internal convention.
+`RealToComplexLinear` map. This uses a data-dependent U(1)-invariant feature
+map (cf. the learned-anchor readout in §10, which trades gauge-invariance for
+a trainable phase alignment).
 
 ## 10. Readout Geometry
 
@@ -483,17 +547,22 @@ readouts are supported.
 R_mag(h_t) = | h_t |                                              in R^D
 ```
 
-### Phase-aware readout (U(1)-invariant bilinear)
+### Phase-aware readout (learned-anchor bilinear)
 
-Let `bar{h}_t = (1/D) sum_i h_t[i]` be the feature-mean reference:
+A learned complex anchor vector `a in C^D` (initialized to `1+0i`, normalized to
+unit magnitude at each forward pass) serves as the phase reference:
 
 ```math
-c_t = h_t odot overline{bar{h}_t}                                 in C^D
+reference = a / |a|                                                in C^D
+c_t = h_t odot overline{reference}                                 in C^D
 R_phase(h_t) = [ Re( c_t ), Im( c_t ), | h_t | ]                  in R^{3D}
 ```
 
-The bilinear cross-product is globally phase-invariant. Relative phase is
-preserved as features while the global gauge is removed continuously.
+Unlike the return map (§9), which uses the data-dependent feature mean for
+strict U(1)-invariance, the readout uses a learned reference. This trades
+gauge-invariance for the ability to learn a task-specific phase alignment
+between the hidden state and the output projection. The anchor is a trainable
+parameter of shape `(D,)`, initialized to `1+0i` everywhere.
 
 Vocabulary logits are produced by a real output map:
 
@@ -768,7 +837,9 @@ whole-span end state, so strict token-level causality still requires
 
 **Properties:**
 
-- `K = 1` recovers exact sequential stepping; `K = T` maximizes parallelism.
+- `K = 1` recovers exact sequential stepping; `1 < K < T` enables parallelism.
+  The implementation falls back to sequential when `K >= T` because a
+  single-chunk stale approximation provides no benefit over exact stepping.
 - All five coupling backends (`sequential`, `fft`, `dwt`, `wavelet_packet`,
   `wavelet_packet_max_gauge`) are equally compatible. Each backend operates on
   per-token tensors of shape `(M_1, ..., M_r)`, and the chunked form simply
@@ -867,13 +938,18 @@ at inference time.
 - normalization choice (Frobenius or per-mode)
 - phase scale `pi_phi` (default: `pi`)
 - static gain fields `(D_raw, A_raw, B_raw)` with sigmoid/tanh squashing
+- optional dynamic gain projector: `dynamic_gains` with `gain_projector_rank`
 - optional self-relation gain field `Lambda_self` (zero-initialized)
 - coupling type: `sequential`, `fft`, `dwt`, `wavelet_packet`, or
   `wavelet_packet_max_gauge`
 - spectral filter parameters: `low_frequency_gain`, `low_frequency_sigma`,
   `high_frequency_gain`, `high_frequency_cutoff`, `wavelet_levels`
+- optional dynamic spectral gain projector: `dynamic_spectral_gains` with
+  `gain_projector_rank`
+- optional FFT anisotropic dynamic gain map: `anisotropic_spectral_gains`
 - coupling temperature `tau` (sequential only)
-- readout choice (magnitude or phase-aware)
+- readout choice (magnitude or phase-aware); phase-aware readout uses a
+  learned complex anchor vector of shape `D` (initialized to `1+0i`)
 - token magnitude type: `learned`, `inverse_frequency`, or
   `inverse_frequency_learned`
 - positional phase type: `rope`, `locked_wave`, or `local_wave`
@@ -1168,6 +1244,15 @@ TrainingConfig(
 
 To enable relational gain modulation, add `dynamic_gains=True`. The low-rank
 projector width is controlled by `gain_projector_rank` (default `8`).
+
+To enable adaptive spectral filters, use a spectral `coupling_type` and set
+`dynamic_spectral_gains=True`; the CLI flag is `--dynamic-spectral-gains`. This
+uses the same `gain_projector_rank` width as dynamic mixer gains.
+For FFT, add `anisotropic_spectral_gains=True` or
+`--anisotropic-spectral-gains` to replace radial dynamic modulation with a full
+coordinatewise frequency-grid map. Do not treat `anisotropic_spectral_gains=True`
+alone as a separate operator; without `dynamic_spectral_gains=True` it is an
+inert control that should match fixed radial FFT.
 
 ## 21. Growth as Adaptive-Rank Sketching
 

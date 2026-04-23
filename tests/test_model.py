@@ -97,6 +97,10 @@ def test_lm_forward_returns_logits_and_block_states() -> None:
     assert logits.shape == (2, 4, 13)
     assert len(states) == 2
     assert states[0].shape == (2, 2, 3)
+    assert isinstance(model.readout, PhaseAwareReadout)
+    assert model.coupling_type == "sequential"
+    assert model.token_lift.magnitude_type == "inverse_frequency_learned"
+    assert model.token_lift.token_phase == "semantic"
 
 
 def test_phase_aware_readout_preserves_output_shape_and_anchor_direction() -> None:
@@ -259,6 +263,26 @@ def test_lm_plumbs_coupling_type_to_blocks() -> None:
 
     assert model.coupling_type == "wavelet_packet_max_gauge"
     assert all(block.mixer.coupling_type == "wavelet_packet_max_gauge" for block in model.blocks)
+
+
+def test_lm_plumbs_dynamic_spectral_gains_to_spectral_blocks() -> None:
+    model = ReciprocatorLM(
+        vocab_size=13,
+        hidden_size=8,
+        state_shape=(2, 3),
+        num_layers=2,
+        coupling_type="fft",
+        dynamic_spectral_gains=True,
+        anisotropic_spectral_gains=True,
+        gain_projector_rank=4,
+    )
+
+    assert model.dynamic_spectral_gains is True
+    assert model.anisotropic_spectral_gains is True
+    assert all(block.mixer.dynamic_spectral_gains for block in model.blocks)
+    assert all(block.mixer.anisotropic_spectral_gains for block in model.blocks)
+    assert all(block.mixer.coupling.dynamic_spectral_gains for block in model.blocks)
+    assert all(block.mixer.coupling.anisotropic_spectral_gains for block in model.blocks)
 
 
 def test_invalid_readout_type_raises() -> None:

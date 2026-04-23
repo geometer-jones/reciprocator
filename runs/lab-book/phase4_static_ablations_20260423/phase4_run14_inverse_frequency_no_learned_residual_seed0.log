@@ -1,0 +1,15 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_static_ablations_20260423/phase4_run14_inverse_frequency_no_learned_residual_seed0/config.json
+step=1 lr=0.001 train_loss=4.6561 train_acc=0.0000 train_ppl=105.2242 train_bpc=6.7173 val_loss=4.5299 val_acc=0.0002 val_ppl=92.7448 val_bpc=6.5352
+step=50 lr=0.001 train_loss=3.1264 train_acc=0.2188 train_ppl=22.7920 train_bpc=4.5105 val_loss=3.1597 val_acc=0.1912 val_ppl=23.5633 val_bpc=4.5585
+step=100 lr=0.001 train_loss=2.7293 train_acc=0.2969 train_ppl=15.3219 train_bpc=3.9375 val_loss=2.7149 val_acc=0.2870 val_ppl=15.1037 val_bpc=3.9168
+step=150 lr=0.001 train_loss=2.5935 train_acc=0.2871 train_ppl=13.3767 train_bpc=3.7416 val_loss=2.5869 val_acc=0.3076 val_ppl=13.2881 val_bpc=3.7321
+step=200 lr=0.001 train_loss=2.4857 train_acc=0.3184 train_ppl=12.0094 train_bpc=3.5861 val_loss=2.5063 val_acc=0.3188 val_ppl=12.2589 val_bpc=3.6158
+step=250 lr=0.001 train_loss=2.4467 train_acc=0.3105 train_ppl=11.5500 train_bpc=3.5298 val_loss=2.4437 val_acc=0.3281 val_ppl=11.5157 val_bpc=3.5255
+step=300 lr=0.001 train_loss=2.4049 train_acc=0.3047 train_ppl=11.0769 train_bpc=3.4695 val_loss=2.4080 val_acc=0.3367 val_ppl=11.1114 val_bpc=3.4740
+step=350 lr=0.001 train_loss=2.2355 train_acc=0.3574 train_ppl=9.3511 train_bpc=3.2251 val_loss=2.3477 val_acc=0.3574 val_ppl=10.4615 val_bpc=3.3870
+step=400 lr=0.001 train_loss=2.4196 train_acc=0.3340 train_ppl=11.2414 train_bpc=3.4908 val_loss=2.3387 val_acc=0.3490 val_ppl=10.3674 val_bpc=3.3740
+step=450 lr=0.001 train_loss=2.2603 train_acc=0.3457 train_ppl=9.5861 train_bpc=3.2609 val_loss=2.3174 val_acc=0.3546 val_ppl=10.1488 val_bpc=3.3432
+step=500 lr=0.001 train_loss=2.1483 train_acc=0.4219 train_ppl=8.5706 train_bpc=3.0994 val_loss=2.3413 val_acc=0.3507 val_ppl=10.3950 val_bpc=3.3778
+training finished (device=cpu, corpus=plato_jowett, vocab=96, train_tokens=90000, val_tokens=10000, state_shape=(2, 3, 4))
+final train(step=500) loss=2.1483 acc=0.4219 ppl=8.5706 bpc=3.0994 last eval(step=500) val_loss=2.3413 val_acc=0.3507 val_ppl=10.3950 val_bpc=3.3778
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase4_static_ablations_20260423/phase4_run14_inverse_frequency_no_learned_residual_seed0/checkpoint_step_000500.pt
