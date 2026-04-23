@@ -1,0 +1,15 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s4_fft_ablation_dim10_20260423/phase2_s4_dim10_run2s4d_fft_anisotropic_control_seed2/config.json
+step=1 lr=0.001 train_loss=4.3825 train_acc=0.0293 train_ppl=80.0369 train_bpc=6.3226 val_loss=4.0238 val_acc=0.0796 val_ppl=55.9151 val_bpc=5.8052
+step=50 lr=0.001 train_loss=2.9616 train_acc=0.2031 train_ppl=19.3282 train_bpc=4.2726 val_loss=2.9659 val_acc=0.2271 val_ppl=19.4120 val_bpc=4.2789
+step=100 lr=0.001 train_loss=2.4667 train_acc=0.3438 train_ppl=11.7830 train_bpc=3.5586 val_loss=2.5808 val_acc=0.3108 val_ppl=13.2073 val_bpc=3.7233
+step=150 lr=0.001 train_loss=2.3267 train_acc=0.3457 train_ppl=10.2444 train_bpc=3.3568 val_loss=2.4128 val_acc=0.3353 val_ppl=11.1648 val_bpc=3.4809
+step=200 lr=0.001 train_loss=2.2465 train_acc=0.3672 train_ppl=9.4547 train_bpc=3.2410 val_loss=2.3317 val_acc=0.3531 val_ppl=10.2957 val_bpc=3.3640
+step=250 lr=0.001 train_loss=2.1710 train_acc=0.4004 train_ppl=8.7670 train_bpc=3.1321 val_loss=2.2990 val_acc=0.3545 val_ppl=9.9639 val_bpc=3.3167
+step=300 lr=0.001 train_loss=2.2454 train_acc=0.3594 train_ppl=9.4443 train_bpc=3.2394 val_loss=2.2583 val_acc=0.3695 val_ppl=9.5665 val_bpc=3.2580
+step=350 lr=0.001 train_loss=2.1837 train_acc=0.3691 train_ppl=8.8789 train_bpc=3.1504 val_loss=2.1629 val_acc=0.3827 val_ppl=8.6966 val_bpc=3.1205
+step=400 lr=0.001 train_loss=2.0732 train_acc=0.3789 train_ppl=7.9503 train_bpc=2.9910 val_loss=2.1663 val_acc=0.3871 val_ppl=8.7261 val_bpc=3.1253
+step=450 lr=0.001 train_loss=2.0248 train_acc=0.4238 train_ppl=7.5742 train_bpc=2.9211 val_loss=2.1376 val_acc=0.3928 val_ppl=8.4789 val_bpc=3.0839
+step=500 lr=0.001 train_loss=2.0375 train_acc=0.4160 train_ppl=7.6717 train_bpc=2.9395 val_loss=2.1716 val_acc=0.3893 val_ppl=8.7721 val_bpc=3.1329
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s4_fft_ablation_dim10_20260423/phase2_s4_dim10_run2s4d_fft_anisotropic_control_seed2/checkpoint_step_000500.pt
+training finished (device=cpu, corpus=greek_classics, vocab=76, train_tokens=90000, val_tokens=10000, state_shape=(10, 10, 10))
+final train(step=500) loss=2.0375 acc=0.4160 ppl=7.6717 bpc=2.9395 last eval(step=500) val_loss=2.1716 val_acc=0.3893 val_ppl=8.7721 val_bpc=3.1329
