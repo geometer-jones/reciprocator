@@ -590,6 +590,40 @@ def test_train_model_records_layer_mode_residual_diagnostics_for_multilayer_mode
     assert result.residual_diagnostics[1]["layer_mode_residual_ema"][1] == pytest.approx([0.23, 0.315])
 
 
+def test_train_model_records_residual_diagnostics_for_hybrid_attention_models() -> None:
+    dataset = build_text_dataset("abcde " * 20, val_fraction=0.2, min_split_tokens=16)
+    config = TrainingConfig(
+        steps=2,
+        eval_every=10,
+        eval_batches=1,
+        batch_size=4,
+        seq_len=8,
+        hidden_size=12,
+        state_shape=(2, 2),
+        num_layers=2,
+        device="cpu",
+        growth_check_interval=1,
+        record_residual_diagnostics=True,
+        attention_every_k=1,
+        attention_num_heads=3,
+        attention_window=8,
+        attention_position="after",
+        seed=0,
+    )
+
+    result = train_model(config, dataset=dataset)
+
+    assert any(not hasattr(block, "mixer") for block in result.model.blocks)
+    assert [row["step"] for row in result.residual_diagnostics] == [1, 2]
+    assert len(result.residual_diagnostics[0]["layer_mode_residual_norms"]) == 2
+    assert [len(mode_variances) for mode_variances in result.residual_diagnostics[0]["mode_slice_activation_variance_ema"]] == [2, 2]
+    assert all(
+        math.isfinite(value) and value >= 0.0
+        for mode_variances in result.residual_diagnostics[0]["mode_slice_activation_variance_ema"]
+        for value in mode_variances
+    )
+
+
 def test_train_model_records_chunk_drift_history_when_requested() -> None:
     dataset = build_text_dataset("abcde " * 40, val_fraction=0.2, min_split_tokens=16)
     config = TrainingConfig(

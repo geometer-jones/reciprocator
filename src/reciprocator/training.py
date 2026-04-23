@@ -440,6 +440,9 @@ def _compute_mode_slice_activation_variances(
     with torch.no_grad():
         hidden = model.token_lift(token_ids)
         for block in model.blocks:
+            if not hasattr(block, "mixer"):
+                hidden, _ = block(hidden, None)
+                continue
             normalized_hidden = block.mixer.pre_norm(hidden)
             flat_hidden = normalized_hidden.reshape(-1, normalized_hidden.shape[-1])
             signal = block.mixer.signal_projector(flat_hidden).reshape(

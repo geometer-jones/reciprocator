@@ -41,7 +41,7 @@ decode-state usage; the plan must check that directly rather than infer it from 
 
 | Parameter             | Value    | Why / change from original                                        |
 |-----------------------|----------|-------------------------------------------------------------------|
-| corpus                | plato_jowett |                                                               |
+| corpus                | greek_classics |                                                             |
 | max_chars             | 100,000  | 20k gives ~280 windows; 100k gives ~1,400 — enough for signal    |
 | val_fraction          | 0.1      |                                                                   |
 | batch_size            | 8        |                                                                   |
@@ -1052,7 +1052,7 @@ range.
 
 **Goal:** Does the hybrid (Reciprocator + local attention) learn faster and to lower bpc than the pure Reciprocator at the same parameter count? Is the two-timescale training regime (stateful + gradient) working?
 
-**Corpus:** `plato_jowett` at `max_chars=100,000` for continuity with prior phases.
+**Corpus:** `greek_classics` at `max_chars=100,000` for continuity with prior phases.
 
 **Config:**
 
@@ -1147,9 +1147,9 @@ Parameter matching for 11B: count non-embedding parameters in 11A and set `num_l
 | weight_decay | 0.01 |
 | seeds | [0, 1] |
 
-**Corpus:** coding corpus (see prerequisite). Also run on `plato_jowett` for cross-corpus comparison.
+**Corpus:** coding corpus (see prerequisite). Also run on `greek_classics` for cross-corpus comparison.
 
-**Reporting metric:** mean `val_bpc` over the final 5 eval checkpoints. Report separately for coding corpus and Plato.
+**Reporting metric:** mean `val_bpc` over the final 5 eval checkpoints. Report separately for the coding corpus and `greek_classics`.
 
 **Decision rule:** if coding-corpus bpc is competitive with the Transformer baseline (Phase B, run B2) within 0.1 bpc, proceed to Phase 13. If not, diagnose: check whether the attention window is too small, whether stateful training is actually helping on code structure, and whether the state_shape is appropriate for the coding task.
 
@@ -1212,7 +1212,7 @@ For `hidden_size=256`, target approximately 5–10M non-embedding parameters for
 
 ### B.3 — Runs
 
-**Sanity comparison (against Phase 11A, hidden_size=256, Plato corpus):**
+**Sanity comparison (against Phase 11A, hidden_size=256, `greek_classics` corpus):**
 
 | Run | Architecture | Params | seq_len | Steps |
 |---|---|---|---|---|

@@ -1,0 +1,15 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8a1_small_to_large_2x3x4_fft_seed1/config.json
+step=1 lr=0.001 train_loss=4.5589 train_acc=0.0078 train_ppl=95.4827 train_bpc=6.5772 val_loss=4.2386 val_acc=0.0032 val_ppl=69.3077 val_bpc=6.1149
+step=50 lr=0.001 train_loss=2.9835 train_acc=0.1680 train_ppl=19.7570 train_bpc=4.3043 val_loss=2.9623 val_acc=0.1791 val_ppl=19.3433 val_bpc=4.2738
+step=100 lr=0.001 train_loss=2.4529 train_acc=0.3320 train_ppl=11.6224 train_bpc=3.5388 val_loss=2.5776 val_acc=0.3070 val_ppl=13.1657 val_bpc=3.7187
+step=150 lr=0.001 train_loss=2.3594 train_acc=0.3398 train_ppl=10.5842 train_bpc=3.4038 val_loss=2.4570 val_acc=0.3331 val_ppl=11.6694 val_bpc=3.5447
+step=200 lr=0.001 train_loss=2.2839 train_acc=0.3613 train_ppl=9.8145 train_bpc=3.2949 val_loss=2.3272 val_acc=0.3517 val_ppl=10.2495 val_bpc=3.3575
+step=250 lr=0.001 train_loss=2.1664 train_acc=0.3984 train_ppl=8.7268 train_bpc=3.1254 val_loss=2.3154 val_acc=0.3597 val_ppl=10.1289 val_bpc=3.3404
+step=300 lr=0.001 train_loss=2.1911 train_acc=0.3652 train_ppl=8.9449 train_bpc=3.1611 val_loss=2.2462 val_acc=0.3612 val_ppl=9.4514 val_bpc=3.2405
+step=350 lr=0.001 train_loss=2.1849 train_acc=0.3887 train_ppl=8.8900 train_bpc=3.1522 val_loss=2.2004 val_acc=0.3762 val_ppl=9.0290 val_bpc=3.1746
+step=400 lr=0.001 train_loss=2.0678 train_acc=0.3867 train_ppl=7.9072 train_bpc=2.9832 val_loss=2.1753 val_acc=0.3831 val_ppl=8.8050 val_bpc=3.1383
+step=450 lr=0.001 train_loss=2.0024 train_acc=0.4336 train_ppl=7.4066 train_bpc=2.8888 val_loss=2.1098 val_acc=0.4071 val_ppl=8.2464 val_bpc=3.0438
+step=500 lr=0.001 train_loss=2.0098 train_acc=0.4219 train_ppl=7.4617 train_bpc=2.8995 val_loss=2.1177 val_acc=0.3940 val_ppl=8.3123 val_bpc=3.0552
+training finished (device=cpu, corpus=greek_classics, vocab=76, train_tokens=90000, val_tokens=10000, state_shape=(2, 3, 4))
+final train(step=500) loss=2.0098 acc=0.4219 ppl=7.4617 bpc=2.8995 last eval(step=500) val_loss=2.1177 val_acc=0.3940 val_ppl=8.3123 val_bpc=3.0552
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8a1_small_to_large_2x3x4_fft_seed1/checkpoint_step_000500.pt

@@ -1,0 +1,6 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8a3_large_middle_2x4x3_sequential_seed1/config.json
+step=1 lr=0.001 train_loss=4.2796 train_acc=0.0039 train_ppl=72.2090 train_bpc=6.1741 val_loss=4.0411 val_acc=0.1572 val_ppl=56.8863 val_bpc=5.8300
+step=50 lr=0.001 train_loss=2.9348 train_acc=0.2129 train_ppl=18.8169 train_bpc=4.2340 val_loss=2.9113 val_acc=0.2213 val_ppl=18.3806 val_bpc=4.2001
+step=100 lr=0.001 train_loss=2.4569 train_acc=0.3262 train_ppl=11.6687 train_bpc=3.5446 val_loss=2.5936 val_acc=0.3154 val_ppl=13.3784 val_bpc=3.7418
+step=150 lr=0.001 train_loss=2.3158 train_acc=0.3516 train_ppl=10.1332 train_bpc=3.3410 val_loss=2.4033 val_acc=0.3323 val_ppl=11.0601 val_bpc=3.4673
+step=200 lr=0.001 train_loss=2.2282 train_acc=0.3711 train_ppl=9.2832 train_bpc=3.2146 val_loss=2.3276 val_acc=0.3490 val_ppl=10.2538 val_bpc=3.3581
