@@ -197,7 +197,10 @@ class _SpectralCouplingBase(nn.Module):
             )
             nn.init.zeros_(self.spectral_projector[-1].weight)
             nn.init.zeros_(self.spectral_projector[-1].bias)
-            self.alpha_spectral = nn.Parameter(torch.zeros(()))
+            # Keep the dynamic branch functionally inert at initialization by
+            # zeroing the projector head, while using a nonzero scale so the
+            # projector receives gradients on the first training step.
+            self.alpha_spectral = nn.Parameter(torch.ones(()))
         else:
             self.spectral_projector = None
             self.register_parameter("alpha_spectral", None)

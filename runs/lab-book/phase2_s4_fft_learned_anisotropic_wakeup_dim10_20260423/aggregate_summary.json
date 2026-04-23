@@ -1,0 +1,40 @@
+[
+  {
+    "config_id": "2S.4c.wakeup",
+    "label": "fft_learned_radial",
+    "description": "Learned radial FFT gains with live spectral init",
+    "completed_seeds": 3,
+    "mean_final3_val_bpc": 3.017788888888889,
+    "mean_final5_val_bpc": 3.06578,
+    "per_seed_final3_val_bpc": [
+      3.009966666666667,
+      3.0261333333333336,
+      3.0172666666666665
+    ],
+    "per_seed_final5_val_bpc": [
+      3.0661400000000003,
+      3.0544800000000003,
+      3.0767199999999995
+    ],
+    "mean_elapsed_seconds": 114.19662364323933
+  },
+  {
+    "config_id": "2S.4e.wakeup",
+    "label": "fft_learned_anisotropic",
+    "description": "Learned anisotropic FFT gains with live spectral init",
+    "completed_seeds": 3,
+    "mean_final3_val_bpc": 3.0191444444444446,
+    "mean_final5_val_bpc": 3.0678533333333333,
+    "per_seed_final3_val_bpc": [
+      3.0104666666666673,
+      3.0266,
+      3.0203666666666664
+    ],
+    "per_seed_final5_val_bpc": [
+      3.06938,
+      3.05544,
+      3.07874
+    ],
+    "mean_elapsed_seconds": 119.70675333340962
+  }
+]

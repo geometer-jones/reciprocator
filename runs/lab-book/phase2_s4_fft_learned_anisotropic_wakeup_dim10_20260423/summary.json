@@ -1,0 +1,80 @@
+[
+  {
+    "config_id": "2S.4c.wakeup",
+    "label": "fft_learned_radial",
+    "description": "Learned radial FFT gains with live spectral init",
+    "seed": 0,
+    "anisotropic_spectral_gains": false,
+    "dynamic_spectral_gains": true,
+    "elapsed_seconds": 106.56378293037415,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s4_fft_learned_anisotropic_wakeup_dim10_20260423/phase2_s4_dim10_2S4cwakeup_fft_learned_radial_seed0.log",
+    "final3_val_bpc": 3.009966666666667,
+    "final5_val_bpc": 3.0661400000000003,
+    "returncode": 0
+  },
+  {
+    "config_id": "2S.4c.wakeup",
+    "label": "fft_learned_radial",
+    "description": "Learned radial FFT gains with live spectral init",
+    "seed": 1,
+    "anisotropic_spectral_gains": false,
+    "dynamic_spectral_gains": true,
+    "elapsed_seconds": 115.7026801109314,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s4_fft_learned_anisotropic_wakeup_dim10_20260423/phase2_s4_dim10_2S4cwakeup_fft_learned_radial_seed1.log",
+    "final3_val_bpc": 3.0261333333333336,
+    "final5_val_bpc": 3.0544800000000003,
+    "returncode": 0
+  },
+  {
+    "config_id": "2S.4c.wakeup",
+    "label": "fft_learned_radial",
+    "description": "Learned radial FFT gains with live spectral init",
+    "seed": 2,
+    "anisotropic_spectral_gains": false,
+    "dynamic_spectral_gains": true,
+    "elapsed_seconds": 120.32340788841248,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s4_fft_learned_anisotropic_wakeup_dim10_20260423/phase2_s4_dim10_2S4cwakeup_fft_learned_radial_seed2.log",
+    "final3_val_bpc": 3.0172666666666665,
+    "final5_val_bpc": 3.0767199999999995,
+    "returncode": 0
+  },
+  {
+    "config_id": "2S.4e.wakeup",
+    "label": "fft_learned_anisotropic",
+    "description": "Learned anisotropic FFT gains with live spectral init",
+    "seed": 0,
+    "anisotropic_spectral_gains": true,
+    "dynamic_spectral_gains": true,
+    "elapsed_seconds": 114.66628932952881,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s4_fft_learned_anisotropic_wakeup_dim10_20260423/phase2_s4_dim10_2S4ewakeup_fft_learned_anisotropic_seed0.log",
+    "final3_val_bpc": 3.0104666666666673,
+    "final5_val_bpc": 3.06938,
+    "returncode": 0
+  },
+  {
+    "config_id": "2S.4e.wakeup",
+    "label": "fft_learned_anisotropic",
+    "description": "Learned anisotropic FFT gains with live spectral init",
+    "seed": 1,
+    "anisotropic_spectral_gains": true,
+    "dynamic_spectral_gains": true,
+    "elapsed_seconds": 125.86409187316895,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s4_fft_learned_anisotropic_wakeup_dim10_20260423/phase2_s4_dim10_2S4ewakeup_fft_learned_anisotropic_seed1.log",
+    "final3_val_bpc": 3.0266,
+    "final5_val_bpc": 3.05544,
+    "returncode": 0
+  },
+  {
+    "config_id": "2S.4e.wakeup",
+    "label": "fft_learned_anisotropic",
+    "description": "Learned anisotropic FFT gains with live spectral init",
+    "seed": 2,
+    "anisotropic_spectral_gains": true,
+    "dynamic_spectral_gains": true,
+    "elapsed_seconds": 118.58987879753113,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s4_fft_learned_anisotropic_wakeup_dim10_20260423/phase2_s4_dim10_2S4ewakeup_fft_learned_anisotropic_seed2.log",
+    "final3_val_bpc": 3.0203666666666664,
+    "final5_val_bpc": 3.07874,
+    "returncode": 0
+  }
+]

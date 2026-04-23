@@ -149,6 +149,27 @@ def test_dynamic_spectral_gains_can_change_profile(coupling_type: str) -> None:
     assert_finite(adapted)
 
 
+def test_dynamic_spectral_gains_receive_projector_gradients_from_inert_init() -> None:
+    tensor = random_complex(2, 2, 4).requires_grad_(True)
+    mixer = ReciprocatorMixer(
+        hidden_size=6,
+        state_shape=(2, 4),
+        coupling_type="fft",
+        dynamic_spectral_gains=True,
+        gain_projector_rank=4,
+    )
+
+    output = mixer.coupling(tensor)
+    loss = output.abs().square().sum()
+    loss.backward()
+
+    projector_head = mixer.coupling.spectral_projector[-1]
+    assert projector_head.weight.grad is not None
+    assert projector_head.bias.grad is not None
+    assert projector_head.weight.grad.abs().sum().item() > 0.0
+    assert projector_head.bias.grad.abs().sum().item() > 0.0
+
+
 def test_anisotropic_fft_spectral_gains_distinguish_equal_radius_coordinates() -> None:
     tensor = random_complex(2, 3, 3)
     radial_mixer = ReciprocatorMixer(
