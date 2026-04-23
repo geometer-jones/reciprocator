@@ -1,0 +1,15 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase1/phase1_run05_semantic_seed1/config.json
+step=1 train_loss=4.7695 train_acc=0.0000 train_ppl=117.8662 train_bpc=6.8810 val_loss=4.5832 val_acc=0.0004 val_ppl=97.8278 val_bpc=6.6122
+step=50 train_loss=3.2032 train_acc=0.1680 train_ppl=24.6119 train_bpc=4.6213 val_loss=3.2328 val_acc=0.1595 val_ppl=25.3495 val_bpc=4.6639
+step=100 train_loss=2.8882 train_acc=0.2090 train_ppl=17.9609 train_bpc=4.1668 val_loss=2.9877 val_acc=0.2078 val_ppl=19.8401 val_bpc=4.3103
+step=150 train_loss=2.7962 train_acc=0.2637 train_ppl=16.3823 train_bpc=4.0341 val_loss=2.7381 val_acc=0.2916 val_ppl=15.4575 val_bpc=3.9502
+step=200 train_loss=2.6281 train_acc=0.3047 train_ppl=13.8468 train_bpc=3.7915 val_loss=2.6032 val_acc=0.3011 val_ppl=13.5072 val_bpc=3.7557
+step=250 train_loss=2.5695 train_acc=0.2969 train_ppl=13.0588 train_bpc=3.7070 val_loss=2.5199 val_acc=0.3209 val_ppl=12.4272 val_bpc=3.6354
+step=300 train_loss=2.4312 train_acc=0.3008 train_ppl=11.3728 train_bpc=3.5075 val_loss=2.4984 val_acc=0.3187 val_ppl=12.1626 val_bpc=3.6044
+step=350 train_loss=2.3414 train_acc=0.3398 train_ppl=10.3953 train_bpc=3.3779 val_loss=2.4072 val_acc=0.3412 val_ppl=11.1034 val_bpc=3.4729
+step=400 train_loss=2.4290 train_acc=0.3418 train_ppl=11.3472 train_bpc=3.5043 val_loss=2.3740 val_acc=0.3387 val_ppl=10.7399 val_bpc=3.4249
+step=450 train_loss=2.3801 train_acc=0.3340 train_ppl=10.8059 train_bpc=3.4338 val_loss=2.3602 val_acc=0.3326 val_ppl=10.5934 val_bpc=3.4051
+step=500 train_loss=2.2632 train_acc=0.3594 train_ppl=9.6142 train_bpc=3.2652 val_loss=2.3350 val_acc=0.3478 val_ppl=10.3292 val_bpc=3.3687
+training finished (device=cpu, corpus=plato_jowett, vocab=96, train_tokens=90000, val_tokens=10000)
+final train(step=500) loss=2.2632 acc=0.3594 ppl=9.6142 bpc=3.2652 last eval(step=500) val_loss=2.3350 val_acc=0.3478 val_ppl=10.3292 val_bpc=3.3687
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase1/phase1_run05_semantic_seed1/checkpoint_step_000500.pt

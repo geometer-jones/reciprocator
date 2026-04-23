@@ -1,0 +1,15 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase1/phase1_run01_baseline_seed0/config.json
+step=1 train_loss=4.9015 train_acc=0.0000 train_ppl=134.4875 train_bpc=7.0713 val_loss=4.7998 val_acc=0.0000 val_ppl=121.4810 val_bpc=6.9246
+step=50 train_loss=3.3331 train_acc=0.1055 train_ppl=28.0238 train_bpc=4.8086 val_loss=3.3392 val_acc=0.0703 val_ppl=28.1976 val_bpc=4.8175
+step=100 train_loss=3.0612 train_acc=0.1680 train_ppl=21.3526 train_bpc=4.4163 val_loss=3.1034 val_acc=0.1637 val_ppl=22.2741 val_bpc=4.4773
+step=150 train_loss=3.0431 train_acc=0.1562 train_ppl=20.9709 train_bpc=4.3903 val_loss=3.0606 val_acc=0.1619 val_ppl=21.3403 val_bpc=4.4155
+step=200 train_loss=3.0404 train_acc=0.1602 train_ppl=20.9131 train_bpc=4.3863 val_loss=3.0789 val_acc=0.1619 val_ppl=21.7345 val_bpc=4.4419
+step=250 train_loss=3.0282 train_acc=0.1582 train_ppl=20.6600 train_bpc=4.3688 val_loss=3.0689 val_acc=0.1616 val_ppl=21.5176 val_bpc=4.4274
+step=300 train_loss=2.9971 train_acc=0.1602 train_ppl=20.0271 train_bpc=4.3239 val_loss=3.0592 val_acc=0.1625 val_ppl=21.3102 val_bpc=4.4135
+step=350 train_loss=3.3901 train_acc=0.1738 train_ppl=29.6678 train_bpc=4.8908 val_loss=3.0056 val_acc=0.1748 val_ppl=20.1973 val_bpc=4.3361
+step=400 train_loss=2.8438 train_acc=0.2246 train_ppl=17.1807 train_bpc=4.1027 val_loss=2.9341 val_acc=0.2113 val_ppl=18.8049 val_bpc=4.2330
+step=450 train_loss=2.8086 train_acc=0.2383 train_ppl=16.5864 train_bpc=4.0519 val_loss=2.8595 val_acc=0.2371 val_ppl=17.4534 val_bpc=4.1254
+step=500 train_loss=2.8186 train_acc=0.2812 train_ppl=16.7530 train_bpc=4.0663 val_loss=2.8262 val_acc=0.2463 val_ppl=16.8819 val_bpc=4.0774
+training finished (device=cpu, corpus=plato_jowett, vocab=96, train_tokens=90000, val_tokens=10000)
+final train(step=500) loss=2.8186 acc=0.2812 ppl=16.7530 bpc=4.0663 last eval(step=500) val_loss=2.8262 val_acc=0.2463 val_ppl=16.8819 val_bpc=4.0774
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase1/phase1_run01_baseline_seed0/checkpoint_step_000500.pt

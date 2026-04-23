@@ -1,0 +1,15 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase1/phase1_run06_virtual_offset_seed2/config.json
+step=1 train_loss=4.7948 train_acc=0.0176 train_ppl=120.8822 train_bpc=6.9175 val_loss=4.7071 val_acc=0.0187 val_ppl=110.7252 val_bpc=6.7908
+step=50 train_loss=3.3487 train_acc=0.1426 train_ppl=28.4659 train_bpc=4.8312 val_loss=3.2865 val_acc=0.1611 val_ppl=26.7504 val_bpc=4.7415
+step=100 train_loss=3.1547 train_acc=0.1543 train_ppl=23.4462 train_bpc=4.5513 val_loss=3.0852 val_acc=0.1631 val_ppl=21.8708 val_bpc=4.4509
+step=150 train_loss=3.0832 train_acc=0.1641 train_ppl=21.8272 train_bpc=4.4481 val_loss=3.0815 val_acc=0.1627 val_ppl=21.7918 val_bpc=4.4457
+step=200 train_loss=3.0228 train_acc=0.1582 train_ppl=20.5482 train_bpc=4.3609 val_loss=3.0555 val_acc=0.1615 val_ppl=21.2313 val_bpc=4.4081
+step=250 train_loss=2.8605 train_acc=0.2090 train_ppl=17.4701 train_bpc=4.1268 val_loss=2.9813 val_acc=0.1995 val_ppl=19.7133 val_bpc=4.3011
+step=300 train_loss=2.9180 train_acc=0.2129 train_ppl=18.5042 train_bpc=4.2098 val_loss=2.9004 val_acc=0.2153 val_ppl=18.1821 val_bpc=4.1844
+step=350 train_loss=2.8101 train_acc=0.2090 train_ppl=16.6110 train_bpc=4.0541 val_loss=2.8625 val_acc=0.2238 val_ppl=17.5047 val_bpc=4.1297
+step=400 train_loss=2.8537 train_acc=0.2207 train_ppl=17.3517 train_bpc=4.1170 val_loss=2.8458 val_acc=0.2227 val_ppl=17.2159 val_bpc=4.1057
+step=450 train_loss=2.8242 train_acc=0.2305 train_ppl=16.8480 train_bpc=4.0745 val_loss=2.7941 val_acc=0.2472 val_ppl=16.3476 val_bpc=4.0310
+step=500 train_loss=2.6588 train_acc=0.2930 train_ppl=14.2786 train_bpc=3.8358 val_loss=2.7698 val_acc=0.2473 val_ppl=15.9547 val_bpc=3.9959
+training finished (device=cpu, corpus=plato_jowett, vocab=96, train_tokens=90000, val_tokens=10000)
+final train(step=500) loss=2.6588 acc=0.2930 ppl=14.2786 bpc=3.8358 last eval(step=500) val_loss=2.7698 val_acc=0.2473 val_ppl=15.9547 val_bpc=3.9959
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase1/phase1_run06_virtual_offset_seed2/checkpoint_step_000500.pt

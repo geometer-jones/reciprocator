@@ -1,0 +1,272 @@
+[
+  {
+    "config_id": "2S1",
+    "label": "sequential",
+    "seed": 0,
+    "run_name": "phase2_s_run2s1_sequential_seed0",
+    "coupling_type": "sequential",
+    "final_val_bpc": 3.2434,
+    "final3_val_bpc_mean": 3.311533333333333,
+    "final3_val_bpcs": [
+      3.3916,
+      3.2996,
+      3.2434
+    ],
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s1_sequential_seed0.log",
+    "config_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s1_sequential_seed0/config.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s1_sequential_seed0/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": "2S1",
+    "label": "sequential",
+    "seed": 1,
+    "run_name": "phase2_s_run2s1_sequential_seed1",
+    "coupling_type": "sequential",
+    "final_val_bpc": 3.3053,
+    "final3_val_bpc_mean": 3.3338666666666668,
+    "final3_val_bpcs": [
+      3.3488,
+      3.3475,
+      3.3053
+    ],
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s1_sequential_seed1.log",
+    "config_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s1_sequential_seed1/config.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s1_sequential_seed1/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": "2S1",
+    "label": "sequential",
+    "seed": 2,
+    "run_name": "phase2_s_run2s1_sequential_seed2",
+    "coupling_type": "sequential",
+    "final_val_bpc": 3.313,
+    "final3_val_bpc_mean": 3.3497,
+    "final3_val_bpcs": [
+      3.3769,
+      3.3592,
+      3.313
+    ],
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s1_sequential_seed2.log",
+    "config_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s1_sequential_seed2/config.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s1_sequential_seed2/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": "2S2",
+    "label": "fft",
+    "seed": 0,
+    "run_name": "phase2_s_run2s2_fft_seed0",
+    "coupling_type": "fft",
+    "final_val_bpc": 3.2643,
+    "final3_val_bpc_mean": 3.296866666666667,
+    "final3_val_bpcs": [
+      3.3578,
+      3.2685,
+      3.2643
+    ],
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s2_fft_seed0.log",
+    "config_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s2_fft_seed0/config.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s2_fft_seed0/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": "2S2",
+    "label": "fft",
+    "seed": 1,
+    "run_name": "phase2_s_run2s2_fft_seed1",
+    "coupling_type": "fft",
+    "final_val_bpc": 3.3109,
+    "final3_val_bpc_mean": 3.3278666666666665,
+    "final3_val_bpcs": [
+      3.3592,
+      3.3135,
+      3.3109
+    ],
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s2_fft_seed1.log",
+    "config_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s2_fft_seed1/config.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s2_fft_seed1/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": "2S2",
+    "label": "fft",
+    "seed": 2,
+    "run_name": "phase2_s_run2s2_fft_seed2",
+    "coupling_type": "fft",
+    "final_val_bpc": 3.37,
+    "final3_val_bpc_mean": 3.3855333333333335,
+    "final3_val_bpcs": [
+      3.4198,
+      3.3668,
+      3.37
+    ],
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s2_fft_seed2.log",
+    "config_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s2_fft_seed2/config.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s2_fft_seed2/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": "2S3",
+    "label": "dwt",
+    "seed": 0,
+    "run_name": "phase2_s_run2s3_dwt_seed0",
+    "coupling_type": "dwt",
+    "final_val_bpc": 3.2636,
+    "final3_val_bpc_mean": 3.296,
+    "final3_val_bpcs": [
+      3.3591,
+      3.2653,
+      3.2636
+    ],
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s3_dwt_seed0.log",
+    "config_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s3_dwt_seed0/config.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s3_dwt_seed0/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": "2S3",
+    "label": "dwt",
+    "seed": 1,
+    "run_name": "phase2_s_run2s3_dwt_seed1",
+    "coupling_type": "dwt",
+    "final_val_bpc": 3.3243,
+    "final3_val_bpc_mean": 3.3325333333333336,
+    "final3_val_bpcs": [
+      3.3601,
+      3.3132,
+      3.3243
+    ],
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s3_dwt_seed1.log",
+    "config_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s3_dwt_seed1/config.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s3_dwt_seed1/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": "2S3",
+    "label": "dwt",
+    "seed": 2,
+    "run_name": "phase2_s_run2s3_dwt_seed2",
+    "coupling_type": "dwt",
+    "final_val_bpc": 3.3663,
+    "final3_val_bpc_mean": 3.3849,
+    "final3_val_bpcs": [
+      3.421,
+      3.3674,
+      3.3663
+    ],
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s3_dwt_seed2.log",
+    "config_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s3_dwt_seed2/config.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s3_dwt_seed2/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": "2S4",
+    "label": "wavelet_packet",
+    "seed": 0,
+    "run_name": "phase2_s_run2s4_wavelet_packet_seed0",
+    "coupling_type": "wavelet_packet",
+    "final_val_bpc": 3.265,
+    "final3_val_bpc_mean": 3.295933333333333,
+    "final3_val_bpcs": [
+      3.3587,
+      3.2641,
+      3.265
+    ],
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s4_wavelet_packet_seed0.log",
+    "config_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s4_wavelet_packet_seed0/config.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s4_wavelet_packet_seed0/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": "2S4",
+    "label": "wavelet_packet",
+    "seed": 1,
+    "run_name": "phase2_s_run2s4_wavelet_packet_seed1",
+    "coupling_type": "wavelet_packet",
+    "final_val_bpc": 3.3099,
+    "final3_val_bpc_mean": 3.3278333333333334,
+    "final3_val_bpcs": [
+      3.3601,
+      3.3135,
+      3.3099
+    ],
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s4_wavelet_packet_seed1.log",
+    "config_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s4_wavelet_packet_seed1/config.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s4_wavelet_packet_seed1/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": "2S4",
+    "label": "wavelet_packet",
+    "seed": 2,
+    "run_name": "phase2_s_run2s4_wavelet_packet_seed2",
+    "coupling_type": "wavelet_packet",
+    "final_val_bpc": 3.3664,
+    "final3_val_bpc_mean": 3.3846666666666665,
+    "final3_val_bpcs": [
+      3.4202,
+      3.3674,
+      3.3664
+    ],
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s4_wavelet_packet_seed2.log",
+    "config_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s4_wavelet_packet_seed2/config.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s4_wavelet_packet_seed2/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": "2S5",
+    "label": "wavelet_packet_max_gauge",
+    "seed": 0,
+    "run_name": "phase2_s_run2s5_wavelet_packet_max_gauge_seed0",
+    "coupling_type": "wavelet_packet_max_gauge",
+    "final_val_bpc": 3.265,
+    "final3_val_bpc_mean": 3.295933333333333,
+    "final3_val_bpcs": [
+      3.3587,
+      3.2641,
+      3.265
+    ],
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s5_wavelet_packet_max_gauge_seed0.log",
+    "config_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s5_wavelet_packet_max_gauge_seed0/config.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s5_wavelet_packet_max_gauge_seed0/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": "2S5",
+    "label": "wavelet_packet_max_gauge",
+    "seed": 1,
+    "run_name": "phase2_s_run2s5_wavelet_packet_max_gauge_seed1",
+    "coupling_type": "wavelet_packet_max_gauge",
+    "final_val_bpc": 3.3099,
+    "final3_val_bpc_mean": 3.3278333333333334,
+    "final3_val_bpcs": [
+      3.3601,
+      3.3135,
+      3.3099
+    ],
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s5_wavelet_packet_max_gauge_seed1.log",
+    "config_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s5_wavelet_packet_max_gauge_seed1/config.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s5_wavelet_packet_max_gauge_seed1/checkpoint_step_000500.pt",
+    "returncode": 0
+  },
+  {
+    "config_id": "2S5",
+    "label": "wavelet_packet_max_gauge",
+    "seed": 2,
+    "run_name": "phase2_s_run2s5_wavelet_packet_max_gauge_seed2",
+    "coupling_type": "wavelet_packet_max_gauge",
+    "final_val_bpc": 3.3664,
+    "final3_val_bpc_mean": 3.3846666666666665,
+    "final3_val_bpcs": [
+      3.4202,
+      3.3674,
+      3.3664
+    ],
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s5_wavelet_packet_max_gauge_seed2.log",
+    "config_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s5_wavelet_packet_max_gauge_seed2/config.json",
+    "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase2_s/phase2_s_run2s5_wavelet_packet_max_gauge_seed2/checkpoint_step_000500.pt",
+    "returncode": 0
+  }
+]

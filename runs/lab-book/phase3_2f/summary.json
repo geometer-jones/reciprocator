@@ -1,0 +1,137 @@
+{
+  "runs": [
+    {
+      "seed": 0,
+      "run_name": "phase3_2f_run_threshold10_mean_seed0",
+      "mode_init": "mean",
+      "growth_residual_threshold": 0.12,
+      "final_state_shape": [
+        3,
+        3,
+        4
+      ],
+      "final_val_bpc": 3.0657540169098114,
+      "final5_val_bpc_mean": 3.0999433058383006,
+      "final5_val_bpcs": [
+        3.140606273269892,
+        3.1343089565258992,
+        3.0818181101582303,
+        3.0772291723276677,
+        3.0657540169098114
+      ],
+      "growth_events": [
+        {
+          "step": 350,
+          "previous_state_shape": "(2, 3, 4)",
+          "state_shape": "(3, 3, 4)"
+        }
+      ],
+      "residual_snapshots": {
+        "50": [
+          0.24820327758789062,
+          6.622220638519138e-08,
+          6.40923190076137e-08
+        ],
+        "200": [
+          0.18118970096111298,
+          4.9851884398322e-08,
+          5.727727980797681e-08
+        ],
+        "500": [
+          0.054610658437013626,
+          0.020644156262278557,
+          4.28896242965493e-08
+        ],
+        "1000": [
+          0.02772975154221058,
+          0.04077057167887688,
+          4.787876051182138e-08
+        ]
+      },
+      "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase3_2f/phase3_2f_run_threshold10_mean_seed0.log",
+      "diagnostics_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase3_2f/phase3_2f_run_threshold10_mean_seed0/residual_diagnostics.json",
+      "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase3_2f/phase3_2f_run_threshold10_mean_seed0/checkpoint_step_001000.pt"
+    },
+    {
+      "seed": 1,
+      "run_name": "phase3_2f_run_threshold10_mean_seed1",
+      "mode_init": "mean",
+      "growth_residual_threshold": 0.12,
+      "final_state_shape": [
+        3,
+        3,
+        4
+      ],
+      "final_val_bpc": 3.057439870368066,
+      "final5_val_bpc_mean": 3.1161989254160694,
+      "final5_val_bpcs": [
+        3.155921371324888,
+        3.1259078620052274,
+        3.1314703828734087,
+        3.1102551405087566,
+        3.057439870368066
+      ],
+      "growth_events": [
+        {
+          "step": 350,
+          "previous_state_shape": "(2, 3, 4)",
+          "state_shape": "(3, 3, 4)"
+        }
+      ],
+      "residual_snapshots": {
+        "50": [
+          0.31447458267211914,
+          1.0188515631170958e-07,
+          1.0188515631170958e-07
+        ],
+        "200": [
+          0.21256044507026672,
+          9.417028934421978e-08,
+          7.496931431205667e-08
+        ],
+        "500": [
+          0.04653497040271759,
+          0.05695229396224022,
+          3.1768610853077917e-08
+        ],
+        "1000": [
+          0.02843591570854187,
+          0.03461316600441933,
+          3.955815230938242e-08
+        ]
+      },
+      "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase3_2f/phase3_2f_run_threshold10_mean_seed1.log",
+      "diagnostics_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase3_2f/phase3_2f_run_threshold10_mean_seed1/residual_diagnostics.json",
+      "checkpoint_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase3_2f/phase3_2f_run_threshold10_mean_seed1/checkpoint_step_001000.pt"
+    }
+  ],
+  "aggregate": {
+    "label": "3.2f_mean",
+    "mode_init": "mean",
+    "growth_residual_threshold": 0.12,
+    "mean_final5_val_bpc": 3.108071115627185,
+    "mean_final_val_bpc": 3.0615969436389388,
+    "growth_steps_by_seed": [
+      [
+        350
+      ],
+      [
+        350
+      ]
+    ],
+    "final_state_shapes": [
+      [
+        3,
+        3,
+        4
+      ],
+      [
+        3,
+        3,
+        4
+      ]
+    ],
+    "vs_3_2d_zero_mean_final5_delta": -0.002363862840012665,
+    "vs_3_2e_residual_mean_final5_delta": -0.03898763713430853
+  }
+}

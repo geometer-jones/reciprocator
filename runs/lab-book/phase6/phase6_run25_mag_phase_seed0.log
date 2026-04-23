@@ -1,0 +1,15 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase6/phase6_run25_mag_phase_seed0/config.json
+step=1 lr=0.001 train_loss=4.8984 train_acc=0.0020 train_ppl=134.0737 train_bpc=7.0669 val_loss=4.7215 val_acc=0.0010 val_ppl=112.3401 val_bpc=6.8117
+step=50 lr=0.001 train_loss=3.3265 train_acc=0.0801 train_ppl=27.8421 train_bpc=4.7992 val_loss=3.3208 val_acc=0.0762 val_ppl=27.6833 val_bpc=4.7909
+step=100 lr=0.001 train_loss=2.9989 train_acc=0.2266 train_ppl=20.0637 train_bpc=4.3265 val_loss=2.9824 val_acc=0.2334 val_ppl=19.7345 val_bpc=4.3026
+step=150 lr=0.001 train_loss=2.7784 train_acc=0.2617 train_ppl=16.0930 train_bpc=4.0084 val_loss=2.7749 val_acc=0.2776 val_ppl=16.0367 val_bpc=4.0033
+step=200 lr=0.001 train_loss=2.6024 train_acc=0.3203 train_ppl=13.4965 train_bpc=3.7545 val_loss=2.6130 val_acc=0.3135 val_ppl=13.6396 val_bpc=3.7697
+step=250 lr=0.001 train_loss=2.5618 train_acc=0.3125 train_ppl=12.9589 train_bpc=3.6959 val_loss=2.5583 val_acc=0.3042 val_ppl=12.9135 val_bpc=3.6908
+step=300 lr=0.001 train_loss=2.5109 train_acc=0.3066 train_ppl=12.3165 train_bpc=3.6225 val_loss=2.5175 val_acc=0.3213 val_ppl=12.3974 val_bpc=3.6320
+step=350 lr=0.001 train_loss=2.3538 train_acc=0.3438 train_ppl=10.5251 train_bpc=3.3958 val_loss=2.4721 val_acc=0.3146 val_ppl=11.8467 val_bpc=3.5664
+step=400 lr=0.001 train_loss=2.5425 train_acc=0.2832 train_ppl=12.7110 train_bpc=3.6680 val_loss=2.4619 val_acc=0.3243 val_ppl=11.7270 val_bpc=3.5518
+step=450 lr=0.001 train_loss=2.3983 train_acc=0.3008 train_ppl=11.0042 train_bpc=3.4600 val_loss=2.4560 val_acc=0.3240 val_ppl=11.6578 val_bpc=3.5432
+step=500 lr=0.001 train_loss=2.2772 train_acc=0.3711 train_ppl=9.7491 train_bpc=3.2853 val_loss=2.4150 val_acc=0.3284 val_ppl=11.1892 val_bpc=3.4840
+training finished (device=cpu, corpus=plato_jowett, vocab=96, train_tokens=90000, val_tokens=10000, state_shape=(2, 3, 4))
+final train(step=500) loss=2.2772 acc=0.3711 ppl=9.7491 bpc=3.2853 last eval(step=500) val_loss=2.4150 val_acc=0.3284 val_ppl=11.1892 val_bpc=3.4840
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase6/phase6_run25_mag_phase_seed0/checkpoint_step_000500.pt

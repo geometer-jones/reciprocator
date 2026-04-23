@@ -1,0 +1,3 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/test_plan/phase2_s3/phase2_s3_run2s3a_sequential_seed0/config.json
+step=1 lr=0.001 train_loss=4.3892 train_acc=0.0098 train_ppl=80.5779 train_bpc=6.3323 val_loss=4.2972 val_acc=0.0839 val_ppl=73.4918 val_bpc=6.1995
+step=50 lr=0.001 train_loss=3.1399 train_acc=0.1738 train_ppl=23.1014 train_bpc=4.5299 val_loss=3.1568 val_acc=0.1602 val_ppl=23.4945 val_bpc=4.5543
