@@ -4,3 +4,12 @@ step=50 lr=0.001 train_loss=2.9802 train_acc=0.1855 train_ppl=19.6920 train_bpc=
 step=100 lr=0.001 train_loss=2.5111 train_acc=0.3164 train_ppl=12.3179 train_bpc=3.6227 val_loss=2.6253 val_acc=0.2936 val_ppl=13.8088 val_bpc=3.7875
 step=150 lr=0.001 train_loss=2.3844 train_acc=0.3496 train_ppl=10.8524 train_bpc=3.4399 val_loss=2.4306 val_acc=0.3402 val_ppl=11.3663 val_bpc=3.5067
 step=200 lr=0.001 train_loss=2.2620 train_acc=0.3613 train_ppl=9.6022 train_bpc=3.2634 val_loss=2.3977 val_acc=0.3416 val_ppl=10.9975 val_bpc=3.4591
+step=250 lr=0.001 train_loss=2.1555 train_acc=0.4082 train_ppl=8.6321 train_bpc=3.1097 val_loss=2.3171 val_acc=0.3553 val_ppl=10.1466 val_bpc=3.3429
+step=300 lr=0.001 train_loss=2.2607 train_acc=0.3809 train_ppl=9.5899 train_bpc=3.2615 val_loss=2.2624 val_acc=0.3654 val_ppl=9.6061 val_bpc=3.2640
+step=350 lr=0.001 train_loss=2.1940 train_acc=0.3828 train_ppl=8.9708 train_bpc=3.1652 val_loss=2.1965 val_acc=0.3728 val_ppl=8.9937 val_bpc=3.1689
+step=400 lr=0.001 train_loss=2.0498 train_acc=0.3633 train_ppl=7.7661 train_bpc=2.9572 val_loss=2.1517 val_acc=0.3899 val_ppl=8.5998 val_bpc=3.1043
+step=450 lr=0.001 train_loss=1.9740 train_acc=0.4238 train_ppl=7.1993 train_bpc=2.8479 val_loss=2.1418 val_acc=0.3851 val_ppl=8.5151 val_bpc=3.0900
+step=500 lr=0.001 train_loss=2.0172 train_acc=0.4141 train_ppl=7.5171 train_bpc=2.9102 val_loss=2.1231 val_acc=0.3969 val_ppl=8.3568 val_bpc=3.0630
+training finished (device=cpu, corpus=greek_classics, vocab=76, train_tokens=90000, val_tokens=10000, state_shape=(2, 4, 3))
+final train(step=500) loss=2.0172 acc=0.4141 ppl=7.5171 bpc=2.9102 last eval(step=500) val_loss=2.1231 val_acc=0.3969 val_ppl=8.3568 val_bpc=3.0630
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8a3_large_middle_2x4x3_sequential_seed0/checkpoint_step_000500.pt

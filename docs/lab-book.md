@@ -526,6 +526,124 @@ The proposed full protocol should not become the default for the current 500-ste
 matrix. A longer-budget phase can revisit scheduling, but Phase 7 is decisive for the
 existing short-run test plan.
 
+### Phase 8: State-Shape Exploration (`greek_classics`)
+
+Phase 8 reran the Phase 4C static recipe on `greek_classics` rather than the older
+`plato_jowett` setup, because the current active plan now uses `greek_classics` as the
+bundled corpus. Treat the results as within-corpus comparisons only; the absolute bpc
+values are not directly interchangeable with the earlier `plato_jowett` branches.
+
+The base recipe was:
+
+- `readout_type=phase_aware`
+- `num_layers=2`
+- `token_magnitude_type=inverse_frequency_learned`
+- `phase_type=rope`
+- `token_phase=semantic`
+- `normalization_type=frobenius`
+
+This phase compared five non-duplicate state shapes across both `sequential` and `fft`
+coupling, with two seeds per condition.
+
+| Shape | Coupling | Mean final-3 `val_bpc` | Delta vs 8.A1 sequential | Delta vs same-shape sequential | Mean seconds/run | Mean train tokens/sec |
+|---|---|---:|---:|---:|---:|---:|
+| `(2,3,4)` | sequential | 3.0815 | 0.0000 | 0.0000 | 176.4 | 1451.4 |
+| `(2,3,4)` | fft | 3.0785 | -0.0030 | -0.0030 | 92.4 | 2770.1 |
+| `(4,3,2)` | sequential | 3.0794 | -0.0021 | 0.0000 | 165.7 | 1545.1 |
+| `(4,3,2)` | fft | 3.0766 | -0.0049 | -0.0028 | 86.0 | 2977.7 |
+| `(2,4,3)` | sequential | 3.0804 | -0.0011 | 0.0000 | 153.1 | 1672.7 |
+| `(2,4,3)` | fft | 3.0786 | -0.0029 | -0.0017 | 85.2 | 3005.4 |
+| `(4,6)` | sequential | 3.0740 | -0.0075 | 0.0000 | 123.2 | 2077.7 |
+| `(4,6)` | fft | 3.0784 | -0.0031 | +0.0044 | 80.4 | 3184.1 |
+| `(24,)` | sequential | 3.0993 | +0.0178 | 0.0000 | 111.9 | 2288.1 |
+| `(24,)` | fft | 3.0760 | -0.0055 | -0.0233 | 71.5 | 3582.1 |
+
+Interpretation:
+
+- Mode ordering was effectively a null result at this budget. The three rank-3
+  permutations stayed within `0.0021` bpc of each other under `sequential`.
+- The best overall condition was the rank-2 same-capacity shape `(4,6)` under
+  `sequential`, with mean final-3 `val_bpc = 3.0740`.
+- That win is real but small: `-0.0075` bpc relative to the rank-3 control `(2,3,4)`,
+  below the plan's `0.02` promotion threshold.
+- The rank-1 vector floor `(24,)` was bad under `sequential` (`+0.0178` bpc vs control),
+  so the tensorized state still appears to matter on the direct recurrent path.
+- The best FFT result came from that same rank-1 vector floor, and it beat the
+  same-shape sequential run by `-0.0233` bpc. But it still did not beat the best
+  overall sequential result `(4,6)`, so FFT does not become the default backend.
+
+Decision:
+
+- Do not promote a new default state shape from Phase 8 alone. `(4,6)` is the most
+  promising follow-up shape on `greek_classics`, but its margin is below threshold.
+- Do not reopen the FFT branch. FFT showed a narrow advantage only on the degenerate
+  rank-1 vector state, not as the overall winner.
+- If later scaling work continues on `greek_classics`, `(4,6)` is the most justified
+  alternative to retest first.
+
+Artifacts:
+
+- [summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/summary.json)
+- [aggregate_summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/aggregate_summary.json)
+
+### Phase 9: Sequence-Length Scaling (`greek_classics`)
+
+Phase 9 kept the promoted Phase 4C-style static control on `greek_classics` and
+varied only `seq_len`. The recipe was:
+
+- `state_shape=(2,3,4)`
+- `readout_type=phase_aware`
+- `num_layers=2`
+- `token_magnitude_type=inverse_frequency_learned`
+- `phase_type=rope`
+- `token_phase=semantic`
+- `normalization_type=frobenius`
+- `coupling_type=sequential`
+- `learning_rate=1e-3`
+- `lr_warmup_steps=0`
+- `lr_decay_style=constant`
+- `grad_clip_norm=None`
+- `weight_decay=0.0`
+
+This was run as a fixed-step comparison: `batch_size=8`, `steps=500`, two seeds per
+condition. That means longer `seq_len` also saw more total training tokens, so this
+phase measures the plan's practical fixed-step operating point rather than isolating
+"longer context helps" as a clean causal claim.
+
+| Seq len | Eval batches | Train tokens/run | Mean final-3 `val_bpc` | Delta vs `64` | Mean final `val_bpc` | Mean seconds/run | Mean train tokens/sec |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `64` | 16 | 256000 | 3.0815 | 0.0000 | 3.0374 | 136.9 | 1870.3 |
+| `128` | 16 | 512000 | 3.0524 | -0.0291 | 3.0096 | 291.9 | 1755.1 |
+| `256` | 8 | 1024000 | 2.9230 | -0.1585 | 2.9088 | 504.5 | 2032.7 |
+
+Interpretation:
+
+- `seq_len=128` was a real but modest win over the old `64` default: `-0.0291` bpc on
+  mean final-3 validation.
+- `seq_len=256` was decisive under this protocol: `-0.1585` bpc relative to `64` and
+  `-0.1294` bpc relative to `128`.
+- The `256` win was stable across seeds. Both `seq_len=256` seeds beat both
+  `seq_len=128` seeds on mean final-3 `val_bpc`.
+- Runtime rose substantially with length, but not prohibitively for this CPU-scale
+  matrix. Mean wall time went from `136.9s` at `64` to `504.5s` at `256`.
+- Because the budget was fixed in steps instead of tokens, this does not prove the gain
+  comes from better long-context exploitation alone. `seq_len=256` also trained on 4x
+  as many tokens as `seq_len=64`.
+
+Decision:
+
+- For the current test plan as written, promote `seq_len=256` as the best fixed-step
+  sequence-length setting on `greek_classics`.
+- Do not make a stronger mechanistic claim than that. A fixed-token control would still
+  be needed to separate context-length benefits from raw token-budget benefits.
+- Carry the `seq_len=256` checkpoints forward into the post-hoc generation and streaming
+  benchmarks before treating the win as fully promoted in writeups.
+
+Artifacts:
+
+- [summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase9_sequence_length_greek_classics_20260423/summary.json)
+- [aggregate_summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase9_sequence_length_greek_classics_20260423/aggregate_summary.json)
+
 ## Best-Known Recipes
 
 ### Best 500-step static recipe
@@ -590,7 +708,7 @@ Incomplete:
 
 - Phase 3.5 full-system dynamic run
 - Phase 4 / 4.1 / 4.2 ablations
-- Phases 8-10 scaling and benchmarking branches
+- Phase 10 scaling branch
 - Post-hoc generation and streaming benchmarks as promotion gates
 
 ## Recommended Revisions To `docs/test-plan.md`

@@ -7,3 +7,9 @@ step=200 lr=0.001 train_loss=2.2636 train_acc=0.3516 train_ppl=9.6179 train_bpc=
 step=250 lr=0.001 train_loss=2.1998 train_acc=0.3867 train_ppl=9.0235 train_bpc=3.1737 val_loss=2.3081 val_acc=0.3524 val_ppl=10.0554 val_bpc=3.3299
 step=300 lr=0.001 train_loss=2.2509 train_acc=0.3555 train_ppl=9.4967 train_bpc=3.2474 val_loss=2.2722 val_acc=0.3594 val_ppl=9.7012 val_bpc=3.2782
 step=350 lr=0.001 train_loss=2.1835 train_acc=0.3672 train_ppl=8.8773 train_bpc=3.1501 val_loss=2.1728 val_acc=0.3824 val_ppl=8.7826 val_bpc=3.1346
+step=400 lr=0.001 train_loss=2.0619 train_acc=0.3613 train_ppl=7.8610 train_bpc=2.9747 val_loss=2.1881 val_acc=0.3826 val_ppl=8.9180 val_bpc=3.1567
+step=450 lr=0.001 train_loss=2.0275 train_acc=0.4355 train_ppl=7.5948 train_bpc=2.9250 val_loss=2.1040 val_acc=0.3965 val_ppl=8.1988 val_bpc=3.0354
+step=500 lr=0.001 train_loss=2.0294 train_acc=0.4023 train_ppl=7.6098 train_bpc=2.9279 val_loss=2.1043 val_acc=0.4053 val_ppl=8.2012 val_bpc=3.0358
+training finished (device=cpu, corpus=greek_classics, vocab=76, train_tokens=90000, val_tokens=10000, state_shape=(2, 4, 3))
+final train(step=500) loss=2.0294 acc=0.4023 ppl=7.6098 bpc=2.9279 last eval(step=500) val_loss=2.1043 val_acc=0.4053 val_ppl=8.2012 val_bpc=3.0358
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8a3_large_middle_2x4x3_fft_seed0/checkpoint_step_000500.pt

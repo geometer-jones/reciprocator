@@ -1,0 +1,38 @@
+{
+  "phase9_seq64_seed1": {
+    "run_name": "phase9_seq64_seed1",
+    "returncode": 0,
+    "elapsed_seconds": 136.61292600631714,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase9_sequence_length_greek_classics_20260423/phase9_seq64_seed1.log"
+  },
+  "phase9_seq64_seed0": {
+    "run_name": "phase9_seq64_seed0",
+    "returncode": 0,
+    "elapsed_seconds": 137.1428987979889,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase9_sequence_length_greek_classics_20260423/phase9_seq64_seed0.log"
+  },
+  "phase9_seq128_seed0": {
+    "run_name": "phase9_seq128_seed0",
+    "returncode": 0,
+    "elapsed_seconds": 284.8559799194336,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase9_sequence_length_greek_classics_20260423/phase9_seq128_seed0.log"
+  },
+  "phase9_seq128_seed1": {
+    "run_name": "phase9_seq128_seed1",
+    "returncode": 0,
+    "elapsed_seconds": 298.9244110584259,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase9_sequence_length_greek_classics_20260423/phase9_seq128_seed1.log"
+  },
+  "phase9_seq256_seed0": {
+    "run_name": "phase9_seq256_seed0",
+    "returncode": 0,
+    "elapsed_seconds": 524.0190830230713,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase9_sequence_length_greek_classics_20260423/phase9_seq256_seed0.log"
+  },
+  "phase9_seq256_seed1": {
+    "run_name": "phase9_seq256_seed1",
+    "returncode": 0,
+    "elapsed_seconds": 484.99815106391907,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase9_sequence_length_greek_classics_20260423/phase9_seq256_seed1.log"
+  }
+}

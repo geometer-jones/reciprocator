@@ -1,0 +1,444 @@
+[
+  {
+    "shape_id": "8.A1",
+    "label": "small_to_large",
+    "description": "Current rank-3 small-to-large control",
+    "coupling_type": "fft",
+    "state_shape": [
+      2,
+      3,
+      4
+    ],
+    "completed_seeds": 2,
+    "per_seed_final3_val_bpc": [
+      3.077915712738024,
+      3.07911337483783
+    ],
+    "per_seed_final_val_bpc": [
+      3.031030386484224,
+      3.05524653262595
+    ],
+    "per_seed_elapsed_seconds": [
+      91.84171175956726,
+      92.99698519706726
+    ],
+    "per_seed_train_tokens_per_second": [
+      2787.404492962667,
+      2752.7774094774977
+    ],
+    "final_state_shapes": [
+      [
+        2,
+        3,
+        4
+      ],
+      [
+        2,
+        3,
+        4
+      ]
+    ],
+    "mean_final3_val_bpc": 3.078514543787927,
+    "mean_final_val_bpc": 3.043138459555087,
+    "mean_elapsed_seconds": 92.41934847831726,
+    "mean_train_tokens_per_second": 2770.0909512200824,
+    "delta_vs_8a1_sequential": -0.002979259043868865,
+    "delta_vs_same_shape_sequential": -0.002979259043868865
+  },
+  {
+    "shape_id": "8.A1",
+    "label": "small_to_large",
+    "description": "Current rank-3 small-to-large control",
+    "coupling_type": "sequential",
+    "state_shape": [
+      2,
+      3,
+      4
+    ],
+    "completed_seeds": 2,
+    "per_seed_final3_val_bpc": [
+      3.0885570496858636,
+      3.0744305559777274
+    ],
+    "per_seed_final_val_bpc": [
+      3.0626546853118657,
+      3.0121293856652445
+    ],
+    "per_seed_elapsed_seconds": [
+      173.06610989570618,
+      179.8329620361328
+    ],
+    "per_seed_train_tokens_per_second": [
+      1479.2035260645298,
+      1423.5432542592685
+    ],
+    "final_state_shapes": [
+      [
+        2,
+        3,
+        4
+      ],
+      [
+        2,
+        3,
+        4
+      ]
+    ],
+    "mean_final3_val_bpc": 3.0814938028317957,
+    "mean_final_val_bpc": 3.037392035488555,
+    "mean_elapsed_seconds": 176.4495359659195,
+    "mean_train_tokens_per_second": 1451.3733901618991,
+    "delta_vs_8a1_sequential": 0.0,
+    "delta_vs_same_shape_sequential": 0.0
+  },
+  {
+    "shape_id": "8.A2",
+    "label": "large_to_small",
+    "description": "Reversed mode order",
+    "coupling_type": "fft",
+    "state_shape": [
+      4,
+      3,
+      2
+    ],
+    "completed_seeds": 2,
+    "per_seed_final3_val_bpc": [
+      3.075816402927295,
+      3.0773231178507015
+    ],
+    "per_seed_final_val_bpc": [
+      3.0342507616216303,
+      3.054168943080222
+    ],
+    "per_seed_elapsed_seconds": [
+      85.73143672943115,
+      86.2118980884552
+    ],
+    "per_seed_train_tokens_per_second": [
+      2986.069168628741,
+      2969.427720258968
+    ],
+    "final_state_shapes": [
+      [
+        4,
+        3,
+        2
+      ],
+      [
+        4,
+        3,
+        2
+      ]
+    ],
+    "mean_final3_val_bpc": 3.076569760388998,
+    "mean_final_val_bpc": 3.0442098523509262,
+    "mean_elapsed_seconds": 85.97166740894318,
+    "mean_train_tokens_per_second": 2977.748444443854,
+    "delta_vs_8a1_sequential": -0.004924042442797649,
+    "delta_vs_same_shape_sequential": -0.002794017605515897
+  },
+  {
+    "shape_id": "8.A2",
+    "label": "large_to_small",
+    "description": "Reversed mode order",
+    "coupling_type": "sequential",
+    "state_shape": [
+      4,
+      3,
+      2
+    ],
+    "completed_seeds": 2,
+    "per_seed_final3_val_bpc": [
+      3.0776441342174525,
+      3.0810834217715755
+    ],
+    "per_seed_final_val_bpc": [
+      3.054495785359271,
+      3.017789915146586
+    ],
+    "per_seed_elapsed_seconds": [
+      165.8083939552307,
+      165.5634250640869
+    ],
+    "per_seed_train_tokens_per_second": [
+      1543.9507849591835,
+      1546.2352261733324
+    ],
+    "final_state_shapes": [
+      [
+        4,
+        3,
+        2
+      ],
+      [
+        4,
+        3,
+        2
+      ]
+    ],
+    "mean_final3_val_bpc": 3.079363777994514,
+    "mean_final_val_bpc": 3.0361428502529284,
+    "mean_elapsed_seconds": 165.6859095096588,
+    "mean_train_tokens_per_second": 1545.093005566258,
+    "delta_vs_8a1_sequential": -0.002130024837281752,
+    "delta_vs_same_shape_sequential": 0.0
+  },
+  {
+    "shape_id": "8.A3",
+    "label": "large_middle",
+    "description": "Largest mode in middle",
+    "coupling_type": "fft",
+    "state_shape": [
+      2,
+      4,
+      3
+    ],
+    "completed_seeds": 2,
+    "per_seed_final3_val_bpc": [
+      3.075984419228273,
+      3.081284770460073
+    ],
+    "per_seed_final_val_bpc": [
+      3.0358294978630567,
+      3.059013167658159
+    ],
+    "per_seed_elapsed_seconds": [
+      85.2305850982666,
+      85.1293888092041
+    ],
+    "per_seed_train_tokens_per_second": [
+      3003.616597314741,
+      3007.1871016689543
+    ],
+    "final_state_shapes": [
+      [
+        2,
+        4,
+        3
+      ],
+      [
+        2,
+        4,
+        3
+      ]
+    ],
+    "mean_final3_val_bpc": 3.078634594844173,
+    "mean_final_val_bpc": 3.047421332760608,
+    "mean_elapsed_seconds": 85.17998695373535,
+    "mean_train_tokens_per_second": 3005.4018494918473,
+    "delta_vs_8a1_sequential": -0.002859207987622625,
+    "delta_vs_same_shape_sequential": -0.001741808041191284
+  },
+  {
+    "shape_id": "8.A3",
+    "label": "large_middle",
+    "description": "Largest mode in middle",
+    "coupling_type": "sequential",
+    "state_shape": [
+      2,
+      4,
+      3
+    ],
+    "completed_seeds": 2,
+    "per_seed_final3_val_bpc": [
+      3.085762216954242,
+      3.0749905888164872
+    ],
+    "per_seed_final_val_bpc": [
+      3.0629533761807513,
+      3.0126307258414253
+    ],
+    "per_seed_elapsed_seconds": [
+      149.95720386505127,
+      156.25771117210388
+    ],
+    "per_seed_train_tokens_per_second": [
+      1707.1537305428703,
+      1638.319146490242
+    ],
+    "final_state_shapes": [
+      [
+        2,
+        4,
+        3
+      ],
+      [
+        2,
+        4,
+        3
+      ]
+    ],
+    "mean_final3_val_bpc": 3.0803764028853644,
+    "mean_final_val_bpc": 3.0377920510110883,
+    "mean_elapsed_seconds": 153.10745751857758,
+    "mean_train_tokens_per_second": 1672.736438516556,
+    "delta_vs_8a1_sequential": -0.001117399946431341,
+    "delta_vs_same_shape_sequential": 0.0
+  },
+  {
+    "shape_id": "8.B2",
+    "label": "rank2_same_capacity",
+    "description": "Rank-2, 24 elements",
+    "coupling_type": "fft",
+    "state_shape": [
+      4,
+      6
+    ],
+    "completed_seeds": 2,
+    "per_seed_final3_val_bpc": [
+      3.0764769847062876,
+      3.080373534716364
+    ],
+    "per_seed_final_val_bpc": [
+      3.035915252712343,
+      3.053758506483938
+    ],
+    "per_seed_elapsed_seconds": [
+      81.41903972625732,
+      79.40283799171448
+    ],
+    "per_seed_train_tokens_per_second": [
+      3144.2276998194684,
+      3224.0661225070203
+    ],
+    "final_state_shapes": [
+      [
+        4,
+        6
+      ],
+      [
+        4,
+        6
+      ]
+    ],
+    "mean_final3_val_bpc": 3.0784252597113255,
+    "mean_final_val_bpc": 3.0448368795981406,
+    "mean_elapsed_seconds": 80.4109388589859,
+    "mean_train_tokens_per_second": 3184.146911163244,
+    "delta_vs_8a1_sequential": -0.003068543120470224,
+    "delta_vs_same_shape_sequential": 0.004413080195597274
+  },
+  {
+    "shape_id": "8.B2",
+    "label": "rank2_same_capacity",
+    "description": "Rank-2, 24 elements",
+    "coupling_type": "sequential",
+    "state_shape": [
+      4,
+      6
+    ],
+    "completed_seeds": 2,
+    "per_seed_final3_val_bpc": [
+      3.048849594931445,
+      3.099174764100012
+    ],
+    "per_seed_final_val_bpc": [
+      2.9965503587346687,
+      3.040414017889275
+    ],
+    "per_seed_elapsed_seconds": [
+      123.63499212265015,
+      122.79081892967224
+    ],
+    "per_seed_train_tokens_per_second": [
+      2070.611204844331,
+      2084.8464260721526
+    ],
+    "final_state_shapes": [
+      [
+        4,
+        6
+      ],
+      [
+        4,
+        6
+      ]
+    ],
+    "mean_final3_val_bpc": 3.0740121795157282,
+    "mean_final_val_bpc": 3.018482188311972,
+    "mean_elapsed_seconds": 123.2129055261612,
+    "mean_train_tokens_per_second": 2077.728815458242,
+    "delta_vs_8a1_sequential": -0.007481623316067498,
+    "delta_vs_same_shape_sequential": 0.0
+  },
+  {
+    "shape_id": "8.B3",
+    "label": "rank1_vector",
+    "description": "Rank-1 vector-state floor",
+    "coupling_type": "fft",
+    "state_shape": [
+      24
+    ],
+    "completed_seeds": 2,
+    "per_seed_final3_val_bpc": [
+      3.0727729477760204,
+      3.0791903729038097
+    ],
+    "per_seed_final_val_bpc": [
+      3.033067048031404,
+      3.0602006863645355
+    ],
+    "per_seed_elapsed_seconds": [
+      71.6408441066742,
+      71.29182696342468
+    ],
+    "per_seed_train_tokens_per_second": [
+      3573.380565125845,
+      3590.8744508867385
+    ],
+    "final_state_shapes": [
+      [
+        24
+      ],
+      [
+        24
+      ]
+    ],
+    "mean_final3_val_bpc": 3.075981660339915,
+    "mean_final_val_bpc": 3.04663386719797,
+    "mean_elapsed_seconds": 71.46633553504944,
+    "mean_train_tokens_per_second": 3582.1275080062915,
+    "delta_vs_8a1_sequential": -0.0055121424918809225,
+    "delta_vs_same_shape_sequential": -0.023280336585289163
+  },
+  {
+    "shape_id": "8.B3",
+    "label": "rank1_vector",
+    "description": "Rank-1 vector-state floor",
+    "coupling_type": "sequential",
+    "state_shape": [
+      24
+    ],
+    "completed_seeds": 2,
+    "per_seed_final3_val_bpc": [
+      3.0974126585230466,
+      3.101111335327362
+    ],
+    "per_seed_final_val_bpc": [
+      3.066742261468416,
+      3.0366351828377707
+    ],
+    "per_seed_elapsed_seconds": [
+      111.23551607131958,
+      112.54199385643005
+    ],
+    "per_seed_train_tokens_per_second": [
+      2301.423223818762,
+      2274.7064560325766
+    ],
+    "final_state_shapes": [
+      [
+        24
+      ],
+      [
+        24
+      ]
+    ],
+    "mean_final3_val_bpc": 3.099261996925204,
+    "mean_final_val_bpc": 3.0516887221530933,
+    "mean_elapsed_seconds": 111.88875496387482,
+    "mean_train_tokens_per_second": 2288.0648399256693,
+    "delta_vs_8a1_sequential": 0.01776819409340824,
+    "delta_vs_same_shape_sequential": 0.0
+  }
+]

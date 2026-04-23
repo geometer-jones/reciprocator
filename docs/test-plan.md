@@ -1059,7 +1059,7 @@ range.
 | Parameter | Value |
 |---|---|
 | num_layers | 6 (Reciprocator) |
-| attention_every_k | 3 → 2 LocalAttentionBlock insertions |
+| attention_every_k | 3 |
 | attention_num_heads | 4 |
 | attention_window | 128 |
 | hidden_size | 256 |
@@ -1086,19 +1086,19 @@ range.
 
 | Run | Description | attention_position | Attn blocks |
 |---|---|---|---|
-| 11A | Hybrid as above | `after` | 2 |
-| 11B | Pure Reciprocator, parameter-matched (no attention blocks) | n/a | 0 |
-| 11C | Hybrid with `stateful_training=False` | `after` | 2 |
-| 11D | Hybrid with attention first in each group | `before` | 3 |
+| 11A | Hybrid as above | `after` | 1 |
+| 11B | Pure Reciprocator, nearest current parameter match (`num_layers=7`) | n/a | 0 |
+| 11C | Hybrid with `stateful_training=False` | `after` | 1 |
+| 11D | Hybrid with attention first in each group | `before` | 2 |
 
 **Attention ordering (11A vs 11D):**
 
-- `"after"` (11A): `[R,R,R,A, R,R,R,A, R,R,R]` — attention is the last operation in each k-group; the next Reciprocator group processes the attention-enhanced state.
-- `"before"` (11D): `[A,R,R,R, A,R,R,R, A,R,R,R]` — attention is the first operation in each k-group; Reciprocators within the group process the attention-resolved state and fold it into long-range memory.
+- `"after"` (11A): `[R,R,R,A, R,R,R]` — attention is inserted after each completed k-group except the last one, so the next Reciprocator group processes the attention-enhanced state.
+- `"before"` (11D): `[A,R,R,R, A,R,R,R]` — attention is inserted before each k-group, so Reciprocators within the group process the attention-resolved state and fold it into long-range memory.
 
 `"before"` has one more attention block than `"after"` for the same `num_layers`. Report exact non-embedding parameter counts for both; the difference should be small (one attention block ≈ `4 × hidden_size²` additional parameters).
 
-Parameter matching for 11B: count non-embedding parameters in 11A and set `num_layers` for the pure Reciprocator to the nearest match. Report exact param counts for all runs.
+Parameter matching for 11B: count non-embedding parameters in 11A and set `num_layers` for the pure Reciprocator to the nearest match. Under the current model code, 11A has `6,369,761` non-embedding parameters and the nearest pure match is `num_layers=7` with `6,797,778`. Recompute if the block definitions change. Report exact param counts for all runs.
 
 **Primary metric:** mean `val_bpc` over the final 5 eval checkpoints.
 
@@ -1124,7 +1124,7 @@ Parameter matching for 11B: count non-embedding parameters in 11A and set `num_l
 | Parameter | Value |
 |---|---|
 | num_layers | 12 (Reciprocator) |
-| attention_every_k | 3 → 4 LocalAttentionBlock insertions |
+| attention_every_k | 3 → 3 LocalAttentionBlock insertions with default `attention_position="after"`; 4 if Phase 11 promotes `"before"` |
 | attention_num_heads | 8 |
 | attention_window | 256 |
 | hidden_size | 512 |
@@ -1159,14 +1159,14 @@ Parameter matching for 11B: count non-embedding parameters in 11A and set `num_l
 
 **Goal:** Does quality improve predictably when going from 12 to 18 Reciprocator layers at the same hidden_size? Is the architecture compute-efficient (loss-per-FLOP competitive)?
 
-**Config:** identical to Phase 12 except `num_layers=18` (Reciprocator), `attention_every_k=3` → 6 LocalAttentionBlock insertions.
+**Config:** identical to Phase 12 except `num_layers=18` (Reciprocator), `attention_every_k=3` → 5 LocalAttentionBlock insertions with default `attention_position="after"`; 6 if Phase 11 promotes `"before"`.
 
 **Runs:**
 
 | Run | num_layers (Recip) | Attn blocks | Steps | Goal |
 |---|---|---|---|---|
-| 13A | 18 | 6 | 10,000 | Scaling check |
-| 13B | 12 (Phase 12 winner) | 4 | 10,000 | Comparison baseline |
+| 13A | 18 | 5 (`after`) / 6 (`before`) | 10,000 | Scaling check |
+| 13B | 12 (Phase 12 winner) | 3 (`after`) / 4 (`before`) | 10,000 | Comparison baseline |
 
 **Metrics:** val_bpc and training FLOPs (estimate: `6 × params × tokens_seen`). Plot bpc vs. FLOPs for both runs to check scaling efficiency.
 

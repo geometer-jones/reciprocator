@@ -170,6 +170,44 @@ def build_parser() -> argparse.ArgumentParser:
         default=False,
         help="Track state drift within chunked mixer updates during training.",
     )
+    parser.add_argument(
+        "--attention-every-k",
+        type=int,
+        default=0,
+        help="Insert a LocalAttentionBlock every k Reciprocator blocks. Use 0 to disable hybrid attention.",
+    )
+    parser.add_argument(
+        "--attention-num-heads",
+        type=int,
+        default=8,
+        help="Number of local-attention heads when hybrid attention is enabled.",
+    )
+    parser.add_argument(
+        "--attention-window",
+        type=int,
+        default=256,
+        help="Sliding local-attention window size when hybrid attention is enabled.",
+    )
+    parser.add_argument(
+        "--attention-position",
+        choices=("before", "after"),
+        default="after",
+        help="Whether local attention is inserted before or after each Reciprocator group.",
+    )
+    stateful_group = parser.add_mutually_exclusive_group()
+    stateful_group.add_argument(
+        "--stateful-training",
+        dest="stateful_training",
+        action="store_true",
+        default=True,
+        help="Carry recurrent state forward across batches during training.",
+    )
+    stateful_group.add_argument(
+        "--stateless-training",
+        dest="stateful_training",
+        action="store_false",
+        help="Reset recurrent state each batch during training.",
+    )
     parser.add_argument("--device", default="cpu", help="One of cpu, cuda, mps, or auto.")
     parser.add_argument(
         "--no-tensor-dynamic-growth",
@@ -389,6 +427,11 @@ def main() -> None:
         benchmark_prompt_lengths=args.benchmark_prompt_lengths,
         benchmark_new_tokens=args.benchmark_new_tokens,
         seed=args.seed,
+        stateful_training=args.stateful_training,
+        attention_every_k=args.attention_every_k,
+        attention_num_heads=args.attention_num_heads,
+        attention_window=args.attention_window,
+        attention_position=args.attention_position,
     )
     if args.checkpoint_every < 0:
         raise ValueError("checkpoint_every must be non-negative.")

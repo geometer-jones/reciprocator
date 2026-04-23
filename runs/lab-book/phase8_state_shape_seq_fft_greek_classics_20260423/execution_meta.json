@@ -1,0 +1,122 @@
+{
+  "phase8_run8a1_small_to_large_2x3x4_fft_seed0": {
+    "run_name": "phase8_run8a1_small_to_large_2x3x4_fft_seed0",
+    "returncode": 0,
+    "elapsed_seconds": 91.84171175956726,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8a1_small_to_large_2x3x4_fft_seed0.log"
+  },
+  "phase8_run8a1_small_to_large_2x3x4_fft_seed1": {
+    "run_name": "phase8_run8a1_small_to_large_2x3x4_fft_seed1",
+    "returncode": 0,
+    "elapsed_seconds": 92.99698519706726,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8a1_small_to_large_2x3x4_fft_seed1.log"
+  },
+  "phase8_run8a1_small_to_large_2x3x4_sequential_seed0": {
+    "run_name": "phase8_run8a1_small_to_large_2x3x4_sequential_seed0",
+    "returncode": 0,
+    "elapsed_seconds": 173.06610989570618,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8a1_small_to_large_2x3x4_sequential_seed0.log"
+  },
+  "phase8_run8a1_small_to_large_2x3x4_sequential_seed1": {
+    "run_name": "phase8_run8a1_small_to_large_2x3x4_sequential_seed1",
+    "returncode": 0,
+    "elapsed_seconds": 179.8329620361328,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8a1_small_to_large_2x3x4_sequential_seed1.log"
+  },
+  "phase8_run8a2_large_to_small_4x3x2_sequential_seed0": {
+    "run_name": "phase8_run8a2_large_to_small_4x3x2_sequential_seed0",
+    "returncode": 0,
+    "elapsed_seconds": 165.8083939552307,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8a2_large_to_small_4x3x2_sequential_seed0.log"
+  },
+  "phase8_run8a2_large_to_small_4x3x2_sequential_seed1": {
+    "run_name": "phase8_run8a2_large_to_small_4x3x2_sequential_seed1",
+    "returncode": 0,
+    "elapsed_seconds": 165.5634250640869,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8a2_large_to_small_4x3x2_sequential_seed1.log"
+  },
+  "phase8_run8a2_large_to_small_4x3x2_fft_seed0": {
+    "run_name": "phase8_run8a2_large_to_small_4x3x2_fft_seed0",
+    "returncode": 0,
+    "elapsed_seconds": 85.73143672943115,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8a2_large_to_small_4x3x2_fft_seed0.log"
+  },
+  "phase8_run8a2_large_to_small_4x3x2_fft_seed1": {
+    "run_name": "phase8_run8a2_large_to_small_4x3x2_fft_seed1",
+    "returncode": 0,
+    "elapsed_seconds": 86.2118980884552,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8a2_large_to_small_4x3x2_fft_seed1.log"
+  },
+  "phase8_run8a3_large_middle_2x4x3_fft_seed0": {
+    "run_name": "phase8_run8a3_large_middle_2x4x3_fft_seed0",
+    "returncode": 0,
+    "elapsed_seconds": 85.2305850982666,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8a3_large_middle_2x4x3_fft_seed0.log"
+  },
+  "phase8_run8a3_large_middle_2x4x3_fft_seed1": {
+    "run_name": "phase8_run8a3_large_middle_2x4x3_fft_seed1",
+    "returncode": 0,
+    "elapsed_seconds": 85.1293888092041,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8a3_large_middle_2x4x3_fft_seed1.log"
+  },
+  "phase8_run8a3_large_middle_2x4x3_sequential_seed0": {
+    "run_name": "phase8_run8a3_large_middle_2x4x3_sequential_seed0",
+    "returncode": 0,
+    "elapsed_seconds": 149.95720386505127,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8a3_large_middle_2x4x3_sequential_seed0.log"
+  },
+  "phase8_run8a3_large_middle_2x4x3_sequential_seed1": {
+    "run_name": "phase8_run8a3_large_middle_2x4x3_sequential_seed1",
+    "returncode": 0,
+    "elapsed_seconds": 156.25771117210388,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8a3_large_middle_2x4x3_sequential_seed1.log"
+  },
+  "phase8_run8b2_rank2_same_capacity_4x6_sequential_seed0": {
+    "run_name": "phase8_run8b2_rank2_same_capacity_4x6_sequential_seed0",
+    "returncode": 0,
+    "elapsed_seconds": 123.63499212265015,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8b2_rank2_same_capacity_4x6_sequential_seed0.log"
+  },
+  "phase8_run8b2_rank2_same_capacity_4x6_sequential_seed1": {
+    "run_name": "phase8_run8b2_rank2_same_capacity_4x6_sequential_seed1",
+    "returncode": 0,
+    "elapsed_seconds": 122.79081892967224,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8b2_rank2_same_capacity_4x6_sequential_seed1.log"
+  },
+  "phase8_run8b2_rank2_same_capacity_4x6_fft_seed0": {
+    "run_name": "phase8_run8b2_rank2_same_capacity_4x6_fft_seed0",
+    "returncode": 0,
+    "elapsed_seconds": 81.41903972625732,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8b2_rank2_same_capacity_4x6_fft_seed0.log"
+  },
+  "phase8_run8b2_rank2_same_capacity_4x6_fft_seed1": {
+    "run_name": "phase8_run8b2_rank2_same_capacity_4x6_fft_seed1",
+    "returncode": 0,
+    "elapsed_seconds": 79.40283799171448,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8b2_rank2_same_capacity_4x6_fft_seed1.log"
+  },
+  "phase8_run8b3_rank1_vector_24_fft_seed0": {
+    "run_name": "phase8_run8b3_rank1_vector_24_fft_seed0",
+    "returncode": 0,
+    "elapsed_seconds": 71.6408441066742,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8b3_rank1_vector_24_fft_seed0.log"
+  },
+  "phase8_run8b3_rank1_vector_24_fft_seed1": {
+    "run_name": "phase8_run8b3_rank1_vector_24_fft_seed1",
+    "returncode": 0,
+    "elapsed_seconds": 71.29182696342468,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8b3_rank1_vector_24_fft_seed1.log"
+  },
+  "phase8_run8b3_rank1_vector_24_sequential_seed0": {
+    "run_name": "phase8_run8b3_rank1_vector_24_sequential_seed0",
+    "returncode": 0,
+    "elapsed_seconds": 111.23551607131958,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8b3_rank1_vector_24_sequential_seed0.log"
+  },
+  "phase8_run8b3_rank1_vector_24_sequential_seed1": {
+    "run_name": "phase8_run8b3_rank1_vector_24_sequential_seed1",
+    "returncode": 0,
+    "elapsed_seconds": 112.54199385643005,
+    "log_path": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase8_state_shape_seq_fft_greek_classics_20260423/phase8_run8b3_rank1_vector_24_sequential_seed1.log"
+  }
+}

@@ -29,6 +29,11 @@ def test_build_parser_exposes_phase_and_growth_defaults() -> None:
     assert args.wavelet_levels is None
     assert args.chunk_size is None
     assert args.track_chunk_drift is False
+    assert args.attention_every_k == 0
+    assert args.attention_num_heads == 8
+    assert args.attention_window == 256
+    assert args.attention_position == "after"
+    assert args.stateful_training is True
     assert args.lr_warmup_steps == 0
     assert args.lr_decay_style == "constant"
     assert args.min_lr_scale == 0.1
@@ -198,3 +203,27 @@ def test_build_parser_parses_max_state_shape_like_state_shape() -> None:
     assert args.generation_top_k == 12
     assert args.benchmark_prompt_lengths == (16, 64, 256)
     assert args.benchmark_new_tokens == 192
+
+
+def test_build_parser_parses_hybrid_attention_and_stateless_flags() -> None:
+    train_script = load_train_script()
+
+    args = train_script.build_parser().parse_args(
+        [
+            "--attention-every-k",
+            "3",
+            "--attention-num-heads",
+            "4",
+            "--attention-window",
+            "128",
+            "--attention-position",
+            "before",
+            "--stateless-training",
+        ]
+    )
+
+    assert args.attention_every_k == 3
+    assert args.attention_num_heads == 4
+    assert args.attention_window == 128
+    assert args.attention_position == "before"
+    assert args.stateful_training is False

@@ -1,0 +1,89 @@
+[
+  {
+    "seq_len": 64,
+    "config_id": "9.1",
+    "label": "seq_len_64",
+    "description": "Current default replication",
+    "eval_batches": 16,
+    "completed_seeds": 2,
+    "per_seed_final3_val_bpc": [
+      3.0885570496858636,
+      3.0744305559777274
+    ],
+    "per_seed_final_val_bpc": [
+      3.0626546853118657,
+      3.0121293856652445
+    ],
+    "per_seed_elapsed_seconds": [
+      137.1428987979889,
+      136.61292600631714
+    ],
+    "per_seed_train_tokens_per_second": [
+      1866.6660996942123,
+      1873.9075977932152
+    ],
+    "mean_final3_val_bpc": 3.0814938028317957,
+    "mean_final_val_bpc": 3.037392035488555,
+    "mean_elapsed_seconds": 136.87791240215302,
+    "mean_train_tokens_per_second": 1870.2868487437138,
+    "delta_vs_seq64": 0.0
+  },
+  {
+    "seq_len": 128,
+    "config_id": "9.2",
+    "label": "seq_len_128",
+    "description": "2x context",
+    "eval_batches": 16,
+    "completed_seeds": 2,
+    "per_seed_final3_val_bpc": [
+      3.061220959108892,
+      3.0435751450034587
+    ],
+    "per_seed_final_val_bpc": [
+      3.0240977658279444,
+      2.995053679715535
+    ],
+    "per_seed_elapsed_seconds": [
+      284.8559799194336,
+      298.9244110584259
+    ],
+    "per_seed_train_tokens_per_second": [
+      1797.3995144662576,
+      1712.8075896749954
+    ],
+    "mean_final3_val_bpc": 3.0523980520561755,
+    "mean_final_val_bpc": 3.0095757227717397,
+    "mean_elapsed_seconds": 291.89019548892975,
+    "mean_train_tokens_per_second": 1755.1035520706264,
+    "delta_vs_seq64": -0.02909575077562021
+  },
+  {
+    "seq_len": 256,
+    "config_id": "9.3",
+    "label": "seq_len_256",
+    "description": "4x context with reduced eval_batches",
+    "eval_batches": 8,
+    "completed_seeds": 2,
+    "per_seed_final3_val_bpc": [
+      2.9462682497223116,
+      2.8996356197272064
+    ],
+    "per_seed_final_val_bpc": [
+      2.9282594232365704,
+      2.8893511002012735
+    ],
+    "per_seed_elapsed_seconds": [
+      524.0190830230713,
+      484.99815106391907
+    ],
+    "per_seed_train_tokens_per_second": [
+      1954.1273079074408,
+      2111.3482551504503
+    ],
+    "mean_final3_val_bpc": 2.9229519347247592,
+    "mean_final_val_bpc": 2.908805261718922,
+    "mean_elapsed_seconds": 504.5086170434952,
+    "mean_train_tokens_per_second": 2032.7377815289456,
+    "delta_vs_seq64": -0.15854186810703652
+  }
+]

@@ -1,0 +1,15 @@
+wrote run config: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase9_sequence_length_greek_classics_20260423/phase9_seq256_seed0/config.json
+step=1 lr=0.001 train_loss=4.4112 train_acc=0.0059 train_ppl=82.3677 train_bpc=6.3640 val_loss=4.0632 val_acc=0.0459 val_ppl=58.1614 val_bpc=5.8620
+step=50 lr=0.001 train_loss=2.9695 train_acc=0.1626 train_ppl=19.4817 train_bpc=4.2840 val_loss=3.0014 val_acc=0.1579 val_ppl=20.1139 val_bpc=4.3301
+step=100 lr=0.001 train_loss=2.6036 train_acc=0.2969 train_ppl=13.5120 train_bpc=3.7562 val_loss=2.6139 val_acc=0.2960 val_ppl=13.6523 val_bpc=3.7711
+step=150 lr=0.001 train_loss=2.3395 train_acc=0.3296 train_ppl=10.3760 train_bpc=3.3752 val_loss=2.4182 val_acc=0.3285 val_ppl=11.2262 val_bpc=3.4888
+step=200 lr=0.001 train_loss=2.1536 train_acc=0.3647 train_ppl=8.6156 train_bpc=3.1070 val_loss=2.2622 val_acc=0.3612 val_ppl=9.6044 val_bpc=3.2637
+step=250 lr=0.001 train_loss=2.1224 train_acc=0.3911 train_ppl=8.3513 train_bpc=3.0620 val_loss=2.2058 val_acc=0.3765 val_ppl=9.0775 val_bpc=3.1823
+step=300 lr=0.001 train_loss=2.1161 train_acc=0.3896 train_ppl=8.2990 train_bpc=3.0529 val_loss=2.1383 val_acc=0.3930 val_ppl=8.4852 val_bpc=3.0849
+step=350 lr=0.001 train_loss=1.9854 train_acc=0.4268 train_ppl=7.2822 train_bpc=2.8644 val_loss=2.0990 val_acc=0.3973 val_ppl=8.1577 val_bpc=3.0282
+step=400 lr=0.001 train_loss=1.9783 train_acc=0.4238 train_ppl=7.2304 train_bpc=2.8541 val_loss=2.0529 val_acc=0.4109 val_ppl=7.7908 val_bpc=2.9618
+step=450 lr=0.001 train_loss=1.9521 train_acc=0.4448 train_ppl=7.0432 train_bpc=2.8162 val_loss=2.0439 val_acc=0.4192 val_ppl=7.7209 val_bpc=2.9488
+step=500 lr=0.001 train_loss=1.8373 train_acc=0.4614 train_ppl=6.2797 train_bpc=2.6507 val_loss=2.0297 val_acc=0.4264 val_ppl=7.6119 val_bpc=2.9283
+training finished (device=cpu, corpus=greek_classics, vocab=76, train_tokens=90000, val_tokens=10000, state_shape=(2, 3, 4))
+final train(step=500) loss=1.8373 acc=0.4614 ppl=6.2797 bpc=2.6507 last eval(step=500) val_loss=2.0297 val_acc=0.4264 val_ppl=7.6119 val_bpc=2.9283
+saved checkpoint: /Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase9_sequence_length_greek_classics_20260423/phase9_seq256_seed0/checkpoint_step_000500.pt
