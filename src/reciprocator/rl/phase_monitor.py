@@ -38,10 +38,7 @@ class PhaseTrajectoryMonitor:
         model.eval()
         try:
             with torch.no_grad():
-                if model.enable_anticipator_relation:
-                    model(token_ids)
-                else:
-                    model(token_ids)
+                model(token_ids)
         finally:
             handle.remove()
             model.train(training)
@@ -52,6 +49,9 @@ class PhaseTrajectoryMonitor:
         if not torch.is_complex(hidden):
             raise TypeError("PhaseTrajectoryMonitor expects complex hidden states.")
 
+        # MPS currently lacks torch.angle for complex tensors; these diagnostics
+        # are small, so compute phase statistics on CPU without moving the model.
+        hidden = hidden.cpu()
         phase = torch.angle(hidden[:, output_start:, :])
         if phase.numel() == 0:
             return PhaseTrajectoryStats(0, 0.0, 0.0, 0.0, 0.0)

@@ -586,6 +586,21 @@ state with geometrically structured coupling that adapts online. This section
 traces each thread so future work can differentiate rather than re-motivate from
 first principles.
 
+### Random Features and Phase-Based Invariance
+
+- Rahimi, A., Recht, B. (2007). *Random Features for Large-Scale Kernel
+  Machines*. NeurIPS 2007. Random Fourier features approximate
+  shift-invariant kernels by mapping inputs through complex exponentials:
+  the conjugate inner product of \(e^{i\omega x}\) and \(e^{i\omega y}\)
+  is \(e^{i\omega(x-y)}\), so absolute position cancels and only relative
+  displacement remains. This is the closest formal precedent for the engine's
+  phase-based separation of invariance and variance: recurring structure
+  produces consistent phase relationships that reinforce, while non-recurring
+  structure produces inconsistent phase relationships that cancel. The engine
+  applies the same mathematical mechanism — complex phase as an automatic
+  invariance extractor — to recurrent state dynamics rather than kernel
+  approximation.
+
 ### Complex-Valued Prototype Composition and Binding
 
 - Plate, T. A. (1995). *Holographic Reduced Representations*. IEEE Transactions

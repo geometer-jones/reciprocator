@@ -14,7 +14,7 @@ framework. The focus is on trying architectural ideas quickly, recording runs un
 - A `src/` package containing the model, mixer, complex-valued layers, training
   loop, and corpus helpers.
 - A CLI training entry point at `scripts/train.py`.
-- Bundled public-domain corpora under `corpora/`.
+- Bundled training corpora under `corpora/`.
 - Saved experimental artifacts under `runs/`.
 - A `pytest` suite covering the package API and training script behavior.
 - Research notes in `test_plan.md` and the corpus-specific READMEs.
@@ -140,7 +140,7 @@ Run a small training job on a bundled corpus:
 
 ```bash
 python3 scripts/train.py \
-  --corpus plato_jowett \
+  --corpus greek_classics \
   --device auto \
   --steps 50 \
   --eval-every 10 \
@@ -153,7 +153,7 @@ python3 scripts/train.py \
 
 That command will:
 
-- load the bundled `plato_jowett` corpus
+- load the bundled `greek_classics` corpus
 - build a character vocabulary and train/validation split
 - train a small `ReciprocatorLM`
 - write run config and checkpoints under `runs/smoke_run/` when checkpointing is enabled
@@ -166,10 +166,11 @@ python3 scripts/train.py --help
 
 ## Bundled corpora
 
-Two corpora are registered today:
+Three corpora are registered today:
 
-- `plato_jowett`
-- `greek_philosophy_classics`
+- `chinese_classics`
+- `greek_classics`
+- `lisp_math`
 
 Each corpus directory contains:
 
@@ -183,7 +184,7 @@ Example:
 from reciprocator import available_corpora, read_corpus_text
 
 print([corpus.name for corpus in available_corpora()])
-text = read_corpus_text("plato_jowett")
+text = read_corpus_text("lisp_math")
 print(len(text))
 ```
 
@@ -201,7 +202,7 @@ model = ReciprocatorLM(
 )
 
 config = TrainingConfig(
-    corpus_name="plato_jowett",
+    corpus_name="lisp_math",
     steps=10,
     eval_every=5,
     hidden_size=32,
@@ -232,8 +233,9 @@ include:
 - [`docs/rl/`](./docs/rl/): RL mathematical reasoning — test plan, lab book, and design docs
 - [`lab-book.md`](./lab-book.md): experiment history and conclusions
 - [`test-plan.md`](./test_plan.md): experiment matrix and evaluation protocol
-- [`corpora/plato_jowett/README.md`](./corpora/plato_jowett/README.md)
-- [`corpora/greek_philosophy_classics/README.md`](./corpora/greek_philosophy_classics/README.md)
+- [`corpora/chinese_classics/README.md`](./corpora/chinese_classics/README.md)
+- [`corpora/greek_classics/README.md`](./corpora/greek_classics/README.md)
+- [`corpora/lisp_math/README.md`](./corpora/lisp_math/README.md)
 
 ## Status
 

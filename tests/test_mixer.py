@@ -17,6 +17,28 @@ def assert_finite(tensor: torch.Tensor) -> None:
         assert torch.isfinite(tensor).all()
 
 
+def force_return_map_to_first_magnitude(mixer: ReciprocatorMixer) -> None:
+    with torch.no_grad():
+        mixer.return_map.proj.weight.zero_()
+        mixer.return_map.proj.bias.zero_()
+        mixer.return_map.proj.weight[0, 2 * mixer.state_size] = 1.0
+        mixer.gate.weight.zero_()
+        mixer.gate.bias.fill_(20.0)
+
+
+def gated_delta_from_features(
+    mixer: ReciprocatorMixer,
+    features: torch.Tensor,
+    normalized_hidden: torch.Tensor,
+) -> torch.Tensor:
+    raw_delta = mixer.return_map(features)
+    gate_input = torch.cat(
+        [normalized_hidden.real, normalized_hidden.imag, raw_delta.real, raw_delta.imag], dim=-1
+    )
+    gate = torch.sigmoid(mixer.gate(gate_input))
+    return gate.to(raw_delta.dtype) * raw_delta
+
+
 @pytest.mark.parametrize(
     "coupling_type",
     ["sequential", "fft", "dwt", "wavelet_packet", "wavelet_packet_max_gauge"],
@@ -398,6 +420,57 @@ def test_return_map_features_are_phase_invariant_and_compact() -> None:
     assert mixer.return_map.proj.in_features == 3 * mixer.state_size
     assert features.shape == (2, 3 * mixer.state_size)
     assert torch.allclose(rotated_features, features, atol=1e-5)
+
+
+def test_step_return_map_uses_state_displacement_features() -> None:
+    torch.manual_seed(0)
+    mixer = ReciprocatorMixer(hidden_size=6, state_shape=(2, 2))
+    force_return_map_to_first_magnitude(mixer)
+    hidden_t = random_complex(2, 6)
+    state = random_complex(2, 2, 2)
+
+    delta, next_state = mixer.step(hidden_t, state)
+
+    normalized_hidden = mixer.pre_norm(hidden_t)
+    expected = gated_delta_from_features(
+        mixer,
+        mixer._state_features(next_state - state),
+        normalized_hidden,
+    )
+    absolute_state_delta = gated_delta_from_features(
+        mixer,
+        mixer._state_features(next_state),
+        normalized_hidden,
+    )
+
+    assert torch.allclose(delta, expected, atol=1e-5)
+    assert not torch.allclose(delta, absolute_state_delta, atol=1e-5)
+
+
+def test_compute_delta_uses_state_displacement_features() -> None:
+    torch.manual_seed(0)
+    mixer = ReciprocatorMixer(hidden_size=6, state_shape=(2, 2))
+    force_return_map_to_first_magnitude(mixer)
+    hidden_t = random_complex(2, 6)
+    old_state = random_complex(2, 2, 2)
+    next_state = random_complex(2, 2, 2)
+    normalized_hidden = mixer.pre_norm(hidden_t)
+
+    delta = mixer._compute_delta(next_state, old_state, normalized_hidden)
+
+    expected = gated_delta_from_features(
+        mixer,
+        mixer._state_features(next_state - old_state),
+        normalized_hidden,
+    )
+    absolute_state_delta = gated_delta_from_features(
+        mixer,
+        mixer._state_features(next_state),
+        normalized_hidden,
+    )
+
+    assert torch.allclose(delta, expected, atol=1e-5)
+    assert not torch.allclose(delta, absolute_state_delta, atol=1e-5)
 
 
 # --- chunked forward ---

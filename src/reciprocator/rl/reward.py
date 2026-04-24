@@ -43,6 +43,17 @@ class RewardResult:
 
 
 class RewardFunction:
+    def __init__(
+        self,
+        *,
+        wrong_result_reward: float = 0.5,
+        eval_error_reward: float = 0.2,
+        stage_one_wrong_reward: float | None = None,
+    ) -> None:
+        self.wrong_result_reward = wrong_result_reward
+        self.eval_error_reward = eval_error_reward
+        self.stage_one_wrong_reward = stage_one_wrong_reward
+
     def score_output(self, problem: ProblemExample, output_text: str) -> RewardResult:
         from .lisp_eval import LispEvaluator
 
@@ -64,11 +75,12 @@ class RewardFunction:
         except ParseError:
             return RewardResult(0.0, "parse_error", parsed=False, evaluated=False, correct=False, actual_value=None, expected_value=problem.expected_result)
         except EvalError:
-            return RewardResult(0.2, "eval_error", parsed=True, evaluated=False, correct=False, actual_value=None, expected_value=problem.expected_result)
+            return RewardResult(self.eval_error_reward, "eval_error", parsed=True, evaluated=False, correct=False, actual_value=None, expected_value=problem.expected_result)
 
         if values_equal(actual, problem.expected_result):
             return RewardResult(1.0, "correct", parsed=True, evaluated=True, correct=True, actual_value=actual, expected_value=problem.expected_result)
-        return RewardResult(0.5, "wrong_result", parsed=True, evaluated=True, correct=False, actual_value=actual, expected_value=problem.expected_result)
+        wrong_reward = self.stage_one_wrong_reward if stage == 1 and self.stage_one_wrong_reward is not None else self.wrong_result_reward
+        return RewardResult(wrong_reward, "wrong_result", parsed=True, evaluated=True, correct=False, actual_value=actual, expected_value=problem.expected_result)
 
     def _score_quote_stage(self, problem: ProblemExample, candidate: str) -> RewardResult:
         try:
@@ -93,6 +105,16 @@ class RewardFunction:
                 raise EvalError("Treating raw output list as data.")
             actual = LispEvaluator(stage=3).evaluate_program(candidate)
         except EvalError:
+            if not raw_form_is_data:
+                return RewardResult(
+                    0.2,
+                    "eval_error",
+                    parsed=True,
+                    evaluated=False,
+                    correct=False,
+                    actual_value=None,
+                    expected_value=problem.expected_result,
+                )
             actual = forms[0]
 
         if not isinstance(actual, ListExpr) and not isinstance(problem.expected_result, (int, float)):

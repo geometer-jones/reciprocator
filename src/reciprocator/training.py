@@ -110,7 +110,6 @@ class TrainingConfig:
     dynamic_spectral_gains: bool = False
     anisotropic_spectral_gains: bool = False
     gain_projector_rank: int = 8
-    enable_anticipator_relation: bool = False
     enable_cross_layer_state: bool = False
     coupling_type: str = "sequential"
     low_frequency_gain: float = 0.5
@@ -190,6 +189,7 @@ class TrainingResult:
     config: TrainingConfig
     dataset: TextDataset
     model: ReciprocatorLM
+    optimizer: Optimizer
     train_losses: list[float]
     train_metrics: list[Tuple[int, TrainingMetrics]]
     val_losses: list[Tuple[int, float]]
@@ -199,6 +199,17 @@ class TrainingResult:
     residual_diagnostics: list[dict]
     chunk_drift_history: list[dict]
     device: torch.device
+
+
+@dataclass(frozen=True)
+class TrainingResumeState:
+    step: int
+    model_state_dict: Dict[str, Tensor]
+    optimizer_state_dict: Optional[dict]
+    train_losses: Sequence[float] = ()
+    val_losses: Sequence[Tuple[int, float]] = ()
+    train_metrics: Sequence[Tuple[int, TrainingMetrics]] = ()
+    val_metrics: Sequence[Tuple[int, TrainingMetrics]] = ()
 
 
 TrainingStepCallback = Callable[
@@ -745,12 +756,7 @@ def _generate_continuation_tokens(
     prompt_batch = prompt_tokens.unsqueeze(0).to(device)
     model.eval()
     with torch.no_grad():
-        if model.enable_anticipator_relation:
-            logits, states, next_ant = model(prompt_batch, position_offset=0)
-            anticipatory_hidden = None if next_ant is None else next_ant[:, -1:]
-        else:
-            logits, states = model(prompt_batch, position_offset=0)
-            anticipatory_hidden = None
+        logits, states = model(prompt_batch, position_offset=0)
         current_logits = logits[:, -1]
         current_position = int(prompt_batch.shape[1])
         generated_tokens: list[int] = []
@@ -765,20 +771,11 @@ def _generate_continuation_tokens(
             if generation_step == max_new_tokens - 1:
                 break
 
-            if model.enable_anticipator_relation:
-                logits, states, next_ant = model(
-                    next_token,
-                    states=states,
-                    position_offset=current_position,
-                    anticipatory_hidden=anticipatory_hidden,
-                )
-                anticipatory_hidden = None if next_ant is None else next_ant[:, -1:]
-            else:
-                logits, states = model(
-                    next_token,
-                    states=states,
-                    position_offset=current_position,
-                )
+            logits, states = model(
+                next_token,
+                states=states,
+                position_offset=current_position,
+            )
             current_logits = logits[:, -1]
             current_position += 1
 
@@ -919,12 +916,7 @@ def benchmark_streaming_inference(
             _reset_peak_memory(device)
             _synchronize_device(device)
             prompt_start = time.perf_counter()
-            if model.enable_anticipator_relation:
-                logits, states, next_ant = model(prompt_batch, position_offset=0)
-                anticipatory_hidden = None if next_ant is None else next_ant[:, -1:]
-            else:
-                logits, states = model(prompt_batch, position_offset=0)
-                anticipatory_hidden = None
+            logits, states = model(prompt_batch, position_offset=0)
             _synchronize_device(device)
             prompt_elapsed = time.perf_counter() - prompt_start
 
@@ -936,20 +928,11 @@ def benchmark_streaming_inference(
                 next_token = current_logits.argmax(dim=-1, keepdim=True)
                 if decode_step == decode_tokens - 1:
                     break
-                if model.enable_anticipator_relation:
-                    logits, states, next_ant = model(
-                        next_token,
-                        states=states,
-                        position_offset=current_position,
-                        anticipatory_hidden=anticipatory_hidden,
-                    )
-                    anticipatory_hidden = None if next_ant is None else next_ant[:, -1:]
-                else:
-                    logits, states = model(
-                        next_token,
-                        states=states,
-                        position_offset=current_position,
-                    )
+                logits, states = model(
+                    next_token,
+                    states=states,
+                    position_offset=current_position,
+                )
                 current_logits = logits[:, -1]
                 current_position += 1
             _synchronize_device(device)
@@ -1965,23 +1948,13 @@ def _compute_batch_metrics(
     track_drift: bool = False,
 ) -> Tuple[Tensor, TrainingMetrics, Tuple[Optional[Tensor], ...], Optional[dict]]:
     drift_stats = None
-    if model.enable_anticipator_relation:
-        outputs = model(
-            token_ids,
-            states=states,
-            targets=targets,
-            chunk_size=chunk_size,
-            track_drift=track_drift,
-        )
-        logits, next_states, *extra = outputs
-    else:
-        outputs = model(
-            token_ids,
-            states=states,
-            chunk_size=chunk_size,
-            track_drift=track_drift,
-        )
-        logits, next_states, *extra = outputs
+    outputs = model(
+        token_ids,
+        states=states,
+        chunk_size=chunk_size,
+        track_drift=track_drift,
+    )
+    logits, next_states, *extra = outputs
     if track_drift and extra:
         drift_stats = extra[-1]
     loss = F.cross_entropy(logits.reshape(-1, model.vocab_size), targets.reshape(-1))
@@ -2137,7 +2110,6 @@ def _build_model_from_config(
         enable_self_relation=config.enable_self_relation,
         dynamic_gains=config.dynamic_gains,
         gain_projector_rank=config.gain_projector_rank,
-        enable_anticipator_relation=config.enable_anticipator_relation,
         enable_cross_layer_state=config.enable_cross_layer_state,
         coupling_type=config.coupling_type,
         low_frequency_gain=config.low_frequency_gain,
@@ -2475,10 +2447,7 @@ def evaluate_metrics(
     with torch.no_grad():
         for _ in range(eval_batches):
             inputs, targets = sample_causal_lm_batch(tokens, batch_size, seq_len, device=device)
-            if model.enable_anticipator_relation:
-                logits, _, _ = model(inputs, targets=targets)
-            else:
-                logits, _ = model(inputs)
+            logits, _ = model(inputs)
             loss = F.cross_entropy(logits.reshape(-1, model.vocab_size), targets.reshape(-1))
             predictions = logits.argmax(dim=-1)
 
@@ -2609,11 +2578,31 @@ def _validate_training_dataset(config: TrainingConfig, dataset: TextDataset) -> 
             )
 
 
+def _stateful_stream_starts_and_positions(
+    *,
+    total_train: int,
+    batch_size: int,
+    seq_len: int,
+    completed_steps: int,
+) -> Tuple[List[int], List[int]]:
+    spacing = total_train // batch_size
+    stream_starts = [i * spacing for i in range(batch_size)]
+    if completed_steps <= 0:
+        return stream_starts, list(stream_starts)
+
+    stream_pos = []
+    for start in stream_starts:
+        steps_before_wrap = max((total_train - start - seq_len - 1) // seq_len + 1, 1)
+        stream_pos.append(start + (completed_steps % steps_before_wrap) * seq_len)
+    return stream_starts, stream_pos
+
+
 def train_model(
     config: TrainingConfig,
     *,
     dataset: Optional[TextDataset] = None,
     step_callback: Optional[TrainingStepCallback] = None,
+    resume_state: Optional[TrainingResumeState] = None,
 ) -> TrainingResult:
     config = _normalize_training_config(config)
     _validate_training_config(config)
@@ -2639,7 +2628,19 @@ def train_model(
         lr=config.learning_rate,
         weight_decay=config.weight_decay,
     )
-    _set_optimizer_learning_rate_scale(optimizer, _learning_rate_scale_for_step(config, 1))
+    resume_step = 0
+    if resume_state is not None:
+        resume_step = int(resume_state.step)
+        if resume_step < 0:
+            raise ValueError("resume_state.step must be non-negative.")
+        if resume_step > config.steps:
+            raise ValueError("resume_state.step cannot exceed config.steps.")
+        model.load_state_dict(resume_state.model_state_dict)
+        if resume_state.optimizer_state_dict is not None:
+            optimizer.load_state_dict(resume_state.optimizer_state_dict)
+    else:
+        _set_optimizer_learning_rate_scale(optimizer, _learning_rate_scale_for_step(config, 1))
+
     mode_residual_ema = None
     layer_mode_residual_ema = None
     mode_pruning_residual_ema = None
@@ -2649,10 +2650,16 @@ def train_model(
     growth_event_history: list[Tuple[int, Tuple[int, ...], Tuple[int, ...]]] = []
     state_axis_kinds = ["mode"] * len(config.state_shape)
 
-    train_losses: list[float] = []
-    train_metrics: list[Tuple[int, TrainingMetrics]] = []
-    val_losses: list[Tuple[int, float]] = []
-    val_metrics: list[Tuple[int, TrainingMetrics]] = []
+    train_losses: list[float] = [] if resume_state is None else [float(loss) for loss in resume_state.train_losses]
+    train_metrics: list[Tuple[int, TrainingMetrics]] = (
+        [] if resume_state is None else [(int(step), metrics) for step, metrics in resume_state.train_metrics]
+    )
+    val_losses: list[Tuple[int, float]] = (
+        [] if resume_state is None else [(int(step), float(loss)) for step, loss in resume_state.val_losses]
+    )
+    val_metrics: list[Tuple[int, TrainingMetrics]] = (
+        [] if resume_state is None else [(int(step), metrics) for step, metrics in resume_state.val_metrics]
+    )
     generation_samples: list[GenerationSample] = []
     runtime_benchmarks: list[RuntimeBenchmark] = []
     residual_diagnostics: list[dict] = []
@@ -2666,12 +2673,15 @@ def train_model(
     stream_starts: Optional[List[int]] = None
     if config.stateful_training:
         total_train = dataset.train_tokens.numel()
-        spacing = total_train // config.batch_size
-        stream_starts = [i * spacing for i in range(config.batch_size)]
-        stream_pos = list(stream_starts)
+        stream_starts, stream_pos = _stateful_stream_starts_and_positions(
+            total_train=total_train,
+            batch_size=config.batch_size,
+            seq_len=config.seq_len,
+            completed_steps=resume_step,
+        )
         carry_states = tuple(None for _ in model.blocks)
 
-    for step in range(1, config.steps + 1):
+    for step in range(resume_step + 1, config.steps + 1):
         _set_optimizer_learning_rate_scale(optimizer, _learning_rate_scale_for_step(config, step))
         if config.stateful_training:
             assert stream_pos is not None and stream_starts is not None
@@ -3011,6 +3021,7 @@ def train_model(
         config=config,
         dataset=dataset,
         model=model,
+        optimizer=optimizer,
         train_losses=train_losses,
         train_metrics=train_metrics,
         val_losses=val_losses,
@@ -3034,6 +3045,7 @@ __all__ = [
     "TextDataset",
     "TrainingConfig",
     "TrainingMetrics",
+    "TrainingResumeState",
     "TrainingResult",
     "TrainingStepCallback",
     "benchmark_streaming_inference",

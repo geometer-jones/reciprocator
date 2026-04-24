@@ -1,0 +1,175 @@
+{
+  "checks": {
+    "final_samples_have_parseable_outputs": true,
+    "final_step_has_parseable_outputs": true,
+    "gradient_norms_finite": true,
+    "gradient_norms_nonzero_each_step": true,
+    "gradient_norms_recorded": true,
+    "mean_reward_10_step_window_changed_gt_0_1_abs": true,
+    "mean_reward_changed_gt_0_1_abs": true,
+    "model_parameters_finite": true
+  },
+  "config": {
+    "batch_size": 2,
+    "coupling_type": "sequential",
+    "device": "cpu",
+    "enable_self_relation": false,
+    "ffn_expansion_factor": 2,
+    "grad_clip_norm": 1.0,
+    "group_size": 4,
+    "hidden_size": 32,
+    "kl_beta": 0.01,
+    "learning_rate": 0.0003,
+    "max_completion_tokens": 4,
+    "normalization_type": "frobenius",
+    "num_layers": 1,
+    "phase_type": "rope",
+    "readout_type": "phase_aware",
+    "sample_record_limit": 8,
+    "seed": 0,
+    "state_shape": [
+      2,
+      3,
+      4
+    ],
+    "steps": 200,
+    "temperature": 1.0,
+    "token_magnitude_type": "inverse_frequency_learned",
+    "token_phase": "semantic",
+    "top_k": null,
+    "weight_decay": 0.0
+  },
+  "deviations_from_test_plan": [
+    "batch_size=2 instead of fixed-table train_batch_problems=32 for local runtime",
+    "max_completion_tokens=4 instead of fixed-table max_output_len=32 because stage-1 numeric answers fit within 4 chars",
+    "phase trajectory recording disabled because Phase R1 checks gradients/rewards/parseability/parameter finiteness, not phase statistics"
+  ],
+  "difficulty": {
+    "available_forms": [],
+    "collection_size": 3,
+    "depth": 2,
+    "nesting_level": 1,
+    "operator_set": [
+      "+",
+      "-",
+      "*",
+      "/"
+    ],
+    "stage": 1,
+    "value_range": [
+      0,
+      9
+    ]
+  },
+  "elapsed_seconds": 65.34468799999999,
+  "final_error_counts": {
+    "eval_error": 3,
+    "wrong_result": 5
+  },
+  "final_parseable_outputs": 8,
+  "final_samples": [
+    {
+      "advantage": 1.0000000000000002,
+      "completion": ":u::",
+      "error_type": "wrong_result",
+      "expected_result": "-2",
+      "mean_phase_variance": 0.0,
+      "phase_delta_variance": 0.0,
+      "prompt_expression": "(- 0 2)",
+      "reward": 0.5,
+      "stage": 1
+    },
+    {
+      "advantage": 1.0000000000000002,
+      "completion": "::::",
+      "error_type": "wrong_result",
+      "expected_result": "-2",
+      "mean_phase_variance": 0.0,
+      "phase_delta_variance": 0.0,
+      "prompt_expression": "(- 0 2)",
+      "reward": 0.5,
+      "stage": 1
+    },
+    {
+      "advantage": -0.9999999999999998,
+      "completion": "9:::",
+      "error_type": "eval_error",
+      "expected_result": "-2",
+      "mean_phase_variance": 0.0,
+      "phase_delta_variance": 0.0,
+      "prompt_expression": "(- 0 2)",
+      "reward": 0.2,
+      "stage": 1
+    },
+    {
+      "advantage": -0.9999999999999998,
+      "completion": "c:::",
+      "error_type": "eval_error",
+      "expected_result": "-2",
+      "mean_phase_variance": 0.0,
+      "phase_delta_variance": 0.0,
+      "prompt_expression": "(- 0 2)",
+      "reward": 0.2,
+      "stage": 1
+    },
+    {
+      "advantage": 0.577350269189626,
+      "completion": "::f:",
+      "error_type": "wrong_result",
+      "expected_result": "0",
+      "mean_phase_variance": 0.0,
+      "phase_delta_variance": 0.0,
+      "prompt_expression": "(- 0 0)",
+      "reward": 0.5,
+      "stage": 1
+    },
+    {
+      "advantage": 0.577350269189626,
+      "completion": ":::8",
+      "error_type": "wrong_result",
+      "expected_result": "0",
+      "mean_phase_variance": 0.0,
+      "phase_delta_variance": 0.0,
+      "prompt_expression": "(- 0 0)",
+      "reward": 0.5,
+      "stage": 1
+    },
+    {
+      "advantage": 0.577350269189626,
+      "completion": "::<e",
+      "error_type": "wrong_result",
+      "expected_result": "0",
+      "mean_phase_variance": 0.0,
+      "phase_delta_variance": 0.0,
+      "prompt_expression": "(- 0 0)",
+      "reward": 0.5,
+      "stage": 1
+    },
+    {
+      "advantage": -1.7320508075688772,
+      "completion": "rd::",
+      "error_type": "eval_error",
+      "expected_result": "0",
+      "mean_phase_variance": 0.0,
+      "phase_delta_variance": 0.0,
+      "prompt_expression": "(- 0 0)",
+      "reward": 0.2,
+      "stage": 1
+    }
+  ],
+  "final_samples_parseable": 8,
+  "final_total_outputs": 8,
+  "first10_mean_reward": 0.13499999999999998,
+  "first_mean_reward": 0.15,
+  "first_success_rate": 0.0,
+  "grad_norm_last": 1.2513523955036179,
+  "grad_norm_max": 3.4628026979373927,
+  "grad_norm_min": 0.0057599423614186525,
+  "last10_mean_reward": 0.43125,
+  "last_mean_reward": 0.3875,
+  "last_success_rate": 0.0,
+  "reward_delta": 0.23750000000000002,
+  "reward_delta_10_step_window": 0.29625,
+  "run_name": "r1_stage1_smoke_seed0",
+  "seed": 0
+}

@@ -119,7 +119,8 @@ per-token lifted representations:
 lift(p) = sum_x p(x) * (rho_tok(x) odot rho_pos(t+1))
 ```
 
-This is used by the anticipator relation (§11).
+This supports callers that need to lift a sparse or soft token distribution into
+the same complex hidden space as discrete token ids.
 
 ## 3. Layer Architecture
 
@@ -194,7 +195,7 @@ phase as structurally separate learning targets with explicit geometric meaning.
 The learned `W_mag` and `W_phi` together absorb the role that a
 Tikhonov-regularized Gram inverse `(E^* E + epsilon I)^{-1}` would play in a
 fixed-dictionary formulation; there is no explicit Gram correction in the
-architecture (see §16).
+architecture (see §15).
 
 ## 5. Normalization
 
@@ -513,15 +514,17 @@ is reconstructed.
 
 ## 9. Hidden-Space Return Map
 
-The mixer summarizes the updated state into a phase-aware real feature map and
-maps it back to the hidden dimension through a gated return. Let
-`bar{S}_t^{(\ell)} = (1 / M_state) sum_j S_t^{(\ell)}[j]` be the mean complex
-state value and define the gauge-invariant cross-product
-`c_t^{(\ell)} = S_t^{(\ell)} odot overline{bar{S}_t^{(\ell)}}`:
+The mixer summarizes the state displacement into a phase-aware real feature map
+and maps it back to the hidden dimension through a gated return. Define the
+displacement `dS_t^{(\ell)} = S_t^{(\ell)} - S_{t-1}^{(\ell)}` — the
+rotational content deposited by this token's interaction with the state. Let
+`bar{dS}_t^{(\ell)} = (1 / M_state) sum_j dS_t^{(\ell)}[j]` be the mean
+displacement value and define the gauge-invariant cross-product
+`c_t^{(\ell)} = dS_t^{(\ell)} odot overline{bar{dS}_t^{(\ell)}}`:
 
 ```math
-psi(S) = [ Re(c), Im(c), |S| ]                             in R^{3 M_state}
-d_t^{(\ell)} = W_ret^{(\ell)} * psi( S_t^{(\ell)} )          in C^D
+psi(dS) = [ Re(c), Im(c), |dS| ]                             in R^{3 M_state}
+d_t^{(\ell)} = W_ret^{(\ell)} * psi( dS_t^{(\ell)} )           in C^D
 g_t^{(\ell)} = sigmoid(
                     W_gate^{(\ell)} *
                     [ Re(u_t^{(\ell)}), Im(u_t^{(\ell)}),
@@ -535,6 +538,13 @@ components of `d_t`. `W_ret` maps real features to complex outputs via a
 `RealToComplexLinear` map. This uses a data-dependent U(1)-invariant feature
 map (cf. the learned-anchor readout in §10, which trades gauge-invariance for
 a trainable phase alignment).
+
+Under Frobenius normalization, both `S_t` and `S_{t-1}` are unit-norm, so
+`|dS_t|` is proportional to the per-element angular displacement — how much
+that state element rotated. All three feature channels are genuinely
+informative: the cross-product captures the phase structure of the displacement
+(how elements relate in their movement), and the magnitude captures the
+absolute scale of the displacement per element.
 
 ## 10. Readout Geometry
 
@@ -570,78 +580,7 @@ Vocabulary logits are produced by a real output map:
 z_t = W_out * R( h_t^{(L)} )
 ```
 
-## 11. Anticipator Relation
-
-An optional anticipator mechanism (enabled by `enable_anticipator_relation`)
-creates a feedback loop where a lifted next-token signal modulates the current
-input before the block stack. The modulation is applied once per forward pass,
-before iterating over the blocks:
-
-```math
-h_t' = h_t + Lambda_anticip odot ( h_t odot a_t )
-```
-
-where `Lambda_anticip = tanh(anticipator_relation_logit)` is a learned
-per-dimension gain initialized to zero. The anticipator is therefore inert at
-initialization and only activates if training finds it useful.
-
-The anticipatory signal `a_t` has three cases.
-
-### Teacher-forced oracle path
-
-During training (or any forward call that supplies `targets`), the next-token
-ids are lifted directly:
-
-```math
-a_t = lift( x_{t+1} )
-```
-
-implemented as a one-position shift of `targets` via `TokenLift`. The final
-sequence position has no in-chunk next token, so its oracle anticipator is
-masked out:
-
-```math
-a_T = 0
-```
-
-This prevents a dummy chunk-boundary token from leaking a training signal into
-the modulation term.
-
-### Inference carry path
-
-At inference time, if a carried anticipatory hidden state is supplied from the
-previous forward call, that carried state is reused:
-
-```math
-a_t = hat{h}_t
-```
-
-If no carried anticipatory state is available (cold start), the anticipator is
-zero:
-
-```math
-a_t = 0
-```
-
-### Next-step prediction for the next call
-
-When `targets` are not supplied, the model also produces a next anticipatory
-hidden state from its own output logits. Rather than lifting the full softmax,
-the implementation keeps the top 8 vocabulary entries per position, renormalizes
-them, and lifts that sparse distribution:
-
-```math
-tilde{p}_{t+1} = renorm( top8( softmax(z_t) ) )
-hat{h}_{t+1} = lift( tilde{p}_{t+1} )
-```
-
-This `hat{h}_{t+1}` is returned as `next_ant` so generation code can thread it
-into the next call as `anticipatory_hidden`. Predicting the anticipatory hidden
-state from output probabilities rather than from internal hidden state keeps the
-mechanism tied to the model's explicit token predictions instead of its private
-internal update path.
-
-## 12. Capacity Allocation
+## 11. Capacity Allocation
 
 The tensor state is defined over a shape `(M_1, ..., M_r)` that can change
 during training through mode-size growth, rank growth, and pruning.
@@ -724,7 +663,7 @@ parameters are transferred via shape-aware pad-copy:
   and column.
 - Mode-weight matrices for other modes are copied unchanged.
 
-## 13. Dynamic Pruning
+## 12. Dynamic Pruning
 
 Pruning removes underused dimensions by collapsing a mode or rank axis.
 
@@ -765,7 +704,7 @@ are remapped accordingly.
 
 Growth and pruning currently require `coupling_type="sequential"`.
 
-## 14. Streaming Form
+## 13. Streaming Form
 
 The serial mixer only requires:
 
@@ -799,7 +738,7 @@ structurally expressive but track noise. The architecture's inductive bias
 sample-efficient for the relevant pattern types — it shapes what can be
 represented efficiently once the parameters are tuned.
 
-## 14.1 Chunked Parallel Form
+## 13.1 Chunked Parallel Form
 
 The sequential forward can be accelerated during training with a chunked scheme
 that amortizes coupling cost across `K`-token chunks. The sequence is divided
@@ -894,7 +833,7 @@ on the same cadence as growth/pruning. If the recent mean chunk drift exceeds
 sequential execution. This warning is diagnostic only; it does not change model
 behavior automatically.
 
-## 14.2 Stateful Sequential Training
+## 13.2 Stateful Sequential Training
 
 The default training loop samples random windows from the corpus — state
 resets to the learned initial prior at every batch, so gradient learning never
@@ -940,7 +879,7 @@ The key invariant: GD now trains on the state that reciprocation learning
 actually builds, rather than always against a hard zero state that never occurs
 at inference time.
 
-## 15. Architectural Parameters
+## 14. Architectural Parameters
 
 - hidden width `D`
 - layer depth `L`
@@ -967,7 +906,6 @@ at inference time.
 - positional phase type: `rope`, `locked_wave`, or `local_wave`
 - token phase: `none`, `semantic`, `virtual_offset`, or
   `semantic_virtual_offset`
-- optional anticipator relation (zero-initialized)
 - optional cross-layer state injection (zero-initialized gate)
 - dynamic growth: `dynamic_mode_growth`, `dynamic_rank_growth`
 - dynamic pruning: `dynamic_mode_pruning`, `dynamic_rank_pruning`
@@ -978,16 +916,16 @@ at inference time.
 - growth initialization: `mode_init` and `rank_init` (zero, mean, or
   orthogonal/residual)
 - pruning guard steps
-- training chunk size `K` (§14.1): `None` = exact sequential; `K >= 1` enables
+- training chunk size `K` (§13.1): `None` = exact sequential; `K >= 1` enables
   chunked parallel coupling. Backend-agnostic.
-- chunk drift instrumentation (§14.1): `track_chunk_drift=False` by default.
+- chunk drift instrumentation (§13.1): `track_chunk_drift=False` by default.
   When enabled, training records per-step `mean_drift` and `max_drift` for the
   current chunk size and warns if recent drift exceeds the fixed `0.05`
   threshold.
-- `stateful_training` (§14.2): when enabled, replaces random batch sampling
+- `stateful_training` (§13.2): when enabled, replaces random batch sampling
   with `B` sequential corpus streams; state is carried across chunks via
   truncated BPTT.
-- `attention_every_k` (§20): insert a `LocalAttentionBlock` after every k-th
+- `attention_every_k` (§19): insert a `LocalAttentionBlock` after every k-th
   Reciprocator block. `0` = pure Reciprocator (default).
 - `attention_num_heads`: number of attention heads (default 8).
 - `attention_window`: KV cache window in tokens (default 256).
@@ -995,13 +933,13 @@ at inference time.
   each k-group; `"before"` places it at the start of each k-group (one
   additional attention block for the same `num_layers`).
 
-## 16. Intentional Non-Features
+## 15. Intentional Non-Features
 
 These omissions are design choices, not oversights.
 
 - **No attention by default.** Cross-position transport is carried entirely by
   the tensor-state mixer. Optional causal sliding-window attention blocks can
-  be interleaved via `attention_every_k` (§20) for tasks requiring exact
+  be interleaved via `attention_every_k` (§19) for tasks requiring exact
   short-range lookup; the pure Reciprocator is the default.
 - **No hard input-gating.** Gains are static parameter tensors with bounded
   parameterizations (sigmoid/tanh). There are no input-dependent gain biases,
@@ -1024,14 +962,14 @@ These omissions are design choices, not oversights.
   can expose a learned summary of its final state, but each tensor state still
   evolves independently.
 - **No fully parallel temporal form.** Training uses sequential token-by-token
-  stepping within each chunk. The chunked form (§14.1) parallelizes the coupling
+  stepping within each chunk. The chunked form (§13.1) parallelizes the coupling
   computation across `K`-token windows but does not eliminate the sequential
   intra-chunk recurrence. A fully parallel prefix-scan form is possible only if
   normalization is deferred to chunk boundaries, which changes model semantics.
 
 ---
 
-## 17. Algebraic Structure of the Coupling
+## 16. Algebraic Structure of the Coupling
 
 ### TT analogy: sequential composition, bilinear scoring
 
@@ -1082,7 +1020,7 @@ structure. Normalization modulates this: Frobenius normalization favors unit-nor
 states spread across many CP components at low magnitude, while per-mode
 normalization constrains each mode independently.
 
-## 18. Norm Geometry and Gradient Flow
+## 17. Norm Geometry and Gradient Flow
 
 ### Not unitary: norm-projected dynamics
 
@@ -1123,7 +1061,7 @@ concentrates (small `tau`). Large `tau` makes the softmax near-uniform and the
 coupling nearer to non-expansive, at the cost of reduced selectivity. The
 temperature `tau` thus trades routing expressivity against gradient conditioning.
 
-## 19. Expressivity vs. Attention
+## 18. Expressivity vs. Attention
 
 The fundamental tradeoff between the Reciprocator's tensor-state mixer and
 attention:
@@ -1154,7 +1092,7 @@ attention patterns (where no low-CP-rank summary is adequate), or when the
 optimal tensor factorization for the task is unknown and the model must discover
 it.
 
-## 20. Hybrid Architecture: Interleaved Attention
+## 19. Hybrid Architecture: Interleaved Attention
 
 The Reciprocator's compressed state trades O(1) incremental compute for
 lossy positional access: the state is a sufficient statistic for the history,
@@ -1266,9 +1204,9 @@ coordinatewise frequency-grid map. Do not treat `anisotropic_spectral_gains=True
 alone as a separate operator; without `dynamic_spectral_gains=True` it is an
 inert control that should match fixed radial FFT.
 
-## 21. Growth as Adaptive-Rank Sketching
+## 20. Growth as Adaptive-Rank Sketching
 
-The growth rule (§12) is not streaming CP decomposition. Streaming CP observes
+The growth rule (§11) is not streaming CP decomposition. Streaming CP observes
 tensor `X_t`, maintains decomposition `X_hat_t = sum lambda_i a_i(t) (x) b_i (x) c_i`,
 and increases rank `R` when `||X_t - X_hat_t|| > epsilon`. The residual is in
 data space — you know exactly what you're failing to represent.
@@ -1299,8 +1237,29 @@ updates. These are not the same thing. The growth rule optimizes for parameter
 expressiveness, not reconstruction quality. It is possible to grow in directions
 that don't help the downstream loss.
 
-The pruning rule (§13) is the dual and is cleaner. It measures how redundant
+The pruning rule (§12) is the dual and is cleaner. It measures how redundant
 each mode is with respect to the other modes — asking whether mode `m` carries
 information not already captured by the other modes. If not, it is pruned by
 averaging. This is closer to classical tensor rank reduction (merging redundant
 modes), and the criterion is well-motivated.
+
+### Displacement readout
+
+The return map (§9) applies `psi` to the displacement `dS_t = S_t - S_{t-1}`
+rather than the full state `S_t`. Under Frobenius normalization, `S_t` and
+`S_{t-1}` are both unit-norm, so `||dS_t||` is proportional to the angular
+displacement between successive states.
+
+This has three consequences:
+
+1. The magnitude channel `|dS_t|` encodes per-element angular displacement —
+   genuinely informative, unlike the constant `|S_t| = 1` under normalization.
+
+2. The gate has less work to do: the displacement is already the novel
+   component. A full-state readout would require the gate to learn to suppress
+   what was already known before this token; the displacement readout starts
+   from the correct signal.
+
+3. The signal passed to the FFN is the constructive deposit of this step —
+   what the token-state interaction actually produced — rather than the
+   accumulated totality of all prior interactions.

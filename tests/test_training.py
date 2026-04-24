@@ -19,6 +19,7 @@ from reciprocator.training import (
     sample_causal_lm_batch,
     train_lisp_grpo,
     train_model,
+    TrainingResumeState,
 )
 
 
@@ -249,29 +250,6 @@ def test_train_model_supports_per_mode_normalization() -> None:
     assert torch.isfinite(torch.tensor(result.train_losses)).all()
 
 
-def test_train_model_supports_anticipator_relation() -> None:
-    dataset = build_text_dataset("abcde " * 40, val_fraction=0.2, min_split_tokens=16)
-    config = TrainingConfig(
-        steps=2,
-        eval_every=1,
-        eval_batches=1,
-        batch_size=4,
-        seq_len=8,
-        hidden_size=12,
-        state_shape=(2, 2),
-        num_layers=1,
-        enable_anticipator_relation=True,
-        device="cpu",
-        seed=0,
-    )
-
-    result = train_model(config, dataset=dataset)
-
-    assert result.model.enable_anticipator_relation is True
-    assert result.model.anticipator_relation_logit is not None
-    assert torch.isfinite(torch.tensor(result.train_losses)).all()
-
-
 def test_train_model_supports_cross_layer_state() -> None:
     dataset = build_text_dataset("abcde " * 40, val_fraction=0.2, min_split_tokens=16)
     config = TrainingConfig(
@@ -362,6 +340,78 @@ def test_train_model_invokes_step_callback_each_step() -> None:
     train_model(config, dataset=dataset, step_callback=callback)
 
     assert seen_steps == [1, 2, 3, 4]
+
+
+def test_train_model_resumes_from_checkpoint_state(monkeypatch) -> None:
+    dataset = build_text_dataset("abcde " * 50, val_fraction=0.2, min_split_tokens=16)
+    initial_config = TrainingConfig(
+        steps=2,
+        eval_every=1,
+        eval_batches=1,
+        batch_size=4,
+        seq_len=8,
+        hidden_size=12,
+        state_shape=(2, 2),
+        num_layers=1,
+        stateful_training=False,
+        device="cpu",
+        seed=0,
+    )
+    initial_result = train_model(initial_config, dataset=dataset)
+    optimizer_state = initial_result.optimizer.state_dict()
+    resume_state = TrainingResumeState(
+        step=2,
+        model_state_dict=initial_result.model.state_dict(),
+        optimizer_state_dict=optimizer_state,
+        train_losses=initial_result.train_losses,
+        val_losses=initial_result.val_losses,
+        train_metrics=initial_result.train_metrics,
+        val_metrics=initial_result.val_metrics,
+    )
+    resumed_config = replace(initial_config, steps=4)
+    seen_steps = []
+    loaded_optimizer_states = []
+    real_load_state_dict = training.torch.optim.Adam.load_state_dict
+
+    def capture_load_state_dict(self, state_dict):
+        loaded_optimizer_states.append(state_dict)
+        return real_load_state_dict(self, state_dict)
+
+    monkeypatch.setattr(training.torch.optim.Adam, "load_state_dict", capture_load_state_dict)
+
+    def callback(
+        step,
+        model,
+        optimizer,
+        callback_dataset,
+        callback_config,
+        train_losses,
+        val_losses,
+        train_metrics,
+        val_metrics,
+        device,
+    ) -> None:
+        seen_steps.append(step)
+        assert callback_config is resumed_config
+        assert len(train_losses) == step
+        assert len(train_metrics) == step
+
+    resumed_result = train_model(
+        resumed_config,
+        dataset=dataset,
+        step_callback=callback,
+        resume_state=resume_state,
+    )
+
+    assert seen_steps == [3, 4]
+    assert len(loaded_optimizer_states) == 1
+    assert loaded_optimizer_states[0] is optimizer_state
+    assert resumed_result.train_losses[:2] == initial_result.train_losses
+    assert resumed_result.val_losses[:2] == initial_result.val_losses
+    assert resumed_result.train_metrics[:2] == initial_result.train_metrics
+    assert resumed_result.val_metrics[:2] == initial_result.val_metrics
+    assert len(resumed_result.train_losses) == 4
+    assert resumed_result.config.state_shape == (2, 2)
 
 
 def test_configure_tensor_dynamic_growth_enables_cuda_expandable_segments(monkeypatch) -> None:

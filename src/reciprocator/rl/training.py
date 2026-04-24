@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 from dataclasses import dataclass
 import random
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Callable, Optional
 
 import torch
 import torch.nn.functional as F
@@ -46,6 +46,7 @@ class LispGRPOConfig:
     coupling_type: str = "sequential"
     normalization_type: str = "frobenius"
     sample_record_limit: int = 4
+    stage1_wrong_reward: float = 0.5
 
 
 @dataclass(frozen=True)
@@ -69,6 +70,7 @@ class RLStepMetrics:
     mean_reward: float
     success_rate: float
     mean_kl: float
+    grad_norm: float
     mean_phase_variance: float
     mean_phase_delta: float
     loss: float
@@ -158,6 +160,8 @@ def _validate_config(config: LispGRPOConfig) -> None:
         raise ValueError("max_completion_tokens and learning_rate must be positive.")
     if config.weight_decay < 0.0 or config.kl_beta < 0.0 or config.temperature < 0.0:
         raise ValueError("weight_decay, kl_beta, and temperature must be non-negative.")
+    if not 0.0 <= config.stage1_wrong_reward <= 1.0:
+        raise ValueError("stage1_wrong_reward must be in [0, 1].")
 
 
 def _sample_completion(
@@ -205,32 +209,32 @@ def _sequence_statistics(
     device: torch.device,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     prompt_tokens = tokenizer.encode(prompt).unsqueeze(0).to(device)
-    logits, states = model(prompt_tokens, position_offset=0)
-    with torch.no_grad():
-        ref_logits, ref_states = reference_model(prompt_tokens, position_offset=0)
-    current_logits = logits[:, -1]
-    current_ref_logits = ref_logits[:, -1]
-    log_prob_terms: list[torch.Tensor] = []
-    kl_terms: list[torch.Tensor] = []
-    position = int(prompt_tokens.shape[1])
+    completion = torch.tensor(completion_ids, dtype=torch.long, device=device)
+    if completion.numel() == 0:
+        zero = torch.tensor(0.0, dtype=torch.float32, device=device)
+        return zero, zero
 
-    for index, token_id in enumerate(completion_ids):
-        log_probs = F.log_softmax(current_logits, dim=-1)
-        probabilities = log_probs.exp()
-        with torch.no_grad():
-            ref_log_probs = F.log_softmax(current_ref_logits, dim=-1)
-        log_prob_terms.append(log_probs[0, token_id])
-        kl_terms.append(torch.sum(probabilities * (log_probs - ref_log_probs), dim=-1).squeeze(0))
-        if index == len(completion_ids) - 1:
-            break
-        token_tensor = torch.tensor([[token_id]], dtype=torch.long, device=device)
-        logits, states = model(token_tensor, states=states, position_offset=position)
-        current_logits = logits[:, -1]
-        with torch.no_grad():
-            ref_logits, ref_states = reference_model(token_tensor, states=ref_states, position_offset=position)
-            current_ref_logits = ref_logits[:, -1]
-        position += 1
-    return torch.stack(log_prob_terms).mean(), torch.stack(kl_terms).mean()
+    if completion.numel() > 1:
+        input_tokens = torch.cat([prompt_tokens.squeeze(0), completion[:-1]], dim=0).unsqueeze(0)
+    else:
+        input_tokens = prompt_tokens
+
+    logits, _ = model(input_tokens, position_offset=0)
+    with torch.no_grad():
+        ref_logits, _ = reference_model(input_tokens, position_offset=0)
+
+    output_start = int(prompt_tokens.shape[1] - 1)
+    output_stop = output_start + int(completion.numel())
+    selected_logits = logits[:, output_start:output_stop, :]
+    selected_ref_logits = ref_logits[:, output_start:output_stop, :]
+    log_probs = F.log_softmax(selected_logits, dim=-1)
+    with torch.no_grad():
+        ref_log_probs = F.log_softmax(selected_ref_logits, dim=-1)
+
+    token_log_probs = log_probs.gather(-1, completion.view(1, -1, 1)).squeeze(-1)
+    probabilities = log_probs.exp()
+    kl_terms = torch.sum(probabilities * (log_probs - ref_log_probs), dim=-1)
+    return token_log_probs.mean(), kl_terms.mean()
 
 
 def _group_relative_advantages(rewards: list[float]) -> list[float]:
@@ -240,6 +244,26 @@ def _group_relative_advantages(rewards: list[float]) -> list[float]:
         return [0.0 for _ in rewards]
     std = variance ** 0.5
     return [(reward - mean_reward) / std for reward in rewards]
+
+
+def _gradient_norm(parameters) -> float:
+    total = 0.0
+    for parameter in parameters:
+        if parameter.grad is None:
+            continue
+        grad = parameter.grad.detach().to("cpu")
+        total += float(grad.abs().pow(2).sum().item())
+    return total**0.5
+
+
+def _clip_gradient_norm(parameters, max_norm: float) -> float:
+    parameters = [parameter for parameter in parameters if parameter.grad is not None]
+    total_norm = _gradient_norm(parameters)
+    if total_norm > max_norm:
+        scale = max_norm / (total_norm + 1e-12)
+        for parameter in parameters:
+            parameter.grad.mul_(scale)
+    return total_norm
 
 
 def _record_samples(
@@ -283,19 +307,20 @@ def train_lisp_grpo(
     generator: Optional[ProblemGenerator] = None,
     reward_function: Optional[RewardFunction] = None,
     phase_monitor: Optional[PhaseTrajectoryMonitor] = None,
+    step_callback: Optional[Callable[[RLStepMetrics, ReciprocatorLM, CurriculumController], None]] = None,
 ) -> RLTrainingResult:
     _validate_config(config)
     torch.manual_seed(config.seed)
     rng = random.Random(config.seed)
     device = _resolve_device(config.device)
     tokenizer = tokenizer or build_lisp_tokenizer()
-    model = model or _build_model(config, tokenizer, device)
+    model = (model or _build_model(config, tokenizer, device)).to(device)
     reference_model = copy.deepcopy(model).to(device).eval()
     for parameter in reference_model.parameters():
         parameter.requires_grad_(False)
     curriculum = curriculum or CurriculumController()
     generator = generator or ProblemGenerator(rng)
-    reward_function = reward_function or RewardFunction()
+    reward_function = reward_function or RewardFunction(stage_one_wrong_reward=config.stage1_wrong_reward)
     phase_monitor = phase_monitor or PhaseTrajectoryMonitor()
     optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate, weight_decay=config.weight_decay)
 
@@ -376,8 +401,9 @@ def train_lisp_grpo(
         optimizer.zero_grad()
         loss = torch.stack(losses).mean()
         loss.backward()
+        grad_norm = _gradient_norm(model.parameters())
         if config.grad_clip_norm is not None:
-            torch.nn.utils.clip_grad_norm_(model.parameters(), config.grad_clip_norm)
+            grad_norm = _clip_gradient_norm(model.parameters(), config.grad_clip_norm)
         optimizer.step()
 
         snapshot = curriculum.record_batch(stage_rewards)
@@ -385,28 +411,30 @@ def train_lisp_grpo(
         flat_phase = [stats for group in phase_rows for stats in group]
         success_rate = sum(1.0 for reward in flat_rewards if reward >= 1.0) / len(flat_rewards)
 
-        step_metrics.append(
-            RLStepMetrics(
-                step=step,
-                current_stage=snapshot.current_stage,
-                stage_distribution=snapshot.stage_distribution,
-                mean_reward=sum(flat_rewards) / len(flat_rewards),
-                success_rate=success_rate,
-                mean_kl=sum(kl_values) / len(kl_values),
-                mean_phase_variance=sum(stats.mean_phase_variance for stats in flat_phase) / len(flat_phase),
-                mean_phase_delta=sum(stats.mean_phase_delta for stats in flat_phase) / len(flat_phase),
-                loss=float(loss.detach().item()),
-                error_counts=error_counts,
-                samples=_record_samples(
-                    problems,
-                    outputs,
-                    rewards,
-                    advantages,
-                    phase_rows,
-                    limit=config.sample_record_limit,
-                ),
-            )
+        metrics = RLStepMetrics(
+            step=step,
+            current_stage=snapshot.current_stage,
+            stage_distribution=snapshot.stage_distribution,
+            mean_reward=sum(flat_rewards) / len(flat_rewards),
+            success_rate=success_rate,
+            mean_kl=sum(kl_values) / len(kl_values),
+            grad_norm=grad_norm,
+            mean_phase_variance=sum(stats.mean_phase_variance for stats in flat_phase) / len(flat_phase),
+            mean_phase_delta=sum(stats.mean_phase_delta for stats in flat_phase) / len(flat_phase),
+            loss=float(loss.detach().item()),
+            error_counts=error_counts,
+            samples=_record_samples(
+                problems,
+                outputs,
+                rewards,
+                advantages,
+                phase_rows,
+                limit=config.sample_record_limit,
+            ),
         )
+        step_metrics.append(metrics)
+        if step_callback is not None:
+            step_callback(metrics, model, curriculum)
 
     return RLTrainingResult(
         config=config,

@@ -609,8 +609,8 @@ structure.
 
 | Phase | Purpose                              | Configs | Seeds | Runs  | Status      |
 |-------|--------------------------------------|---------|-------|-------|-------------|
-| R0    | Evaluator + generator validation     | n/a     | n/a   | 0     |             |
-| R1    | GRPO smoke test                      | 1       | 3     | 3     |             |
+| R0    | Evaluator + generator validation     | n/a     | n/a   | 0     | Passed 2026-04-23 |
+| R1    | GRPO smoke test                      | 1       | 3     | 3     | Diagnostic passed 2026-04-23 |
 | R2    | Arithmetic mastery                   | 2       | 3     | 6     |             |
 | R3    | Curriculum controller validation     | 2       | 2     | 4     |             |
 | R4    | Multi-stage progression (1-4)        | 2       | 2     | 4     |             |

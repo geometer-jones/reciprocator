@@ -51,7 +51,6 @@ def test_build_parser_exposes_phase_and_growth_defaults() -> None:
     assert args.grad_clip_norm is None
     assert args.weight_decay == 0.0
     assert args.normalization_type == "frobenius"
-    assert args.enable_anticipator_relation is False
     assert args.enable_cross_layer_state is False
     assert args.dynamic_mode_growth is False
     assert args.dynamic_rank_growth is False
@@ -81,6 +80,7 @@ def test_build_parser_exposes_phase_and_growth_defaults() -> None:
     assert args.generation_top_k == 20
     assert args.benchmark_prompt_lengths == ()
     assert args.benchmark_new_tokens == 128
+    assert args.resume_from is None
 
 
 def test_build_parser_parses_max_state_shape_like_state_shape() -> None:
@@ -92,7 +92,6 @@ def test_build_parser_parses_max_state_shape_like_state_shape() -> None:
             "per_mode",
             "--token-phase",
             "semantic_virtual_offset",
-            "--enable-anticipator-relation",
             "--enable-cross-layer-state",
             "--disable-self-relation",
             "--coupling-type",
@@ -178,7 +177,6 @@ def test_build_parser_parses_max_state_shape_like_state_shape() -> None:
 
     assert args.normalization_type == "per_mode"
     assert args.token_phase == "semantic_virtual_offset"
-    assert args.enable_anticipator_relation is True
     assert args.enable_cross_layer_state is True
     assert args.enable_self_relation is False
     assert args.coupling_type == "wavelet_packet_max_gauge"
@@ -248,3 +246,51 @@ def test_build_parser_parses_hybrid_attention_and_stateless_flags() -> None:
     assert args.attention_window == 128
     assert args.attention_position == "before"
     assert args.stateful_training is False
+
+
+def test_resume_helpers_restore_checkpoint_config_and_metrics() -> None:
+    train_script = load_train_script()
+    payload = {
+        "step": 7,
+        "model_state_dict": {"weight": object()},
+        "optimizer_state_dict": {"state": {}, "param_groups": []},
+        "config": {
+            "steps": 500,
+            "device": "cuda",
+            "state_shape": [2, 3, 4],
+            "max_state_shape": [3, 4, 5],
+            "benchmark_prompt_lengths": [16, 64],
+        },
+        "train_losses": [1.25, 1.0],
+        "val_losses": [[1, 1.5]],
+        "train_metrics": [
+            {"step": 1, "loss": 1.25, "accuracy": 0.2, "perplexity": 3.5, "bpc": 1.8},
+        ],
+        "val_metrics": [
+            {"step": 1, "loss": 1.5, "accuracy": 0.1, "perplexity": 4.5, "bpc": 2.1},
+        ],
+    }
+
+    config = train_script.training_config_from_checkpoint(payload)
+    args = train_script.build_parser().parse_args(
+        ["--resume-from", "checkpoint.pt", "--steps", "750", "--device", "cpu"]
+    )
+    config = train_script._apply_resume_overrides(
+        config,
+        args,
+        ["--resume-from", "checkpoint.pt", "--steps", "750", "--device", "cpu"],
+    )
+    resume_state = train_script.resume_state_from_checkpoint(payload)
+
+    assert config.steps == 750
+    assert config.device == "cpu"
+    assert config.state_shape == (2, 3, 4)
+    assert config.max_state_shape == (3, 4, 5)
+    assert config.benchmark_prompt_lengths == (16, 64)
+    assert resume_state.step == 7
+    assert resume_state.optimizer_state_dict is payload["optimizer_state_dict"]
+    assert resume_state.train_losses == [1.25, 1.0]
+    assert resume_state.val_losses == [(1, 1.5)]
+    assert resume_state.train_metrics[0][0] == 1
+    assert resume_state.train_metrics[0][1].bpc == 1.8
+    assert resume_state.val_metrics[0][1].accuracy == 0.1

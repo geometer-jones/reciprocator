@@ -55,6 +55,10 @@ _CORPORA: Dict[str, BundledCorpus] = {
         name="greek_classics",
         combined_filename="greek_classics_combined.txt",
     ),
+    "lisp_math": BundledCorpus(
+        name="lisp_math",
+        combined_filename="lisp_math_combined.txt",
+    ),
 }
 
 

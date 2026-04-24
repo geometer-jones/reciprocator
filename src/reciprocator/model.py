@@ -429,7 +429,6 @@ class ReciprocatorLM(nn.Module):
         enable_self_relation: bool = False,
         dynamic_gains: bool = False,
         gain_projector_rank: int = 8,
-        enable_anticipator_relation: bool = False,
         enable_cross_layer_state: bool = False,
         coupling_type: str = "sequential",
         low_frequency_gain: float = 0.5,
@@ -456,7 +455,6 @@ class ReciprocatorLM(nn.Module):
         self.enable_self_relation = enable_self_relation
         self.dynamic_gains = dynamic_gains
         self.gain_projector_rank = gain_projector_rank
-        self.enable_anticipator_relation = enable_anticipator_relation
         self.enable_cross_layer_state = enable_cross_layer_state
         self.coupling_type = canonicalize_coupling_type(coupling_type)
         self.dynamic_spectral_gains = dynamic_spectral_gains
@@ -522,11 +520,6 @@ class ReciprocatorLM(nn.Module):
         else:
             raise ValueError("readout_type must be one of {'magnitude', 'phase_aware'}.")
 
-        if self.enable_anticipator_relation:
-            self.anticipator_relation_logit = nn.Parameter(torch.zeros(hidden_size))
-        else:
-            self.register_parameter("anticipator_relation_logit", None)
-
     @staticmethod
     def _state_feature_map(state: Tensor) -> Tensor:
         features = phase_aware_feature_map(state, batch_dim=True)
@@ -582,7 +575,7 @@ class ReciprocatorLM(nn.Module):
 
         # Note: next_state reflects the full chunk; this correction is non-causal
         # within the chunk but causal across chunks. Consistent with the stale-coupling
-        # approximation in _chunked_forward (§14.1).
+        # approximation in _chunked_forward (§13.1).
         return hidden + beta * correction_c
 
     def _forward_blocks(
@@ -653,68 +646,12 @@ class ReciprocatorLM(nn.Module):
             "block_count": len(filtered),
         }
 
-    def _forward_with_anticipator_relation(
-        self,
-        hidden: Tensor,
-        states: Sequence[Optional[Tensor]],
-        *,
-        position_offset: int,
-        targets: Optional[Tensor] = None,
-        anticipatory_hidden: Optional[Tensor] = None,
-        chunk_size: Optional[int] = None,
-        track_drift: bool = False,
-    ):
-        relation_gain = torch.tanh(self.anticipator_relation_logit).to(hidden.dtype).view(1, 1, -1)
-
-        if targets is not None:
-            ant = self.token_lift(targets, position_offset=position_offset + 1)
-            ant[:, -1] = 0
-        elif anticipatory_hidden is not None:
-            ant = anticipatory_hidden
-            if ant.ndim == 2:
-                ant = ant.unsqueeze(1)
-            if ant.shape != hidden.shape:
-                raise ValueError("anticipatory_hidden must match the lifted hidden shape.")
-        else:
-            ant = torch.zeros_like(hidden)
-
-        hidden = hidden + relation_gain * (hidden * ant)
-
-        hidden, next_states, block_drift_stats = self._forward_blocks(
-            hidden,
-            states,
-            chunk_size=chunk_size,
-            track_drift=track_drift,
-        )
-
-        logits = self.readout(self.final_norm(hidden))
-        if targets is None:
-            probs = F.softmax(logits, dim=-1)
-            k = min(8, self.vocab_size)
-            topk_probs, topk_idx = probs.topk(k, dim=-1)
-            topk_probs = topk_probs / topk_probs.sum(dim=-1, keepdim=True)
-            next_ant = self.token_lift.lift_distribution(
-                topk_probs,
-                topk_idx,
-                position_offset=position_offset + 1,
-            )
-        else:
-            next_ant = None
-
-        if track_drift:
-            assert block_drift_stats is not None
-            drift_stats = self._aggregate_chunk_drift_stats(block_drift_stats, chunk_size=chunk_size)
-            return logits, tuple(next_states), next_ant, drift_stats
-        return logits, tuple(next_states), next_ant
-
     def forward(
         self,
         token_ids: Tensor,
         *,
         states: Optional[Sequence[Optional[Tensor]]] = None,
         position_offset: int = 0,
-        targets: Optional[Tensor] = None,
-        anticipatory_hidden: Optional[Tensor] = None,
         chunk_size: Optional[int] = None,
         track_drift: bool = False,
     ):
@@ -724,17 +661,6 @@ class ReciprocatorLM(nn.Module):
             states = (None,) * len(self.blocks)
         if len(states) != len(self.blocks):
             raise ValueError("Number of states must match the number of blocks.")
-
-        if self.enable_anticipator_relation:
-            return self._forward_with_anticipator_relation(
-                hidden,
-                states,
-                position_offset=position_offset,
-                targets=targets,
-                anticipatory_hidden=anticipatory_hidden,
-                chunk_size=chunk_size,
-                track_drift=track_drift,
-            )
 
         hidden, next_states, block_drift_stats = self._forward_blocks(
             hidden,
@@ -758,18 +684,10 @@ class ReciprocatorLM(nn.Module):
         states: Optional[Sequence[Optional[Tensor]]] = None,
         position_offset: int = 0,
     ) -> Tuple[Tensor, Tuple[Tensor, ...]]:
-        if self.enable_anticipator_relation:
-            logits, next_states, _ = self(
-                token_ids,
-                states=states,
-                position_offset=position_offset,
-                targets=targets,
-            )
-        else:
-            logits, next_states = self(
-                token_ids,
-                states=states,
-                position_offset=position_offset,
-            )
+        logits, next_states = self(
+            token_ids,
+            states=states,
+            position_offset=position_offset,
+        )
         loss = F.cross_entropy(logits.reshape(-1, self.vocab_size), targets.reshape(-1))
         return loss, next_states

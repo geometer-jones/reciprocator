@@ -7,12 +7,6 @@ def random_complex(*shape: int) -> torch.Tensor:
     return torch.complex(torch.randn(*shape), torch.randn(*shape))
 
 
-def next_token_targets(token_ids: torch.Tensor) -> torch.Tensor:
-    targets = torch.zeros_like(token_ids)
-    targets[:, :-1] = token_ids[:, 1:]
-    return targets
-
-
 def test_token_lift_returns_complex_hidden_stream() -> None:
     lift = TokenLift(vocab_size=11, hidden_size=8)
     token_ids = torch.tensor([[1, 2, 3], [3, 2, 1]])
@@ -224,19 +218,6 @@ def test_lm_plumbs_self_relation_flag_to_blocks() -> None:
     assert all(block.mixer.enable_self_relation for block in model.blocks)
 
 
-def test_lm_plumbs_anticipator_relation_flag() -> None:
-    model = ReciprocatorLM(
-        vocab_size=13,
-        hidden_size=8,
-        state_shape=(2, 3),
-        num_layers=2,
-        enable_anticipator_relation=True,
-    )
-
-    assert model.enable_anticipator_relation is True
-    assert model.anticipator_relation_logit is not None
-
-
 def test_lm_plumbs_cross_layer_state_flag() -> None:
     model = ReciprocatorLM(
         vocab_size=13,
@@ -343,105 +324,6 @@ def test_lm_streaming_matches_full_sequence() -> None:
     streamed_logits = torch.cat(step_logits, dim=1)
     assert torch.allclose(streamed_logits, full_logits, atol=1e-5)
     assert torch.allclose(states[0], full_states[0], atol=1e-5)
-
-
-def test_lm_anticipator_relation_is_inert_at_initialization() -> None:
-    torch.manual_seed(0)
-    model = ReciprocatorLM(vocab_size=9, hidden_size=6, state_shape=(2, 2), num_layers=1)
-    anticipatory_model = ReciprocatorLM(
-        vocab_size=9,
-        hidden_size=6,
-        state_shape=(2, 2),
-        num_layers=1,
-        enable_anticipator_relation=True,
-    )
-    incompatible_keys = anticipatory_model.load_state_dict(model.state_dict(), strict=False)
-
-    assert incompatible_keys.missing_keys == ["anticipator_relation_logit"]
-    assert incompatible_keys.unexpected_keys == []
-
-    token_ids = torch.tensor([[1, 2, 3, 4], [4, 3, 2, 1]])
-    targets = next_token_targets(token_ids)
-    logits, states = model(token_ids)
-    anticipatory_logits, anticipatory_states, next_ant = anticipatory_model(token_ids, targets=targets)
-
-    assert torch.allclose(anticipatory_logits, logits, atol=1e-5)
-    assert torch.allclose(anticipatory_states[0], states[0], atol=1e-5)
-    assert next_ant is None
-
-
-def test_lm_anticipator_relation_changes_outputs_when_gain_is_nonzero() -> None:
-    torch.manual_seed(0)
-    model = ReciprocatorLM(vocab_size=9, hidden_size=6, state_shape=(2, 2), num_layers=1)
-    anticipatory_model = ReciprocatorLM(
-        vocab_size=9,
-        hidden_size=6,
-        state_shape=(2, 2),
-        num_layers=1,
-        enable_anticipator_relation=True,
-    )
-    anticipatory_model.load_state_dict(model.state_dict(), strict=False)
-
-    with torch.no_grad():
-        anticipatory_model.anticipator_relation_logit.fill_(2.0)
-
-    token_ids = torch.tensor([[1, 2, 3, 4], [4, 3, 2, 1]])
-    targets = next_token_targets(token_ids)
-    logits, states = model(token_ids)
-    anticipatory_logits, anticipatory_states, _ = anticipatory_model(token_ids, targets=targets)
-
-    assert not torch.allclose(anticipatory_logits, logits, atol=1e-5)
-    assert not torch.allclose(anticipatory_states[0], states[0], atol=1e-5)
-
-
-def test_lm_anticipator_relation_streaming_matches_full_sequence() -> None:
-    model = ReciprocatorLM(
-        vocab_size=9,
-        hidden_size=6,
-        state_shape=(2, 2),
-        num_layers=1,
-        enable_anticipator_relation=True,
-    )
-    token_ids = torch.tensor([[1, 2, 3, 4], [4, 3, 2, 1]])
-    targets = next_token_targets(token_ids)
-
-    full_logits, full_states, full_next_ant = model(token_ids, targets=targets)
-
-    states = model.initial_state(token_ids.shape[0], device=token_ids.device)
-    step_logits = []
-    for position in range(token_ids.shape[1]):
-        step_targets = targets[:, position : position + 1]
-        logits_t, states, step_next_ant = model(
-            token_ids[:, position : position + 1],
-            states=states,
-            position_offset=position,
-            targets=step_targets,
-        )
-        step_logits.append(logits_t)
-        assert step_next_ant is None
-
-    streamed_logits = torch.cat(step_logits, dim=1)
-    assert torch.allclose(streamed_logits, full_logits, atol=1e-5)
-    assert torch.allclose(states[0], full_states[0], atol=1e-5)
-    assert full_next_ant is None
-
-
-def test_lm_anticipator_relation_inference_returns_next_ant() -> None:
-    model = ReciprocatorLM(
-        vocab_size=9,
-        hidden_size=6,
-        state_shape=(2, 2),
-        num_layers=1,
-        enable_anticipator_relation=True,
-    )
-    token_ids = torch.tensor([[1, 2, 3], [4, 3, 2]])
-
-    logits, states, next_ant = model(token_ids)
-
-    assert logits.shape == (2, 3, 9)
-    assert len(states) == 1
-    assert next_ant is not None
-    assert next_ant.shape == (2, 3, 6)
 
 
 def test_lm_cross_layer_state_is_inert_at_initialization() -> None:

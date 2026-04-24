@@ -1,0 +1,741 @@
+[
+  {
+    "step": 1,
+    "state_shape": [
+      2,
+      3,
+      4
+    ],
+    "growth_event_history": [],
+    "val_loss": 4.236956059932709,
+    "val_accuracy": 0.1988525390625,
+    "val_perplexity": 69.19689972323957,
+    "val_bpc": 6.112635496129361,
+    "cross_memory_residual": 0.0,
+    "token_count": 128,
+    "mean_phase_variance": 3.2141740322113037,
+    "max_phase_variance": 3.7259275913238525,
+    "mean_phase_delta": 0.22423996031284332,
+    "phase_delta_variance": 0.6769877672195435
+  },
+  {
+    "step": 50,
+    "state_shape": [
+      2,
+      3,
+      4
+    ],
+    "axis_kinds": [
+      "mode",
+      "mode",
+      "mode"
+    ],
+    "mode_residual_norms": [
+      0.07016713172197342,
+      5.121427548715474e-08,
+      4.682617316120741e-08
+    ],
+    "mode_residual_ema": [
+      0.07016713172197342,
+      5.121427548715474e-08,
+      4.682617316120741e-08
+    ],
+    "effective_growth_residual_threshold": 0.12,
+    "post_growth_cooldown_checks_remaining": 0,
+    "layer_mode_residual_norms": [],
+    "layer_mode_residual_ema": [],
+    "mode_redundancy_norms": [
+      0.13704228401184082,
+      0.12529926002025604,
+      0.12528741359710693
+    ],
+    "mode_redundancy_ema": [
+      0.13704228401184082,
+      0.12529926002025604,
+      0.12528741359710693
+    ],
+    "mode_slice_activation_variance_ema": [
+      [
+        0.0207668449729681,
+        0.015966171398758888
+      ],
+      [
+        0.01813242956995964,
+        0.018585827201604843,
+        0.018866771832108498
+      ],
+      [
+        0.021263428032398224,
+        0.024204054847359657,
+        0.01903512515127659,
+        0.009378123097121716
+      ]
+    ],
+    "prune_candidate_streaks": [
+      1,
+      1,
+      1
+    ],
+    "recent_chunk_drift_mean": null,
+    "recent_chunk_drift_max": null,
+    "growth_event_history": [],
+    "val_loss": 1.857342928647995,
+    "val_accuracy": 0.48291015625,
+    "val_perplexity": 6.406691100291751,
+    "val_bpc": 2.6795794323906463,
+    "cross_memory_residual": 0.0,
+    "token_count": 128,
+    "mean_phase_variance": 3.3288910388946533,
+    "max_phase_variance": 3.683976411819458,
+    "mean_phase_delta": 1.56305992603302,
+    "phase_delta_variance": 4.950301647186279
+  },
+  {
+    "step": 100,
+    "state_shape": [
+      2,
+      3,
+      4
+    ],
+    "axis_kinds": [
+      "mode",
+      "mode",
+      "mode"
+    ],
+    "mode_residual_norms": [
+      0.03949371725320816,
+      5.5129262932496204e-08,
+      3.1445068771063234e-08
+    ],
+    "mode_residual_ema": [
+      0.06403245031833649,
+      5.199727581839397e-08,
+      4.374995299372131e-08
+    ],
+    "effective_growth_residual_threshold": 0.12,
+    "post_growth_cooldown_checks_remaining": 0,
+    "layer_mode_residual_norms": [],
+    "layer_mode_residual_ema": [],
+    "mode_redundancy_norms": [
+      0.09375576674938202,
+      0.09137866646051407,
+      0.08897332847118378
+    ],
+    "mode_redundancy_ema": [
+      0.12838497757911682,
+      0.11851514875888824,
+      0.11802460253238678
+    ],
+    "mode_slice_activation_variance_ema": [
+      [
+        0.02040422149002552,
+        0.015511448495090008
+      ],
+      [
+        0.017985206097364426,
+        0.01819666475057602,
+        0.018235215917229652
+      ],
+      [
+        0.0201407503336668,
+        0.02294120192527771,
+        0.01966797187924385,
+        0.009570221416652203
+      ]
+    ],
+    "prune_candidate_streaks": [
+      2,
+      2,
+      2
+    ],
+    "recent_chunk_drift_mean": null,
+    "recent_chunk_drift_max": null,
+    "growth_event_history": [],
+    "val_loss": 1.2124205976724625,
+    "val_accuracy": 0.6409912109375,
+    "val_perplexity": 3.361611922150225,
+    "val_bpc": 1.7491531837336947,
+    "cross_memory_residual": 0.0,
+    "token_count": 128,
+    "mean_phase_variance": 3.325517177581787,
+    "max_phase_variance": 3.638275384902954,
+    "mean_phase_delta": 1.7149134874343872,
+    "phase_delta_variance": 5.337190628051758
+  },
+  {
+    "step": 150,
+    "state_shape": [
+      2,
+      3,
+      4
+    ],
+    "axis_kinds": [
+      "mode",
+      "mode",
+      "mode"
+    ],
+    "mode_residual_norms": [
+      0.070362888276577,
+      4.875008841054296e-08,
+      3.771569012656073e-08
+    ],
+    "mode_residual_ema": [
+      0.06529853492975235,
+      5.134783975790924e-08,
+      4.2543103262460136e-08
+    ],
+    "effective_growth_residual_threshold": 0.12,
+    "post_growth_cooldown_checks_remaining": 0,
+    "layer_mode_residual_norms": [],
+    "layer_mode_residual_ema": [],
+    "mode_redundancy_norms": [
+      0.07648082077503204,
+      0.07507746666669846,
+      0.07577982544898987
+    ],
+    "mode_redundancy_ema": [
+      0.11800414323806763,
+      0.10982760787010193,
+      0.10957564413547516
+    ],
+    "mode_slice_activation_variance_ema": [
+      [
+        0.020666152238845825,
+        0.015397091396152973
+      ],
+      [
+        0.018537163734436035,
+        0.018042167648673058,
+        0.018066076561808586
+      ],
+      [
+        0.019296063110232353,
+        0.02215985208749771,
+        0.021160481497645378,
+        0.010031656362116337
+      ]
+    ],
+    "prune_candidate_streaks": [
+      3,
+      3,
+      3
+    ],
+    "recent_chunk_drift_mean": null,
+    "recent_chunk_drift_max": null,
+    "growth_event_history": [],
+    "val_loss": 1.0717258155345917,
+    "val_accuracy": 0.66845703125,
+    "val_perplexity": 2.920415251346368,
+    "val_bpc": 1.5461735192644355,
+    "cross_memory_residual": 0.0,
+    "token_count": 128,
+    "mean_phase_variance": 3.31636643409729,
+    "max_phase_variance": 3.642367362976074,
+    "mean_phase_delta": 1.7162322998046875,
+    "phase_delta_variance": 5.3926472663879395
+  },
+  {
+    "step": 200,
+    "state_shape": [
+      2,
+      3,
+      4
+    ],
+    "axis_kinds": [
+      "mode",
+      "mode",
+      "mode"
+    ],
+    "mode_residual_norms": [
+      0.0377061702311039,
+      2.378066099595344e-08,
+      1.30385160446167e-08
+    ],
+    "mode_residual_ema": [
+      0.0597800649702549,
+      4.583440471606082e-08,
+      3.664218439780598e-08
+    ],
+    "effective_growth_residual_threshold": 0.12,
+    "post_growth_cooldown_checks_remaining": 0,
+    "layer_mode_residual_norms": [],
+    "layer_mode_residual_ema": [],
+    "mode_redundancy_norms": [
+      0.0767660066485405,
+      0.07367702573537827,
+      0.06651633977890015
+    ],
+    "mode_redundancy_ema": [
+      0.10975652188062668,
+      0.10259749740362167,
+      0.1009637787938118
+    ],
+    "mode_slice_activation_variance_ema": [
+      [
+        0.020958319306373596,
+        0.015397152863442898
+      ],
+      [
+        0.01875775121152401,
+        0.018191227689385414,
+        0.018124768510460854
+      ],
+      [
+        0.019040552899241447,
+        0.021672066301107407,
+        0.02219621278345585,
+        0.010284551419317722
+      ]
+    ],
+    "prune_candidate_streaks": [
+      4,
+      4,
+      4
+    ],
+    "recent_chunk_drift_mean": null,
+    "recent_chunk_drift_max": null,
+    "growth_event_history": [],
+    "val_loss": 0.9883429184556007,
+    "val_accuracy": 0.6885986328125,
+    "val_perplexity": 2.6867785702896434,
+    "val_bpc": 1.4258774271536203,
+    "cross_memory_residual": 0.0,
+    "token_count": 128,
+    "mean_phase_variance": 3.3089990615844727,
+    "max_phase_variance": 3.664217472076416,
+    "mean_phase_delta": 1.6619459390640259,
+    "phase_delta_variance": 5.202025413513184
+  },
+  {
+    "step": 250,
+    "state_shape": [
+      2,
+      3,
+      4
+    ],
+    "axis_kinds": [
+      "mode",
+      "mode",
+      "mode"
+    ],
+    "mode_residual_norms": [
+      0.03620400279760361,
+      2.211768546089843e-08,
+      3.210024601685291e-08
+    ],
+    "mode_residual_ema": [
+      0.0550648532807827,
+      4.1091062996656547e-08,
+      3.5733798142700834e-08
+    ],
+    "effective_growth_residual_threshold": 0.12,
+    "post_growth_cooldown_checks_remaining": 0,
+    "layer_mode_residual_norms": [],
+    "layer_mode_residual_ema": [],
+    "mode_redundancy_norms": [
+      0.07832013070583344,
+      0.07232638448476791,
+      0.06481841951608658
+    ],
+    "mode_redundancy_ema": [
+      0.10346924513578415,
+      0.09654328227043152,
+      0.09373470395803452
+    ],
+    "mode_slice_activation_variance_ema": [
+      [
+        0.02108379267156124,
+        0.015700846910476685
+      ],
+      [
+        0.018728574737906456,
+        0.018861543387174606,
+        0.018086757510900497
+      ],
+      [
+        0.0191652849316597,
+        0.020965803414583206,
+        0.023063652217388153,
+        0.010778738185763359
+      ]
+    ],
+    "prune_candidate_streaks": [
+      5,
+      5,
+      5
+    ],
+    "recent_chunk_drift_mean": null,
+    "recent_chunk_drift_max": null,
+    "growth_event_history": [],
+    "val_loss": 0.9159136712551117,
+    "val_accuracy": 0.7149658203125,
+    "val_perplexity": 2.499057526148445,
+    "val_bpc": 1.321384111402154,
+    "cross_memory_residual": 0.0,
+    "token_count": 128,
+    "mean_phase_variance": 3.3145151138305664,
+    "max_phase_variance": 3.700686454772949,
+    "mean_phase_delta": 1.7697941064834595,
+    "phase_delta_variance": 5.568365097045898
+  },
+  {
+    "step": 300,
+    "state_shape": [
+      2,
+      3,
+      4
+    ],
+    "axis_kinds": [
+      "mode",
+      "mode",
+      "mode"
+    ],
+    "mode_residual_norms": [
+      0.027821067720651627,
+      3.844456131218976e-08,
+      3.4496672185468924e-08
+    ],
+    "mode_residual_ema": [
+      0.049616094678640366,
+      4.056176550193413e-08,
+      3.548637295125445e-08
+    ],
+    "effective_growth_residual_threshold": 0.12,
+    "post_growth_cooldown_checks_remaining": 0,
+    "layer_mode_residual_norms": [],
+    "layer_mode_residual_ema": [],
+    "mode_redundancy_norms": [
+      0.07101596891880035,
+      0.06442926079034805,
+      0.07004787772893906
+    ],
+    "mode_redundancy_ema": [
+      0.09697858989238739,
+      0.09012047946453094,
+      0.08899733424186707
+    ],
+    "mode_slice_activation_variance_ema": [
+      [
+        0.021182920783758163,
+        0.016066376119852066
+      ],
+      [
+        0.01883521117269993,
+        0.019453730434179306,
+        0.018028629943728447
+      ],
+      [
+        0.019455477595329285,
+        0.02043825201690197,
+        0.023688897490501404,
+        0.011194063350558281
+      ]
+    ],
+    "prune_candidate_streaks": [
+      6,
+      6,
+      6
+    ],
+    "recent_chunk_drift_mean": null,
+    "recent_chunk_drift_max": null,
+    "growth_event_history": [],
+    "val_loss": 0.8747707977890968,
+    "val_accuracy": 0.7154541015625,
+    "val_perplexity": 2.398325529452068,
+    "val_bpc": 1.2620274918848122,
+    "cross_memory_residual": 0.0,
+    "token_count": 128,
+    "mean_phase_variance": 3.307647228240967,
+    "max_phase_variance": 3.645461082458496,
+    "mean_phase_delta": 1.7063792943954468,
+    "phase_delta_variance": 5.35476541519165
+  },
+  {
+    "step": 350,
+    "state_shape": [
+      2,
+      3,
+      4
+    ],
+    "axis_kinds": [
+      "mode",
+      "mode",
+      "mode"
+    ],
+    "mode_residual_norms": [
+      0.022818293422460556,
+      3.8263646473524204e-08,
+      1.3170890156288806e-08
+    ],
+    "mode_residual_ema": [
+      0.044256534427404404,
+      4.0102143827880354e-08,
+      3.102327639226132e-08
+    ],
+    "effective_growth_residual_threshold": 0.12,
+    "post_growth_cooldown_checks_remaining": 0,
+    "layer_mode_residual_norms": [],
+    "layer_mode_residual_ema": [],
+    "mode_redundancy_norms": [
+      0.07867907732725143,
+      0.06696006655693054,
+      0.06959600001573563
+    ],
+    "mode_redundancy_ema": [
+      0.09331868588924408,
+      0.08548840135335922,
+      0.08511706441640854
+    ],
+    "mode_slice_activation_variance_ema": [
+      [
+        0.02119789458811283,
+        0.01692693494260311
+      ],
+      [
+        0.018796376883983612,
+        0.020568184554576874,
+        0.018175853416323662
+      ],
+      [
+        0.02050335705280304,
+        0.02005903422832489,
+        0.024036254733800888,
+        0.0117864478379488
+      ]
+    ],
+    "prune_candidate_streaks": [
+      7,
+      7,
+      7
+    ],
+    "recent_chunk_drift_mean": null,
+    "recent_chunk_drift_max": null,
+    "growth_event_history": [],
+    "val_loss": 0.8238819912075996,
+    "val_accuracy": 0.73779296875,
+    "val_perplexity": 2.279331028150334,
+    "val_bpc": 1.1886104629929286,
+    "cross_memory_residual": 0.0,
+    "token_count": 128,
+    "mean_phase_variance": 3.2949986457824707,
+    "max_phase_variance": 3.6568853855133057,
+    "mean_phase_delta": 1.6993372440338135,
+    "phase_delta_variance": 5.30172872543335
+  },
+  {
+    "step": 400,
+    "state_shape": [
+      2,
+      3,
+      4
+    ],
+    "axis_kinds": [
+      "mode",
+      "mode",
+      "mode"
+    ],
+    "mode_residual_norms": [
+      0.022271396592259407,
+      1.7792892492707324e-08,
+      2.6143469611383807e-08
+    ],
+    "mode_residual_ema": [
+      0.03985951095819473,
+      3.5640294271388484e-08,
+      3.0047317522985395e-08
+    ],
+    "effective_growth_residual_threshold": 0.12,
+    "post_growth_cooldown_checks_remaining": 0,
+    "layer_mode_residual_norms": [],
+    "layer_mode_residual_ema": [],
+    "mode_redundancy_norms": [
+      0.06364303082227707,
+      0.05721571668982506,
+      0.06438793241977692
+    ],
+    "mode_redundancy_ema": [
+      0.08738356083631516,
+      0.07983386516571045,
+      0.08097123354673386
+    ],
+    "mode_slice_activation_variance_ema": [
+      [
+        0.021348221227526665,
+        0.01761053502559662
+      ],
+      [
+        0.01869078353047371,
+        0.021642033010721207,
+        0.01838766224682331
+      ],
+      [
+        0.021929696202278137,
+        0.019988298416137695,
+        0.023977629840373993,
+        0.011971957981586456
+      ]
+    ],
+    "prune_candidate_streaks": [
+      8,
+      8,
+      8
+    ],
+    "recent_chunk_drift_mean": null,
+    "recent_chunk_drift_max": null,
+    "growth_event_history": [],
+    "val_loss": 0.846393033862114,
+    "val_accuracy": 0.7208251953125,
+    "val_perplexity": 2.3312230263163176,
+    "val_bpc": 1.2210870325958363,
+    "cross_memory_residual": 0.0,
+    "token_count": 128,
+    "mean_phase_variance": 3.308157444000244,
+    "max_phase_variance": 3.64319109916687,
+    "mean_phase_delta": 1.702222228050232,
+    "phase_delta_variance": 5.315253734588623
+  },
+  {
+    "step": 450,
+    "state_shape": [
+      2,
+      3,
+      4
+    ],
+    "axis_kinds": [
+      "mode",
+      "mode",
+      "mode"
+    ],
+    "mode_residual_norms": [
+      0.019870644435286522,
+      2.9050696070953563e-08,
+      2.3413086580603704e-08
+    ],
+    "mode_residual_ema": [
+      0.03586173802614212,
+      3.432237605238697e-08,
+      2.8720471334509057e-08
+    ],
+    "effective_growth_residual_threshold": 0.12,
+    "post_growth_cooldown_checks_remaining": 0,
+    "layer_mode_residual_norms": [],
+    "layer_mode_residual_ema": [],
+    "mode_redundancy_norms": [
+      0.06269845366477966,
+      0.06225912645459175,
+      0.06212905794382095
+    ],
+    "mode_redundancy_ema": [
+      0.08244654536247253,
+      0.07631891965866089,
+      0.07720279693603516
+    ],
+    "mode_slice_activation_variance_ema": [
+      [
+        0.02144123800098896,
+        0.018303481861948967
+      ],
+      [
+        0.018470745533704758,
+        0.02274489589035511,
+        0.018608879297971725
+      ],
+      [
+        0.02328788861632347,
+        0.020084727555513382,
+        0.023676209151744843,
+        0.012253080494701862
+      ]
+    ],
+    "prune_candidate_streaks": [
+      9,
+      9,
+      9
+    ],
+    "recent_chunk_drift_mean": null,
+    "recent_chunk_drift_max": null,
+    "growth_event_history": [],
+    "val_loss": 0.8107845634222031,
+    "val_accuracy": 0.73828125,
+    "val_perplexity": 2.249672305078637,
+    "val_bpc": 1.1697148688785357,
+    "cross_memory_residual": 0.0,
+    "token_count": 128,
+    "mean_phase_variance": 3.29811954498291,
+    "max_phase_variance": 3.6310815811157227,
+    "mean_phase_delta": 1.6993443965911865,
+    "phase_delta_variance": 5.3166399002075195
+  },
+  {
+    "step": 500,
+    "state_shape": [
+      2,
+      3,
+      4
+    ],
+    "axis_kinds": [
+      "mode",
+      "mode",
+      "mode"
+    ],
+    "mode_residual_norms": [
+      0.021092573180794716,
+      5.6504500633991483e-08,
+      3.032166517868973e-08
+    ],
+    "mode_residual_ema": [
+      0.03290790319442749,
+      3.8758802389793345e-08,
+      2.9040711169159295e-08
+    ],
+    "effective_growth_residual_threshold": 0.12,
+    "post_growth_cooldown_checks_remaining": 0,
+    "layer_mode_residual_norms": [],
+    "layer_mode_residual_ema": [],
+    "mode_redundancy_norms": [
+      0.06580537557601929,
+      0.06067970022559166,
+      0.05856514722108841
+    ],
+    "mode_redundancy_ema": [
+      0.07911831885576248,
+      0.0731910765171051,
+      0.07347527146339417
+    ],
+    "mode_slice_activation_variance_ema": [
+      [
+        0.021308012306690216,
+        0.019280774518847466
+      ],
+      [
+        0.018002260476350784,
+        0.024233881384134293,
+        0.01875852420926094
+      ],
+      [
+        0.025214672088623047,
+        0.020036764442920685,
+        0.02313750609755516,
+        0.012426704168319702
+      ]
+    ],
+    "prune_candidate_streaks": [
+      10,
+      10,
+      10
+    ],
+    "recent_chunk_drift_mean": null,
+    "recent_chunk_drift_max": null,
+    "growth_event_history": [],
+    "val_loss": 0.7696141228079796,
+    "val_accuracy": 0.752685546875,
+    "val_perplexity": 2.158933010022705,
+    "val_bpc": 1.1103184783731819,
+    "cross_memory_residual": 0.0,
+    "token_count": 128,
+    "mean_phase_variance": 3.289424419403076,
+    "max_phase_variance": 3.549704074859619,
+    "mean_phase_delta": 1.715151309967041,
+    "phase_delta_variance": 5.3535614013671875
+  }
+]

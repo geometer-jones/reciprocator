@@ -818,15 +818,20 @@ class ReciprocatorMixer(nn.Module):
             eps=self.eps,
         )
 
-        delta = self.return_map(self._state_features(next_state))
+        delta = self.return_map(self._state_features(next_state - state))
         gate_input = torch.cat(
             [normalized_hidden.real, normalized_hidden.imag, delta.real, delta.imag], dim=-1
         )
         gate = torch.sigmoid(self.gate(gate_input))
         return gate.to(delta.dtype) * delta, next_state
 
-    def _compute_delta(self, next_state: Tensor, normalized_hidden: Tensor) -> Tensor:
-        features = self._state_features(next_state)
+    def _compute_delta(
+        self,
+        next_state: Tensor,
+        old_state: Tensor,
+        normalized_hidden: Tensor,
+    ) -> Tensor:
+        features = self._state_features(next_state - old_state)
         delta = self.return_map(features)
         gate_input = torch.cat(
             [normalized_hidden.real, normalized_hidden.imag, delta.real, delta.imag], dim=-1
@@ -907,6 +912,7 @@ class ReciprocatorMixer(nn.Module):
                 core_state = chunk_start_state
                 if track_drift:
                     for i in range(L_rest):
+                        old_core_state = core_state
                         proposal = (
                             decay_gain[:, i] * core_state
                             + input_gain[:, i] * s_rest[:, i]
@@ -924,10 +930,11 @@ class ReciprocatorMixer(nn.Module):
                         drifts.append(
                             state_delta.flatten(start_dim=1).norm(p=2, dim=1).mean().item()
                         )
-                        delta_t = self._compute_delta(core_state, normed[:, i])
+                        delta_t = self._compute_delta(core_state, old_core_state, normed[:, i])
                         deltas.append(delta_t)
                 else:
                     for i in range(L_rest):
+                        old_core_state = core_state
                         proposal = (
                             decay_gain[:, i] * core_state
                             + input_gain[:, i] * s_rest[:, i]
@@ -941,7 +948,7 @@ class ReciprocatorMixer(nn.Module):
                             dims=tuple(range(1, proposal.ndim)),
                             eps=self.eps,
                         )
-                        delta_t = self._compute_delta(core_state, normed[:, i])
+                        delta_t = self._compute_delta(core_state, old_core_state, normed[:, i])
                         deltas.append(delta_t)
 
                 current_state = core_state

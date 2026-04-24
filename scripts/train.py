@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import asdict
+from dataclasses import asdict, fields, replace
 import json
 from pathlib import Path
 import sys
-from typing import Tuple
+from typing import Any, Mapping, Optional, Sequence, Tuple
 
 import torch
 
@@ -18,7 +18,7 @@ if str(SRC_ROOT) not in sys.path:
 
 from reciprocator import available_corpora
 from reciprocator.mixer import canonicalize_coupling_type
-from reciprocator.training import TrainingConfig, train_model
+from reciprocator.training import TrainingConfig, TrainingMetrics, TrainingResumeState, train_model
 
 
 def parse_state_shape(raw: str) -> Tuple[int, ...]:
@@ -140,11 +140,6 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         default=False,
         help="Use full coordinatewise FFT dynamic spectral gains instead of radial sampled gains.",
-    )
-    parser.add_argument(
-        "--enable-anticipator-relation",
-        action="store_true",
-        help="Use the previous step's model output as a next-step prediction relation.",
     )
     parser.add_argument(
         "--enable-cross-layer-state",
@@ -312,6 +307,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--checkpoint-dir", type=str, default="runs")
     parser.add_argument("--checkpoint-every", type=int, default=0)
     parser.add_argument("--checkpoint-out", type=str, default=None)
+    parser.add_argument(
+        "--resume-from",
+        type=str,
+        default=None,
+        help="Resume training from a checkpoint produced by this script.",
+    )
     return parser
 
 
@@ -374,6 +375,102 @@ def write_run_config(run_dir: Path, config: TrainingConfig) -> None:
     print(f"wrote run config: {config_path}", flush=True)
 
 
+def load_checkpoint(path: Path) -> dict:
+    checkpoint_path = path.expanduser().resolve()
+    payload = torch.load(checkpoint_path, map_location="cpu")
+    if not isinstance(payload, dict):
+        raise ValueError(f"Checkpoint must contain a dict payload: {checkpoint_path}")
+    return payload
+
+
+_TUPLE_CONFIG_FIELDS = {"state_shape", "max_state_shape", "benchmark_prompt_lengths"}
+
+
+def training_config_from_checkpoint(payload: Mapping[str, Any]) -> TrainingConfig:
+    raw_config = payload.get("config")
+    if not isinstance(raw_config, dict):
+        raise ValueError("Checkpoint is missing a config dict.")
+
+    config_field_names = {field.name for field in fields(TrainingConfig)}
+    config_kwargs = {}
+    for name in config_field_names:
+        if name not in raw_config:
+            continue
+        value = raw_config[name]
+        if name in _TUPLE_CONFIG_FIELDS and value is not None:
+            value = tuple(value)
+        config_kwargs[name] = value
+    return TrainingConfig(**config_kwargs)
+
+
+def _metric_from_checkpoint_row(row: Any) -> Tuple[int, TrainingMetrics]:
+    if isinstance(row, dict):
+        return (
+            int(row["step"]),
+            TrainingMetrics(
+                loss=float(row["loss"]),
+                accuracy=float(row["accuracy"]),
+                perplexity=float(row["perplexity"]),
+                bpc=float(row["bpc"]),
+            ),
+        )
+
+    step, metrics = row
+    if isinstance(metrics, TrainingMetrics):
+        return int(step), metrics
+    if isinstance(metrics, dict):
+        return (
+            int(step),
+            TrainingMetrics(
+                loss=float(metrics["loss"]),
+                accuracy=float(metrics["accuracy"]),
+                perplexity=float(metrics["perplexity"]),
+                bpc=float(metrics["bpc"]),
+            ),
+        )
+    raise ValueError(f"Unsupported metric checkpoint row: {row!r}")
+
+
+def _step_loss_from_checkpoint_row(row: Any) -> Tuple[int, float]:
+    step, loss = row
+    return int(step), float(loss)
+
+
+def resume_state_from_checkpoint(payload: Mapping[str, Any]) -> TrainingResumeState:
+    if "step" not in payload:
+        raise ValueError("Checkpoint is missing step.")
+    model_state_dict = payload.get("model_state_dict")
+    if not isinstance(model_state_dict, dict):
+        raise ValueError("Checkpoint is missing model_state_dict.")
+
+    return TrainingResumeState(
+        step=int(payload["step"]),
+        model_state_dict=model_state_dict,
+        optimizer_state_dict=payload.get("optimizer_state_dict"),
+        train_losses=[float(loss) for loss in payload.get("train_losses", [])],
+        val_losses=[_step_loss_from_checkpoint_row(row) for row in payload.get("val_losses", [])],
+        train_metrics=[_metric_from_checkpoint_row(row) for row in payload.get("train_metrics", [])],
+        val_metrics=[_metric_from_checkpoint_row(row) for row in payload.get("val_metrics", [])],
+    )
+
+
+def _option_was_provided(argv: Sequence[str], option: str) -> bool:
+    return any(arg == option or arg.startswith(f"{option}=") for arg in argv)
+
+
+def _apply_resume_overrides(
+    config: TrainingConfig,
+    args: argparse.Namespace,
+    argv: Sequence[str],
+) -> TrainingConfig:
+    updates = {}
+    if _option_was_provided(argv, "--steps"):
+        updates["steps"] = args.steps
+    if _option_was_provided(argv, "--device"):
+        updates["device"] = args.device
+    return replace(config, **updates) if updates else config
+
+
 def _format_preview(text: str, *, max_chars: int = 120) -> str:
     preview = text.replace("\n", "\\n")
     if len(preview) > max_chars:
@@ -381,8 +478,10 @@ def _format_preview(text: str, *, max_chars: int = 120) -> str:
     return preview
 
 
-def main() -> None:
-    args = build_parser().parse_args()
+def main(argv: Optional[Sequence[str]] = None) -> None:
+    if argv is None:
+        argv = sys.argv[1:]
+    args = build_parser().parse_args(argv)
     config = TrainingConfig(
         corpus_name=args.corpus,
         max_chars=args.max_chars,
@@ -410,7 +509,6 @@ def main() -> None:
         enable_self_relation=args.enable_self_relation,
         dynamic_spectral_gains=args.dynamic_spectral_gains,
         anisotropic_spectral_gains=args.anisotropic_spectral_gains,
-        enable_anticipator_relation=args.enable_anticipator_relation,
         enable_cross_layer_state=args.enable_cross_layer_state,
         coupling_type=args.coupling_type,
         low_frequency_gain=args.low_frequency_gain,
@@ -458,6 +556,27 @@ def main() -> None:
     )
     if args.checkpoint_every < 0:
         raise ValueError("checkpoint_every must be non-negative.")
+
+    resume_state = None
+    if args.resume_from is not None:
+        checkpoint_payload = load_checkpoint(Path(args.resume_from))
+        config = _apply_resume_overrides(
+            training_config_from_checkpoint(checkpoint_payload),
+            args,
+            argv,
+        )
+        resume_state = resume_state_from_checkpoint(checkpoint_payload)
+        print(
+            f"resuming from checkpoint: {Path(args.resume_from).expanduser().resolve()} "
+            f"step={resume_state.step} state_shape={config.state_shape}",
+            flush=True,
+        )
+        if resume_state.optimizer_state_dict is None and resume_state.step < config.steps:
+            print(
+                "warning: checkpoint has no optimizer_state_dict; optimizer state will restart.",
+                file=sys.stderr,
+                flush=True,
+            )
 
     run_dir = None
     if args.run_name is not None:
@@ -524,7 +643,7 @@ def main() -> None:
             )
             save_checkpoint(run_dir / f"checkpoint_step_{step:06d}.pt", payload)
 
-    result = train_model(config, step_callback=step_callback)
+    result = train_model(config, step_callback=step_callback, resume_state=resume_state)
 
     last_train_step, last_train_metrics = result.train_metrics[-1]
     last_eval_step, last_val_metrics = result.val_metrics[-1]
@@ -549,9 +668,9 @@ def main() -> None:
     )
 
     final_payload = _checkpoint_payload(
-        step=config.steps,
+        step=result.config.steps,
         model=result.model,
-        optimizer=None,
+        optimizer=result.optimizer,
         config=result.config,
         dataset=result.dataset,
         train_losses=result.train_losses,
@@ -562,8 +681,8 @@ def main() -> None:
         runtime_benchmarks=result.runtime_benchmarks,
     )
 
-    if run_dir is not None and (args.checkpoint_every == 0 or config.steps % args.checkpoint_every != 0):
-        save_checkpoint(run_dir / f"checkpoint_step_{config.steps:06d}.pt", final_payload)
+    if run_dir is not None and (args.checkpoint_every == 0 or result.config.steps % args.checkpoint_every != 0):
+        save_checkpoint(run_dir / f"checkpoint_step_{result.config.steps:06d}.pt", final_payload)
 
     if args.checkpoint_out is not None:
         save_checkpoint(Path(args.checkpoint_out), final_payload)

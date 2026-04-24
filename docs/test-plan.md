@@ -690,7 +690,6 @@ backend and filter settings fixed during all Phase 4 ablations.
 | 16 | num_layers = 2                                         | Best static winner      | Does depth help?                                    |
 | 17 | token_phase = semantic_virtual_offset                  | Best static winner      | Does virtual_offset add anything on top of semantic? |
 | 18 | enable_self_relation = True                            | Best static winner      | Does the prior-state × present Hadamard term help?   |
-| 18b | enable_anticipator_relation = True                    | Best static winner      | Does next-step self-prediction feedback help enough to justify the more sequential path? |
 
 **Notes on conditionals:**
 
@@ -701,10 +700,6 @@ backend and filter settings fixed during all Phase 4 ablations.
   trigger still behaves sensibly when `num_layers > 1`.
 - Run 17 only makes sense if the best static winner uses `token_phase=semantic`. If the
   winner uses `none` or `virtual_offset`, reformulate or skip.
-- For run 18b, report wall-clock time and tokens/sec alongside `val_bpc`. This flag
-  changes the forward path to token-by-token anticipatory feedback, so quality alone is
-  not enough to evaluate the tradeoff.
-
 ---
 
 ## Phase 4.2: Multi-layer growth sanity check
@@ -1326,9 +1321,6 @@ Mamba is the key competitor for efficiency claims. If Mamba matches the Reciproc
 - Dynamic growth conclusions are currently scoped to `num_layers=1`. If static depth
   helps, Phase 4.2 is the gate for deciding whether layer-aggregated residual triggers
   also work with depth.
-- `enable_anticipator_relation` is a meaningful mechanism, not a cosmetic flag. Treat
-  its Phase 4 result as a quality/throughput tradeoff, since it changes the recurrence
-  path and prevents the simpler full-sequence forward used by the non-anticipatory model.
 - The streaming benchmark and generation-quality pass are promotion gates for
   checkpoints, not optional afterthoughts. If a checkpoint wins on bpc but fails either
   gate, document that explicitly and do not present it as an unqualified best model.

@@ -15,6 +15,7 @@ def test_frobenius_normalize_returns_unit_norm_per_batch() -> None:
 
 
 def test_per_mode_normalize_returns_unit_norm_fibers() -> None:
+    torch.manual_seed(1)
     x = random_complex(3, 2, 4)
     y = per_mode_normalize(x, dims=(1, 2))
     power = y.real.square() + y.imag.square()

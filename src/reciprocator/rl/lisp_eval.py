@@ -492,7 +492,12 @@ def symbolic_equivalence(left: Expression, right: Expression, *, samples: int = 
     matches = 0
     for _ in range(samples):
         assignments = {name: rng.randint(-3, 3) or 1 for name in variables}
-        if _evaluate_symbolic_numeric(normalized_left, assignments) == _evaluate_symbolic_numeric(normalized_right, assignments):
+        try:
+            left_value = _evaluate_symbolic_numeric(normalized_left, assignments)
+            right_value = _evaluate_symbolic_numeric(normalized_right, assignments)
+        except EvalError:
+            return False, 0.0
+        if left_value == right_value:
             matches += 1
     return False, matches / samples
 

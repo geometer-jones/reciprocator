@@ -1,0 +1,772 @@
+{
+  "config": {
+    "max_completion_tokens": 12,
+    "num_problems": 100,
+    "pass_k": 16,
+    "seed": 7,
+    "stage": 1,
+    "stage1_wrong_reward": 0.1,
+    "temperature": 0.8,
+    "top_k": 20
+  },
+  "results": [
+    {
+      "checkpoint": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lisp_math_pretrain_dynamic_growth_h256_20260424/checkpoint_step_000500.pt",
+      "checkpoint_step": 500,
+      "greedy_correct": 9,
+      "greedy_error_counts": {
+        "correct": 9,
+        "parse_error": 28,
+        "wrong_result": 63
+      },
+      "greedy_exact": 0.09,
+      "lm_config": {
+        "hidden_size": 256,
+        "normalization_type": "frobenius",
+        "num_layers": 1,
+        "phase_type": "rope",
+        "readout_type": "phase_aware",
+        "state_shape": [
+          2,
+          3,
+          4
+        ],
+        "token_magnitude_type": "inverse_frequency_learned"
+      },
+      "num_problems": 100,
+      "pass_at_k": 0.66,
+      "pass_correct": 66,
+      "pass_k": 16,
+      "residual_diagnostics": {
+        "growth_residual_threshold": 0.12,
+        "layer_mode_residual_ema": [
+          [
+            0.14575792849063873,
+            1.0359053703723475e-07,
+            8.505173099138119e-08
+          ]
+        ],
+        "layer_mode_residual_norms": [
+          [
+            0.14575792849063873,
+            1.0359053703723475e-07,
+            8.505173099138119e-08
+          ]
+        ],
+        "max_growth_pressure": 1.2146494388580322,
+        "mode_redundancy_ema": [
+          0.1045939028263092,
+          0.0880192443728447,
+          0.1078135073184967
+        ],
+        "mode_redundancy_norms": [
+          0.1045939028263092,
+          0.0880192443728447,
+          0.1078135073184967
+        ],
+        "mode_residual_ema": [
+          0.14575792849063873,
+          1.0359053703723475e-07,
+          8.505173099138119e-08
+        ],
+        "mode_residual_norms": [
+          0.14575792849063873,
+          1.0359053703723475e-07,
+          8.505173099138119e-08
+        ],
+        "mode_slice_activation_variance_ema": [
+          [
+            0.015223241411149502,
+            0.047819834202528
+          ],
+          [
+            0.017438769340515137,
+            0.0675714910030365,
+            0.004778587259352207
+          ],
+          [
+            0.08464620262384415,
+            0.005897824186831713,
+            0.022910168394446373,
+            0.0029905003029853106
+          ]
+        ],
+        "rank_residuals_saturated": false,
+        "residual_saturate_threshold": 0.07,
+        "state_shape": [
+          2,
+          3,
+          4
+        ],
+        "step": 500
+      },
+      "sample_error_counts": {
+        "correct": 130,
+        "eval_error": 2,
+        "parse_error": 376,
+        "wrong_result": 1092
+      },
+      "samples": [
+        {
+          "expected_result": "3",
+          "greedy_completion": "",
+          "greedy_correct": false,
+          "greedy_error_type": "parse_error",
+          "greedy_reward": 0.0,
+          "index": 0,
+          "prompt_expression": "(* 1 3)",
+          "sampled_completions": [
+            {
+              "completion": "3",
+              "correct": true,
+              "error_type": "correct",
+              "reward": 1.0
+            },
+            {
+              "completion": "10",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "1",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "-6",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            }
+          ]
+        },
+        {
+          "expected_result": "1",
+          "greedy_completion": "",
+          "greedy_correct": false,
+          "greedy_error_type": "parse_error",
+          "greedy_reward": 0.0,
+          "index": 1,
+          "prompt_expression": "(expt 0 0)",
+          "sampled_completions": [
+            {
+              "completion": "4",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "",
+              "correct": false,
+              "error_type": "parse_error",
+              "reward": 0.0
+            },
+            {
+              "completion": "",
+              "correct": false,
+              "error_type": "parse_error",
+              "reward": 0.0
+            },
+            {
+              "completion": "",
+              "correct": false,
+              "error_type": "parse_error",
+              "reward": 0.0
+            }
+          ]
+        },
+        {
+          "expected_result": "1",
+          "greedy_completion": "1",
+          "greedy_correct": true,
+          "greedy_error_type": "correct",
+          "greedy_reward": 1.0,
+          "index": 2,
+          "prompt_expression": "(mod 7 3)",
+          "sampled_completions": [
+            {
+              "completion": "-3",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "10",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "4",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            }
+          ]
+        },
+        {
+          "expected_result": "5",
+          "greedy_completion": "4",
+          "greedy_correct": false,
+          "greedy_error_type": "wrong_result",
+          "greedy_reward": 0.1,
+          "index": 3,
+          "prompt_expression": "(+ 4 1)",
+          "sampled_completions": [
+            {
+              "completion": "2",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "4",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "2",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "6",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            }
+          ]
+        },
+        {
+          "expected_result": "3",
+          "greedy_completion": "16",
+          "greedy_correct": false,
+          "greedy_error_type": "wrong_result",
+          "greedy_reward": 0.1,
+          "index": 4,
+          "prompt_expression": "(+ 0 3)",
+          "sampled_completions": [
+            {
+              "completion": "-4",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "18",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "26",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "4",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            }
+          ]
+        },
+        {
+          "expected_result": "0",
+          "greedy_completion": "16",
+          "greedy_correct": false,
+          "greedy_error_type": "wrong_result",
+          "greedy_reward": 0.1,
+          "index": 5,
+          "prompt_expression": "(/ 0 2)",
+          "sampled_completions": [
+            {
+              "completion": ":false",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "3",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "5",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "18",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            }
+          ]
+        },
+        {
+          "expected_result": "0",
+          "greedy_completion": "1",
+          "greedy_correct": false,
+          "greedy_error_type": "wrong_result",
+          "greedy_reward": 0.1,
+          "index": 6,
+          "prompt_expression": "(mod 3 3)",
+          "sampled_completions": [
+            {
+              "completion": "",
+              "correct": false,
+              "error_type": "parse_error",
+              "reward": 0.0
+            },
+            {
+              "completion": "",
+              "correct": false,
+              "error_type": "parse_error",
+              "reward": 0.0
+            },
+            {
+              "completion": "",
+              "correct": false,
+              "error_type": "parse_error",
+              "reward": 0.0
+            },
+            {
+              "completion": "5",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            }
+          ]
+        },
+        {
+          "expected_result": "0",
+          "greedy_completion": "1",
+          "greedy_correct": false,
+          "greedy_error_type": "wrong_result",
+          "greedy_reward": 0.1,
+          "index": 7,
+          "prompt_expression": "(mod 6 2)",
+          "sampled_completions": [
+            {
+              "completion": "2",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "2",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "4",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "0",
+              "correct": true,
+              "error_type": "correct",
+              "reward": 1.0
+            }
+          ]
+        }
+      ],
+      "stage": 1
+    },
+    {
+      "checkpoint": "/Users/peterwei/Desktop/wokspace/reciprocator/runs/lisp_math_rl_stage1_grpo_h256_20260424/checkpoint_step_000025.pt",
+      "checkpoint_step": 25,
+      "greedy_correct": 26,
+      "greedy_error_counts": {
+        "correct": 26,
+        "wrong_result": 74
+      },
+      "greedy_exact": 0.26,
+      "lm_config": {
+        "hidden_size": 256,
+        "normalization_type": "frobenius",
+        "num_layers": 1,
+        "phase_type": "rope",
+        "readout_type": "phase_aware",
+        "state_shape": [
+          2,
+          3,
+          4
+        ],
+        "token_magnitude_type": "inverse_frequency_learned"
+      },
+      "num_problems": 100,
+      "pass_at_k": 0.27,
+      "pass_correct": 27,
+      "pass_k": 16,
+      "residual_diagnostics": {
+        "growth_residual_threshold": 0.12,
+        "layer_mode_residual_ema": [
+          [
+            0.1461450457572937,
+            8.576262189308181e-08,
+            5.625064858350015e-08
+          ]
+        ],
+        "layer_mode_residual_norms": [
+          [
+            0.1461450457572937,
+            8.576262189308181e-08,
+            5.625064858350015e-08
+          ]
+        ],
+        "max_growth_pressure": 1.217875361442566,
+        "mode_redundancy_ema": [
+          0.10790448635816574,
+          0.0926596000790596,
+          0.12241627275943756
+        ],
+        "mode_redundancy_norms": [
+          0.10790448635816574,
+          0.0926596000790596,
+          0.12241627275943756
+        ],
+        "mode_residual_ema": [
+          0.1461450457572937,
+          8.576262189308181e-08,
+          5.625064858350015e-08
+        ],
+        "mode_residual_norms": [
+          0.1461450457572937,
+          8.576262189308181e-08,
+          5.625064858350015e-08
+        ],
+        "mode_slice_activation_variance_ema": [
+          [
+            0.015109290368855,
+            0.04786400869488716
+          ],
+          [
+            0.017201919108629227,
+            0.06747803837060928,
+            0.004807786550372839
+          ],
+          [
+            0.08472373336553574,
+            0.006014586891978979,
+            0.02244408242404461,
+            0.00298270583152771
+          ]
+        ],
+        "rank_residuals_saturated": false,
+        "residual_saturate_threshold": 0.07,
+        "state_shape": [
+          2,
+          3,
+          4
+        ],
+        "step": 25
+      },
+      "sample_error_counts": {
+        "correct": 415,
+        "parse_error": 1,
+        "wrong_result": 1184
+      },
+      "samples": [
+        {
+          "expected_result": "3",
+          "greedy_completion": "0",
+          "greedy_correct": false,
+          "greedy_error_type": "wrong_result",
+          "greedy_reward": 0.1,
+          "index": 0,
+          "prompt_expression": "(* 1 3)",
+          "sampled_completions": [
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            }
+          ]
+        },
+        {
+          "expected_result": "1",
+          "greedy_completion": "0",
+          "greedy_correct": false,
+          "greedy_error_type": "wrong_result",
+          "greedy_reward": 0.1,
+          "index": 1,
+          "prompt_expression": "(expt 0 0)",
+          "sampled_completions": [
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            }
+          ]
+        },
+        {
+          "expected_result": "1",
+          "greedy_completion": "0",
+          "greedy_correct": false,
+          "greedy_error_type": "wrong_result",
+          "greedy_reward": 0.1,
+          "index": 2,
+          "prompt_expression": "(mod 7 3)",
+          "sampled_completions": [
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            }
+          ]
+        },
+        {
+          "expected_result": "5",
+          "greedy_completion": "0",
+          "greedy_correct": false,
+          "greedy_error_type": "wrong_result",
+          "greedy_reward": 0.1,
+          "index": 3,
+          "prompt_expression": "(+ 4 1)",
+          "sampled_completions": [
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            }
+          ]
+        },
+        {
+          "expected_result": "3",
+          "greedy_completion": "0",
+          "greedy_correct": false,
+          "greedy_error_type": "wrong_result",
+          "greedy_reward": 0.1,
+          "index": 4,
+          "prompt_expression": "(+ 0 3)",
+          "sampled_completions": [
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            },
+            {
+              "completion": "0",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            }
+          ]
+        },
+        {
+          "expected_result": "0",
+          "greedy_completion": "0",
+          "greedy_correct": true,
+          "greedy_error_type": "correct",
+          "greedy_reward": 1.0,
+          "index": 5,
+          "prompt_expression": "(/ 0 2)",
+          "sampled_completions": [
+            {
+              "completion": "0",
+              "correct": true,
+              "error_type": "correct",
+              "reward": 1.0
+            },
+            {
+              "completion": "0",
+              "correct": true,
+              "error_type": "correct",
+              "reward": 1.0
+            },
+            {
+              "completion": "0",
+              "correct": true,
+              "error_type": "correct",
+              "reward": 1.0
+            },
+            {
+              "completion": "0",
+              "correct": true,
+              "error_type": "correct",
+              "reward": 1.0
+            }
+          ]
+        },
+        {
+          "expected_result": "0",
+          "greedy_completion": "0",
+          "greedy_correct": true,
+          "greedy_error_type": "correct",
+          "greedy_reward": 1.0,
+          "index": 6,
+          "prompt_expression": "(mod 3 3)",
+          "sampled_completions": [
+            {
+              "completion": "0",
+              "correct": true,
+              "error_type": "correct",
+              "reward": 1.0
+            },
+            {
+              "completion": "0",
+              "correct": true,
+              "error_type": "correct",
+              "reward": 1.0
+            },
+            {
+              "completion": "0",
+              "correct": true,
+              "error_type": "correct",
+              "reward": 1.0
+            },
+            {
+              "completion": "1",
+              "correct": false,
+              "error_type": "wrong_result",
+              "reward": 0.1
+            }
+          ]
+        },
+        {
+          "expected_result": "0",
+          "greedy_completion": "0",
+          "greedy_correct": true,
+          "greedy_error_type": "correct",
+          "greedy_reward": 1.0,
+          "index": 7,
+          "prompt_expression": "(mod 6 2)",
+          "sampled_completions": [
+            {
+              "completion": "0",
+              "correct": true,
+              "error_type": "correct",
+              "reward": 1.0
+            },
+            {
+              "completion": "0",
+              "correct": true,
+              "error_type": "correct",
+              "reward": 1.0
+            },
+            {
+              "completion": "0",
+              "correct": true,
+              "error_type": "correct",
+              "reward": 1.0
+            },
+            {
+              "completion": "0",
+              "correct": true,
+              "error_type": "correct",
+              "reward": 1.0
+            }
+          ]
+        }
+      ],
+      "stage": 1
+    }
+  ]
+}
