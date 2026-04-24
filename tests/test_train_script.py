@@ -37,6 +37,8 @@ def test_build_parser_exposes_phase_and_growth_defaults() -> None:
     assert args.high_frequency_cutoff == 0.5
     assert args.dynamic_spectral_gains is False
     assert args.anisotropic_spectral_gains is False
+    assert args.enable_cross_bilinear is True
+    assert args.cross_bilinear_rank == 8
     assert args.wavelet_levels is None
     assert args.chunk_size is None
     assert args.track_chunk_drift is False
@@ -61,13 +63,13 @@ def test_build_parser_exposes_phase_and_growth_defaults() -> None:
     assert args.max_state_shape is None
     assert args.growth_check_interval == 50
     assert args.growth_residual_threshold == 0.4
-    assert args.post_growth_cooldown_checks == 0
-    assert args.post_growth_cooldown_threshold_scale == 1.5
+    assert args.post_growth_cooldown_checks == 5
+    assert args.post_growth_cooldown_threshold_scale == 2.0
     assert args.residual_saturate_threshold == 0.4
     assert args.growth_residual_ema_decay == 0.95
     assert args.record_residual_diagnostics is False
     assert args.diagnostics_out is None
-    assert args.min_checks_before_first_growth == 0
+    assert args.min_checks_before_first_growth == 7
     assert args.rank_growth_loss_ceiling == 1.5
     assert args.prune_threshold == 0.08
     assert args.prune_sustain_steps == 4
@@ -84,7 +86,7 @@ def test_build_parser_exposes_phase_and_growth_defaults() -> None:
     assert args.resume_from is None
 
 
-def test_build_parser_parses_max_state_shape_like_state_shape() -> None:
+def test_build_parser_parses_max_mode_sizes_like_state_shape() -> None:
     train_script = load_train_script()
 
     args = train_script.build_parser().parse_args(
@@ -107,6 +109,9 @@ def test_build_parser_parses_max_state_shape_like_state_shape() -> None:
             "0.65",
             "--dynamic-spectral-gains",
             "--anisotropic-spectral-gains",
+            "--disable-cross-bilinear",
+            "--cross-bilinear-rank",
+            "4",
             "--wavelet-levels",
             "3",
             "--chunk-size",
@@ -151,7 +156,7 @@ def test_build_parser_parses_max_state_shape_like_state_shape() -> None:
             "9",
             "--max-rank",
             "6",
-            "--max-state-shape",
+            "--max-mode-sizes",
             "3,4,5",
             "--growth-check-interval",
             "75",
@@ -187,6 +192,8 @@ def test_build_parser_parses_max_state_shape_like_state_shape() -> None:
     assert args.high_frequency_cutoff == 0.65
     assert args.dynamic_spectral_gains is True
     assert args.anisotropic_spectral_gains is True
+    assert args.enable_cross_bilinear is False
+    assert args.cross_bilinear_rank == 4
     assert args.wavelet_levels == 3
     assert args.chunk_size == 16
     assert args.track_chunk_drift is True
@@ -223,6 +230,14 @@ def test_build_parser_parses_max_state_shape_like_state_shape() -> None:
     assert args.generation_top_k == 12
     assert args.benchmark_prompt_lengths == (16, 64, 256)
     assert args.benchmark_new_tokens == 192
+
+
+def test_build_parser_keeps_max_state_shape_as_compatibility_alias() -> None:
+    train_script = load_train_script()
+
+    args = train_script.build_parser().parse_args(["--max-state-shape", "3,4,5"])
+
+    assert args.max_state_shape == (3, 4, 5)
 
 
 def test_build_parser_parses_hybrid_attention_and_stateless_flags() -> None:

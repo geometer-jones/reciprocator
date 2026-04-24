@@ -23,7 +23,7 @@ This document is the retrospective companion to [docs/test-plan.md](/Users/peter
 
 Unless noted otherwise, the test matrix used:
 
-- corpus: `plato_jowett`
+- corpus: `greek_classics`
 - `max_chars=100000`
 - `batch_size=8`
 - `seq_len=64`
@@ -529,9 +529,9 @@ existing short-run test plan.
 ### Phase 8: State-Shape Exploration (`greek_classics`)
 
 Phase 8 reran the Phase 4C static recipe on `greek_classics` rather than the older
-`plato_jowett` setup, because the current active plan now uses `greek_classics` as the
+`greek_classics` setup, because the current active plan now uses `greek_classics` as the
 bundled corpus. Treat the results as within-corpus comparisons only; the absolute bpc
-values are not directly interchangeable with the earlier `plato_jowett` branches.
+values are not directly interchangeable with the earlier `greek_classics` branches.
 
 The base recipe was:
 
@@ -643,6 +643,56 @@ Artifacts:
 
 - [summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase9_sequence_length_greek_classics_20260423/summary.json)
 - [aggregate_summary.json](/Users/peterwei/Desktop/wokspace/reciprocator/runs/lab-book/phase9_sequence_length_greek_classics_20260423/aggregate_summary.json)
+
+### Phase 4.3.1: Four-Mode Cross-Bilinear Rank Sweep
+
+This seed-0 sweep was run on `2026-04-24` as a larger follow-up to the small
+cross-bilinear rank check. It used a four-mode state and a larger hidden size to
+test whether `cross_bilinear_rank > 8` becomes useful once the model has more
+capacity.
+
+Run root:
+
+- `runs/lab-book/phase4_3_1_four_mode_h64_rank_sweep_20260424`
+
+Common config:
+
+- `corpus_name=greek_classics`, `max_chars=100000`, train split `90000` chars
+- `hidden_size=64`, `num_layers=2`
+- `state_shape=(4,4,4,4)`, `max_mode_sizes=(8,8,8,8)`
+- `batch_size=8`, `seq_len=64`, `eval_every=50`, `max_steps=500`
+- `learning_rate=0.001`, no warmup, constant LR, no gradient clipping, no weight decay
+- CPU run, seed `0`
+
+Parameter counts:
+
+| Run | Cross-bilinear rank | Params |
+|---|---:|---:|
+| `phase4_3_1a_no_bilinear_seed0` | none | 455,322 |
+| `phase4_3_1b_bilinear_rank4_seed0` | 4 | 467,610 |
+| `phase4_3_1c_bilinear_rank8_seed0` | 8 | 479,898 |
+| `phase4_3_1d_bilinear_rank16_seed0` | 16 | 504,474 |
+
+Final results at step `500`:
+
+| Run | Final train BPC | Final train acc | Final `val_bpc` | Final `val_acc` |
+|---|---:|---:|---:|---:|
+| `phase4_3_1a_no_bilinear_seed0` | 2.5805 | 0.4824 | 2.7815 | 0.4493 |
+| `phase4_3_1b_bilinear_rank4_seed0` | 2.5898 | 0.4902 | 2.8516 | 0.4471 |
+| `phase4_3_1c_bilinear_rank8_seed0` | 2.5682 | 0.4922 | 2.8236 | 0.4386 |
+| `phase4_3_1d_bilinear_rank16_seed0` | 2.6312 | 0.4844 | 2.7982 | 0.4449 |
+
+Interpretation:
+
+- Lower BPC is better. On this seed, the no-bilinear control won with final
+  `val_bpc=2.7815`.
+- Rank 16 was the best cross-bilinear variant, but it still trailed the
+  no-bilinear control by `0.0167` bpc.
+- Rank 8 did not improve over rank 4 by enough to change the conclusion, and
+  neither beat the control.
+- This result does not support promoting cross-bilinear coupling as a default
+  for the current four-mode, 500-step setup. A multi-seed rerun would be needed
+  before closing the branch entirely.
 
 ## Best-Known Recipes
 
@@ -955,6 +1005,33 @@ Interpretation under the bug:
 - Future rerun should preserve the matched-medium design, but should first fix
   the mixer output and add a regression test that distinguishes full-state readout
   from delta readout.
+
+## Baseline Architecture Results: Transformer vs Mamba
+
+Run context:
+
+- Corpus: full `greek_classics`
+- Target: roughly match the full-corpus RRR parameter count
+- Optimizer/training recipe: batch size `16`, eval every `50`, learning rate
+  `0.001`, no warmup, constant LR, no grad clipping, no weight decay
+- Stop rule: taper stop
+
+Results:
+
+| Run | Params | Stop step | Best step | Best `val_bpc` | Final `val_bpc` | Final `val_acc` |
+|---|---:|---:|---:|---:|---:|---:|
+| `transformer_h368_l5_full_parammatch_RRR_taper_seed0` | 11,015,547 | 1600 | 1250 | 2.3201 | 2.3225 | 0.5228 |
+| `mamba_h576_l5_s32_full_parammatch_RRR_taper_seed0` | 11,216,651 | 2900 | 2400 | 2.1619 | 2.2077 | 0.5449 |
+
+Interpretation:
+
+- Mamba beat the Transformer baseline on best validation BPC by about `0.1582`
+  and on final validation accuracy by about `2.1` percentage points.
+- The Transformer tapered much earlier and at a weaker validation point; this is
+  plausibly capacity/architecture limited under the matched-parameter constraint,
+  not a training-time failure.
+- The Mamba run was substantially stronger among the two param-matched pure
+  baselines and is the better current non-Reciprocator comparison point.
 
 ## Closed, Pending, and Incomplete Branches
 

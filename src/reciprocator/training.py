@@ -29,7 +29,7 @@ from .rl.training import (
 )
 from .rl.phase_monitor import PhaseTrajectoryMonitor
 from .mixer import canonicalize_coupling_type, phase_aware_feature_map
-from .model import LocalAttentionBlock, ReciprocatorLM
+from .model import LocalAttentionBlock, ReciprocatorBlock, ReciprocatorLM
 
 CHUNK_DRIFT_WARN_THRESHOLD = 0.05
 
@@ -110,6 +110,8 @@ class TrainingConfig:
     dynamic_spectral_gains: bool = False
     anisotropic_spectral_gains: bool = False
     gain_projector_rank: int = 8
+    enable_cross_bilinear: bool = True
+    cross_bilinear_rank: int = 8
     enable_cross_layer_state: bool = False
     coupling_type: str = "sequential"
     low_frequency_gain: float = 0.5
@@ -127,14 +129,14 @@ class TrainingConfig:
     max_rank: Optional[int] = None
     growth_check_interval: int = 50
     growth_residual_threshold: float = 0.4
-    post_growth_cooldown_checks: int = 0
-    post_growth_cooldown_threshold_scale: float = 1.5
+    post_growth_cooldown_checks: int = 5
+    post_growth_cooldown_threshold_scale: float = 2.0
     residual_saturate_threshold: float = 0.4
     growth_residual_ema_decay: float = 0.95
     record_residual_diagnostics: bool = False
     chunk_size: Optional[int] = None
     track_chunk_drift: bool = False
-    min_checks_before_first_growth: int = 0
+    min_checks_before_first_growth: int = 7
     rank_growth_loss_ceiling: float = 1.5
     prune_threshold: float = 0.08
     prune_sustain_steps: int = 4
@@ -1974,6 +1976,21 @@ def _record_residual_diagnostic_row(residual_diagnostics: list[dict], row: dict)
     residual_diagnostics.append(row)
 
 
+def _cross_bilinear_w_norms(model: ReciprocatorLM) -> list[float]:
+    norms: list[float] = []
+    for block in model.blocks:
+        if not isinstance(block, ReciprocatorBlock):
+            continue
+        bilinear = block.mixer.cross_bilinear
+        if bilinear is None:
+            norms.append(0.0)
+            continue
+        real_norm = bilinear.W.weight_real.detach().norm().square()
+        imag_norm = bilinear.W.weight_imag.detach().norm().square()
+        norms.append(float(torch.sqrt(real_norm + imag_norm).item()))
+    return norms
+
+
 def _reciprocator_state_tensors(states: Sequence[object]) -> Tuple[Tensor, ...]:
     return tuple(state for state in states if isinstance(state, Tensor))
 
@@ -2112,6 +2129,8 @@ def _build_model_from_config(
         enable_self_relation=config.enable_self_relation,
         dynamic_gains=config.dynamic_gains,
         gain_projector_rank=config.gain_projector_rank,
+        enable_cross_bilinear=config.enable_cross_bilinear,
+        cross_bilinear_rank=config.cross_bilinear_rank,
         enable_cross_layer_state=config.enable_cross_layer_state,
         coupling_type=config.coupling_type,
         low_frequency_gain=config.low_frequency_gain,
@@ -2504,6 +2523,8 @@ def _validate_training_config(config: TrainingConfig) -> None:
         raise ValueError("weight_decay must be non-negative.")
     if config.gain_projector_rank <= 0:
         raise ValueError("gain_projector_rank must be positive.")
+    if config.cross_bilinear_rank <= 0:
+        raise ValueError("cross_bilinear_rank must be positive.")
     if config.growth_residual_threshold < 0:
         raise ValueError("growth_residual_threshold must be non-negative.")
     if config.post_growth_cooldown_checks < 0:
@@ -2822,6 +2843,7 @@ def train_model(
                         "prune_candidate_streaks": list(prune_candidate_streaks),
                         "recent_chunk_drift_mean": recent_chunk_drift_mean,
                         "recent_chunk_drift_max": recent_chunk_drift_max,
+                        "cross_bilinear_w_norms": _cross_bilinear_w_norms(model),
                     },
                 )
 

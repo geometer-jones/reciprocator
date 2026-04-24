@@ -347,7 +347,7 @@ This expands both:
 | dynamic_rank_growth | True |
 | dynamic_mode_pruning | True |
 | dynamic_rank_pruning | True |
-| max_state_shape | `(6,10,10,10)` |
+| max_mode_sizes / max_state_shape | `(6,10,10,10)` |
 | max_rank | 5 |
 | growth_check_interval | 50 |
 | growth_residual_ema_decay | 0.8 |
@@ -526,7 +526,7 @@ accumulating. The slice is immediately active after insertion.
 | growth_check_interval    | 50                          | Shared cadence for both growth and prune checks                       |
 | growth_residual_ema_decay | [Phase 3.1 winner]         | Equivalent to `residual_ema_alpha = 1 - decay`                        |
 | min_checks_before_first_growth | [Phase 3.1 winner]    | EMA updates required before growth is eligible; see note below        |
-| max_state_shape          | (6,6,6)                     |                                                                       |
+| max_mode_sizes / max_state_shape | (6,6,6)             | Per-mode growth caps; rank growth is separately capped by `max_rank`. |
 
 **`min_checks_before_first_growth`:** at the start of training the EMA has no history — the first
 few values reflect initialization noise rather than structural signal. Growth is

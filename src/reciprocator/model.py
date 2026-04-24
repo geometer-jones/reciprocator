@@ -243,6 +243,8 @@ class ReciprocatorBlock(nn.Module):
         anisotropic_spectral_gains: bool = False,
         wavelet_levels: Optional[int] = None,
         normalization_type: str = "frobenius",
+        enable_cross_bilinear: bool = True,
+        cross_bilinear_rank: int = 8,
     ) -> None:
         super().__init__()
         self.mixer = ReciprocatorMixer(
@@ -260,6 +262,8 @@ class ReciprocatorBlock(nn.Module):
             anisotropic_spectral_gains=anisotropic_spectral_gains,
             wavelet_levels=wavelet_levels,
             normalization_type=normalization_type,
+            enable_cross_bilinear=enable_cross_bilinear,
+            cross_bilinear_rank=cross_bilinear_rank,
         )
         self.ffn_norm = ComplexLayerNorm(hidden_size)
         self.ffn = ComplexFeedForward(hidden_size, expansion_factor=ffn_expansion_factor)
@@ -439,6 +443,8 @@ class ReciprocatorLM(nn.Module):
         anisotropic_spectral_gains: bool = False,
         wavelet_levels: Optional[int] = None,
         normalization_type: str = "frobenius",
+        enable_cross_bilinear: bool = True,
+        cross_bilinear_rank: int = 8,
         token_frequencies: Optional[Tensor] = None,
         attention_every_k: int = 0,
         attention_num_heads: int = 8,
@@ -461,6 +467,8 @@ class ReciprocatorLM(nn.Module):
         self.dynamic_spectral_gains = dynamic_spectral_gains
         self.anisotropic_spectral_gains = anisotropic_spectral_gains
         self.normalization_type = canonicalize_normalization_type(normalization_type)
+        self.enable_cross_bilinear = enable_cross_bilinear
+        self.cross_bilinear_rank = cross_bilinear_rank
 
         self.token_lift = TokenLift(
             vocab_size=vocab_size,
@@ -497,6 +505,8 @@ class ReciprocatorLM(nn.Module):
                             anisotropic_spectral_gains=anisotropic_spectral_gains,
                             wavelet_levels=wavelet_levels,
                             normalization_type=self.normalization_type,
+                            enable_cross_bilinear=enable_cross_bilinear,
+                            cross_bilinear_rank=cross_bilinear_rank,
                         )
                     )
                     continue
@@ -522,6 +532,8 @@ class ReciprocatorLM(nn.Module):
                         anisotropic_spectral_gains=anisotropic_spectral_gains,
                         wavelet_levels=wavelet_levels,
                         normalization_type=self.normalization_type,
+                        enable_cross_bilinear=enable_cross_bilinear,
+                        cross_bilinear_rank=cross_bilinear_rank,
                     )
                 )
                 if attention_every_k > 0 and attention_position == "after" and (i + 1) % attention_every_k == 0 and i < num_layers - 1:

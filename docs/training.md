@@ -32,7 +32,7 @@ Small smoke run:
 
 ```bash
 python3 scripts/train.py \
-  --corpus plato_jowett \
+  --corpus greek_classics \
   --device auto \
   --steps 50 \
   --eval-every 10 \
@@ -46,7 +46,7 @@ Checkpointed run with an explicit name:
 
 ```bash
 python3 scripts/train.py \
-  --corpus plato_jowett \
+  --corpus greek_classics \
   --device auto \
   --steps 500 \
   --eval-every 50 \
@@ -149,7 +149,7 @@ If you want to experiment with attention today, do it programmatically through
 - `--dynamic-rank-growth`
 - `--dynamic-mode-pruning`
 - `--dynamic-rank-pruning`
-- `--max-state-shape`
+- `--max-mode-sizes` (`--max-state-shape` remains a compatibility alias)
 - `--max-rank`
 - `--growth-check-interval`
 - `--growth-residual-threshold`
@@ -175,9 +175,10 @@ describing residual and redundancy signals across growth checks.
 any mode or rank growth event. The raised threshold applies for that many later
 growth-check intervals, using:
 `growth_residual_threshold * post_growth_cooldown_threshold_scale`. For example,
-`--post-growth-cooldown-checks 2 --post-growth-cooldown-threshold-scale 1.5`
-makes the next two growth checks use a +50% mode-growth threshold before
-returning to the baseline.
+the default `--post-growth-cooldown-checks 5 --post-growth-cooldown-threshold-scale 2.0`
+makes the next five growth checks use a doubled mode-growth threshold before
+returning to the baseline. The default `--min-checks-before-first-growth 7`
+also suppresses early growth until seven EMA updates have been recorded.
 
 ## Generation and benchmark outputs
 
@@ -185,7 +186,7 @@ You can attach generation and runtime evaluation to a training run:
 
 ```bash
 python3 scripts/train.py \
-  --corpus plato_jowett \
+  --corpus greek_classics \
   --steps 100 \
   --eval-every 20 \
   --generation-eval-samples 4 \
@@ -221,7 +222,7 @@ the run directory.
 
 ```bash
 python3 scripts/train.py \
-  --corpus plato_jowett \
+  --corpus greek_classics \
   --steps 500 \
   --eval-every 50 \
   --hidden-size 32 \
@@ -233,7 +234,7 @@ python3 scripts/train.py \
 
 ```bash
 python3 scripts/train.py \
-  --corpus plato_jowett \
+  --corpus greek_classics \
   --steps 500 \
   --eval-every 50 \
   --state-shape 2,3,4 \
@@ -249,7 +250,7 @@ To compare adaptive spectral filters, keep the same backend and add
 
 ```bash
 python3 scripts/train.py \
-  --corpus plato_jowett \
+  --corpus greek_classics \
   --steps 500 \
   --eval-every 50 \
   --state-shape 2,3,4 \
@@ -263,12 +264,12 @@ python3 scripts/train.py \
 
 ```bash
 python3 scripts/train.py \
-  --corpus plato_jowett \
+  --corpus greek_classics \
   --steps 1000 \
   --eval-every 50 \
   --state-shape 2,3,4 \
   --dynamic-mode-growth \
-  --max-state-shape 4,4,5 \
+  --max-mode-sizes 4,4,5 \
   --growth-check-interval 50 \
   --growth-residual-threshold 0.12 \
   --growth-residual-ema-decay 0.8 \
@@ -295,7 +296,7 @@ Minimal example:
 from reciprocator.training import TrainingConfig, train_model
 
 config = TrainingConfig(
-    corpus_name="plato_jowett",
+    corpus_name="greek_classics",
     steps=10,
     eval_every=5,
     hidden_size=32,

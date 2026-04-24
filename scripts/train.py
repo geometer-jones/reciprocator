@@ -112,10 +112,16 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--hidden-size", type=int, default=256)
     parser.add_argument("--state-shape", type=parse_state_shape, default=(4, 4, 4))
     parser.add_argument(
+        "--max-mode-sizes",
         "--max-state-shape",
+        dest="max_state_shape",
         type=parse_state_shape,
         default=None,
-        help="Optional max growth target, parsed like --state-shape (for example: 2,3,4).",
+        help=(
+            "Optional per-mode size caps for dynamic mode growth, parsed like --state-shape "
+            "(for example: 8,8,8). Rank growth is separately capped by --max-rank. "
+            "--max-state-shape is kept as a compatibility alias."
+        ),
     )
     parser.add_argument("--num-layers", type=int, default=1)
     parser.add_argument("--ffn-expansion-factor", type=int, default=2)
@@ -162,6 +168,26 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         default=False,
         help="Use full coordinatewise FFT dynamic spectral gains instead of radial sampled gains.",
+    )
+    cross_bilinear_group = parser.add_mutually_exclusive_group()
+    cross_bilinear_group.add_argument(
+        "--enable-cross-bilinear",
+        dest="enable_cross_bilinear",
+        action="store_true",
+        default=True,
+        help="Add zero-initialized low-rank cross-mode bilinear correction to the routed relation.",
+    )
+    cross_bilinear_group.add_argument(
+        "--disable-cross-bilinear",
+        dest="enable_cross_bilinear",
+        action="store_false",
+        help="Disable the cross-mode bilinear correction.",
+    )
+    parser.add_argument(
+        "--cross-bilinear-rank",
+        type=int,
+        default=8,
+        help="Rank of the cross-mode bilinear correction when enabled.",
     )
     parser.add_argument(
         "--enable-cross-layer-state",
@@ -258,13 +284,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--post-growth-cooldown-checks",
         type=int,
-        default=0,
+        default=5,
         help="Number of growth-check intervals after a growth event that use an elevated growth threshold.",
     )
     parser.add_argument(
         "--post-growth-cooldown-threshold-scale",
         type=float,
-        default=1.5,
+        default=2.0,
         help="Multiplier applied to growth_residual_threshold during post-growth cooldown checks.",
     )
     parser.add_argument("--residual-saturate-threshold", type=float, default=0.4)
@@ -284,7 +310,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--min-checks-before-first-growth",
         type=int,
-        default=0,
+        default=7,
         help="Minimum number of elapsed growth intervals before dynamic growth becomes eligible.",
     )
     parser.add_argument(
@@ -537,6 +563,8 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         enable_self_relation=args.enable_self_relation,
         dynamic_spectral_gains=args.dynamic_spectral_gains,
         anisotropic_spectral_gains=args.anisotropic_spectral_gains,
+        enable_cross_bilinear=args.enable_cross_bilinear,
+        cross_bilinear_rank=args.cross_bilinear_rank,
         enable_cross_layer_state=args.enable_cross_layer_state,
         coupling_type=args.coupling_type,
         low_frequency_gain=args.low_frequency_gain,

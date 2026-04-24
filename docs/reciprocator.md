@@ -653,10 +653,10 @@ effective mode-growth threshold for the next few growth-check intervals:
 effective_threshold = growth_residual_threshold * post_growth_cooldown_threshold_scale
 ```
 
-The default cooldown length is `0`, preserving the original trigger behavior. A
-typical stabilizing setting is two or three checks with a scale around `1.5` to
-`1.8`, giving newly added slices time to absorb signal before the mode-growth
-trigger returns to its baseline sensitivity.
+The default cooldown length is `5` growth checks with a scale of `2.0`, giving
+newly added slices time to absorb signal before the mode-growth trigger returns
+to its baseline sensitivity. First growth is also delayed by default until
+`min_checks_before_first_growth=7` EMA updates have been recorded.
 
 ### Rank growth
 

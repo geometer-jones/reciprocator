@@ -291,6 +291,23 @@ def test_lm_plumbs_dynamic_spectral_gains_to_spectral_blocks() -> None:
     assert all(block.mixer.coupling.anisotropic_spectral_gains for block in model.blocks)
 
 
+def test_lm_plumbs_cross_bilinear_settings_to_blocks() -> None:
+    model = ReciprocatorLM(
+        vocab_size=13,
+        hidden_size=8,
+        state_shape=(2, 3),
+        num_layers=2,
+        enable_cross_bilinear=False,
+        cross_bilinear_rank=4,
+    )
+
+    assert model.enable_cross_bilinear is False
+    assert model.cross_bilinear_rank == 4
+    assert all(block.mixer.enable_cross_bilinear is False for block in model.blocks)
+    assert all(block.mixer.cross_bilinear_rank == 4 for block in model.blocks)
+    assert all(block.mixer.cross_bilinear is None for block in model.blocks)
+
+
 def test_invalid_readout_type_raises() -> None:
     try:
         ReciprocatorLM(vocab_size=13, hidden_size=8, state_shape=(2, 3), readout_type="invalid")

@@ -63,8 +63,8 @@ def test_training_config_defaults_match_stronger_experiment_baseline() -> None:
     assert config.dynamic_spectral_gains is False
     assert config.anisotropic_spectral_gains is False
     assert config.normalization_type == "frobenius"
-    assert config.post_growth_cooldown_checks == 0
-    assert config.post_growth_cooldown_threshold_scale == pytest.approx(1.5)
+    assert config.post_growth_cooldown_checks == 5
+    assert config.post_growth_cooldown_threshold_scale == pytest.approx(2.0)
     assert config.prune_threshold == pytest.approx(0.08)
     assert config.prune_sustain_steps == 4
     assert config.prune_min_steps == 300
@@ -395,6 +395,7 @@ def test_train_model_resumes_from_checkpoint_state(monkeypatch) -> None:
         val_losses,
         train_metrics,
         val_metrics,
+        residual_diagnostics,
         device,
     ) -> None:
         seen_steps.append(step)
@@ -562,6 +563,7 @@ def test_train_model_logs_growth_event_history_at_validation(monkeypatch) -> Non
         device="cpu",
         dynamic_mode_growth=True,
         growth_check_interval=1,
+        min_checks_before_first_growth=0,
         seed=0,
     )
     grown_config = replace(config, state_shape=(3, 2))
@@ -594,6 +596,7 @@ def test_train_model_applies_post_growth_cooldown_threshold_for_next_checks(monk
         growth_residual_threshold=0.4,
         post_growth_cooldown_checks=2,
         post_growth_cooldown_threshold_scale=1.5,
+        min_checks_before_first_growth=0,
         seed=0,
     )
     grown_config = replace(config, state_shape=(3, 2))
@@ -636,6 +639,7 @@ def test_train_model_records_residual_diagnostics_on_growth_check_cadence(monkey
         num_layers=1,
         device="cpu",
         growth_check_interval=2,
+        prune_threshold=0.4,
         record_residual_diagnostics=True,
         seed=0,
     )
