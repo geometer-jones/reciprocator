@@ -692,6 +692,270 @@ This is not just historical inertia. Phase 7 directly tested the proposed
 warmup/cosine/clip/decay protocol and found it worse by at least `0.2924` bpc on the
 Phase 1 baseline.
 
+## Phase 11: Hybrid Architecture Sanity Scale (Preliminary)
+
+This seed-0 preview was launched on `2026-04-23` / `2026-04-24` and halted
+manually before completion. Treat these as optimization-trajectory notes, not as
+Phase 11 promotion results. The planned Phase 11 metric remains mean `val_bpc`
+over the final 5 eval checkpoints after full 2000-step runs and all seeds.
+
+Run root:
+
+- `runs/lab-book/phase11_hybrid_sanity_greek_classics_parallel_20260423`
+
+Common config:
+
+- `corpus_name=greek_classics`, `max_chars=100000`, train split `90000` chars
+- `hidden_size=256`, `state_shape=(4,4,4)`, `coupling_type=sequential`
+- `normalization_type=frobenius`
+- `token_magnitude_type=inverse_frequency_learned`, `phase_type=rope`, `token_phase=semantic`
+- `readout_type=phase_aware`, `enable_self_relation=True`
+- Phase 7 optimizer winner: fixed `learning_rate=1e-3`, no warmup, constant LR,
+  no gradient clipping, no weight decay
+- `seq_len=128`, `batch_size=8`, `eval_every=100`, `eval_batches=16`
+- `device=cuda`
+- `enable_cross_layer_state=False`
+- dynamic mode/rank growth and pruning disabled
+
+Parameter counts from the current code:
+
+| Run | Model | Non-embedding params | Total params |
+|---|---:|---:|---:|
+| 11A / 11C | 6 Reciprocator layers + 1 attention block (`after`) | 6,382,834 | 6,402,366 |
+| 11B | 7 pure Reciprocator layers | 6,810,851 | 6,830,383 |
+| 11D | 6 Reciprocator layers + 2 attention blocks (`before`) | 6,909,938 | 6,929,470 |
+
+Latest reported seed-0 values before manual halt:
+
+| Run | Variant | Latest step | Latest `val_bpc` |
+|---|---|---:|---:|
+| 11A | Hybrid, attention `after`, stateful training | 1000 | 2.5021 |
+| 11B | Pure Reciprocator, stateful training | 800 | 2.4671 |
+| 11C | Hybrid, attention `after`, stateless training | 1000 | 2.2945 |
+| 11D | Hybrid, attention `before`, stateful training | 1000 | 2.5525 |
+
+Preliminary read:
+
+- All four runs learned cleanly from the step-1 `val_bpc` range of roughly `4.8`-`5.1`.
+- The stateless hybrid (`11C`) was the clear early leader at the halt point.
+- Among stateful runs, the pure baseline (`11B`) was ahead of both hybrid stateful
+  variants at its latest reported step, though it had only reported through step `800`.
+- This does not settle the architecture question. The small fixed state
+  `state_shape=(4,4,4)` may understate the stateful path; follow-up testing should
+  include larger fixed state shapes, dynamic mode/rank growth, and
+  `enable_cross_layer_state=True`.
+- No final checkpoint was written for this preview because the jobs were interrupted
+  before step `2000` and were launched without intermediate checkpointing.
+
+## Phase 11x: Post-Growth Cooldown / Larger Batch Preview (Stopped at Step 900)
+
+This preview was launched on `2026-04-24` and stopped manually after all three
+runs had written step-900 checkpoints and residual diagnostics. Treat this as a
+trajectory/debugging result, not a promotion result: the planned full-budget
+metric remains final-5 mean `val_bpc` over completed runs.
+
+Run root:
+
+- `runs/lab-book/phase11x_post_growth_cooldown_bs16_20260424`
+
+Common config:
+
+- `corpus_name=greek_classics`, `hidden_size=256`, `seq_len=128`, `batch_size=16`
+- `steps=2000`, `eval_every=100`, `eval_batches=16`, `checkpoint_every=100`
+- `num_layers=3`, `attention_every_k=3`, `attention_position=after`
+- `token_magnitude_type=inverse_frequency_learned`, `phase_type=rope`
+- `readout_type=phase_aware`, `normalization_type=frobenius`
+- `enable_self_relation=True`, `device=cuda`
+- `learning_rate=1e-3`, `lr_warmup_steps=100`, `lr_decay_style=cosine`
+- `min_lr_scale=0.1`, `grad_clip_norm=1.0`, `weight_decay=0.01`
+- `record_residual_diagnostics=True`
+
+Run-specific config:
+
+| Run | Stateful | Cross-layer state | Initial state | Dynamic growth |
+|---|---:|---:|---:|---:|
+| `11C-xlarge-control` | no | no | `(8,12,12)` | no |
+| `fixed-after-large-stateful` | yes | yes | `(8,12,12)` | no |
+| `dynamic-after-cooldown` | yes | yes | `(4,6,6)` | yes, max `(8,12,12)` |
+
+Dynamic growth settings:
+
+- `dynamic_mode_growth=True`, `dynamic_rank_growth=True`
+- `max_rank=10`, `growth_check_interval=50`
+- `growth_residual_ema_decay=0.8`
+- `min_checks_before_first_growth=7`
+- `growth_residual_threshold=0.12`
+- `post_growth_cooldown_checks=3`
+- `post_growth_cooldown_threshold_scale=1.8`
+- `residual_saturate_threshold=0.07`
+- `mode_init=mean`
+
+Parameter counts from the current code:
+
+| Run | Non-embedding params | Total params |
+|---|---:|---:|
+| `11C-xlarge-control` | 11,369,967 | 11,389,499 |
+| `fixed-after-large-stateful` | 13,139,441 | 13,158,973 |
+| `dynamic-after-cooldown` initial | 3,827,753 | 3,847,285 |
+
+Stopped results:
+
+| Run | Latest step | Latest state | Latest `val_bpc` | Best step | Best `val_bpc` |
+|---|---:|---:|---:|---:|---:|
+| `11C-xlarge-control` | 900 | `(8,12,12)` | 3.7541 | 200 | 3.4629 |
+| `fixed-after-large-stateful` | 900 | `(8,12,12)` | 3.7510 | 300 | 3.4289 |
+| `dynamic-after-cooldown` | 900 | `(6,7,6)` | 3.8222 | 200 | 3.4099 |
+
+Validation trajectory:
+
+| Step | 11C control | Fixed large stateful | Dynamic cooldown |
+|---:|---:|---:|---:|
+| 1 | 6.3389 | 6.2207 | 6.4384 |
+| 100 | 3.7166 | 3.7205 | 3.6655 |
+| 200 | 3.4629 | 3.5356 | 3.4099 |
+| 300 | 3.4761 | 3.4289 | 3.5797 |
+| 400 | 3.5424 | 3.5593 | 3.6711 |
+| 500 | 3.5108 | 3.4859 | 3.5163 |
+| 600 | 3.5653 | 3.6122 | 3.5678 |
+| 700 | 3.6238 | 3.7503 | 3.5615 |
+| 800 | 3.6987 | 3.7103 | 3.6784 |
+| 900 | 3.7541 | 3.7510 | 3.8222 |
+
+Dynamic growth events:
+
+- step `350`: `(4,6,6)` -> `(5,6,6)`
+- step `550`: `(5,6,6)` -> `(6,6,6)`
+- step `750`: `(6,6,6)` -> `(6,7,6)`
+
+At the stop point, `dynamic-after-cooldown` had
+`post_growth_cooldown_checks_remaining=1` and mode residual EMA
+`[0.1765, 0.1252, 0.1742]`. The fixed/control runs also had residual EMAs above
+or near the base threshold on multiple modes, but no growth path enabled.
+
+Preliminary read:
+
+- The cooldown mechanism prevented runaway growth. Growth occurred every ~200
+  steps after eligibility rather than every 50-step check.
+- Dynamic was the best run at step `200` and remained competitive through step
+  `700`, but the latest growth at step `750` was followed by a clear validation
+  regression through step `900`.
+- The fixed large stateful model reached the best overall checkpoint in this
+  preview (`3.4289` at step `300`) but then degraded. This points more toward
+  optimization/schedule instability than a clean capacity win.
+- The stateless xlarge control also drifted upward after its step-200 best,
+  so the warmup/cosine/clip/decay plus `batch_size=16` protocol is not clearly
+  stable on this short run.
+- `cross_memory_residual` logged as `0.0` for all runs. Do not interpret that as
+  evidence that the state has captured all attention-cache information; this
+  diagnostic path still looks inactive or uninformative in the current setup.
+
+## Phase 11Y: Matched Medium Stateful vs Stateless Preview (Bugged Full-State Readout)
+
+This preview was launched on `2026-04-24` with two runs in parallel. Snapshot
+recorded at `2026-04-24 05:54:04 UTC`, after both runs had written step-1300
+checkpoints and residual diagnostics. The jobs may have continued after this
+snapshot.
+
+Run root:
+
+- `runs/lab-book/phase11y_matched_medium_bs16_20260424`
+
+Common config:
+
+- `corpus_name=greek_classics`, `hidden_size=256`, `seq_len=128`, `batch_size=16`
+- `steps=2000`, `eval_every=100`, `eval_batches=16`, `checkpoint_every=100`
+- `num_layers=3`, `attention_every_k=3`, `attention_position=after`
+- `state_shape=(6,8,8)`, `coupling_type=sequential`
+- `token_magnitude_type=inverse_frequency_learned`, `phase_type=rope`,
+  `token_phase=semantic`
+- `readout_type=phase_aware`, `normalization_type=frobenius`
+- `enable_self_relation=True`, `device=cuda`
+- Phase 7 optimizer winner: `learning_rate=1e-3`, `lr_warmup_steps=0`,
+  `lr_decay_style=constant`, `grad_clip_norm=None`, `weight_decay=0.0`
+- `record_residual_diagnostics=True`, `track_chunk_drift=False`
+
+Run-specific config:
+
+| Run | Stateful | Cross-layer state | Dynamic growth |
+|---|---:|---:|---:|
+| `11Y-control-medium-stateless` | no | no | no |
+| `11Y-dynamic-medium-to-large` | yes | yes | yes, max `(8,12,12)` |
+
+Dynamic settings:
+
+- `dynamic_mode_growth=True`, `dynamic_rank_growth=True`
+- `max_rank=10`, `growth_check_interval=50`
+- `growth_residual_ema_decay=0.8`
+- `min_checks_before_first_growth=7`
+- `growth_residual_threshold=0.12`
+- `post_growth_cooldown_checks=3`
+- `post_growth_cooldown_threshold_scale=1.8`
+- `residual_saturate_threshold=0.07`
+- `mode_init=mean`
+- pruning disabled in this run
+
+Validation trajectory:
+
+| Step | Control `val_bpc` | Dynamic `val_bpc` | Gap dyn-control | Control acc | Dynamic acc |
+|---:|---:|---:|---:|---:|---:|
+| 1 | 4.9667 | 4.9618 | -0.0049 | 0.1602 | 0.1587 |
+| 100 | 3.3705 | 3.4429 | 0.0724 | 0.3450 | 0.3350 |
+| 200 | 2.9002 | 3.0377 | 0.1375 | 0.4221 | 0.4032 |
+| 300 | 2.7198 | 2.7849 | 0.0650 | 0.4574 | 0.4411 |
+| 400 | 2.5692 | 2.6796 | 0.1104 | 0.4877 | 0.4702 |
+| 500 | 2.4364 | 2.6228 | 0.1864 | 0.5209 | 0.4940 |
+| 600 | 2.3610 | 2.5046 | 0.1436 | 0.5296 | 0.5016 |
+| 700 | 2.3371 | 2.3950 | 0.0580 | 0.5294 | 0.5366 |
+| 800 | 2.3182 | 2.4010 | 0.0828 | 0.5422 | 0.5309 |
+| 900 | 2.2236 | 2.3864 | 0.1628 | 0.5593 | 0.5412 |
+| 1000 | 2.2269 | 2.4196 | 0.1927 | 0.5602 | 0.5324 |
+| 1100 | 2.2076 | 2.3892 | 0.1816 | 0.5679 | 0.5358 |
+| 1200 | 2.2017 | 2.3605 | 0.1588 | 0.5725 | 0.5536 |
+| 1300 | 2.2088 | 2.4111 | 0.2022 | 0.5727 | 0.5477 |
+
+Snapshot results:
+
+| Run | Latest step | Latest state | Latest `val_bpc` | Best step | Best `val_bpc` |
+|---|---:|---:|---:|---:|---:|
+| `11Y-control-medium-stateless` | 1300 | `(6,8,8)` | 2.2088 | 1200 | 2.2017 |
+| `11Y-dynamic-medium-to-large` | 1300 | `(6,8,8)` | 2.4111 | 1200 | 2.3605 |
+
+Dynamic diagnostics at step `1300`:
+
+- `growth_event_history=[]`; no growth fired
+- `mode_residual_ema=[0.0399, 0.0246, 0.0237]`, far below the `0.12`
+  growth threshold
+- `mode_redundancy_ema=[0.1352, 0.1204, 0.1212]`
+- cross-layer state was enabled but the learned gates remained small in earlier
+  checkpoint inspection (`tanh(beta)` around `-0.0005` and `-0.028` at step `700`)
+- `cross_memory_residual=0.0` remained uninformative
+
+Bug discovered during interpretation:
+
+- The Reciprocator mixer currently computes the value returned as `delta` from
+  the full `next_state`, not from the incremental state change.
+- The relevant path is `ReciprocatorMixer.step`: `delta =
+  self.return_map(self._state_features(next_state))`, then
+  `ReciprocatorBlock.forward` treats that returned value as the block's delta.
+- Therefore the engine is passing a readout of the accumulated recurrent state
+  into the hidden stream rather than the intended per-token update signal.
+
+Interpretation under the bug:
+
+- This preview should not be used as evidence against the intended delta-engine
+  design. It is a bugged "full-state readout" baseline.
+- The observed pattern fits the bug: the stateful/dynamic run fit training harder
+  than the stateless control, but validation lagged and became less stable.
+- No growth fired because residual pressure fell steadily; under the bug this may
+  reflect basis specialization around the accumulated state readout rather than a
+  true absence of delta-capacity pressure.
+- The stateless control remained the cleaner performer in this bugged preview,
+  but the intended Phase 11 comparison needs to be rerun after the mixer returns
+  an actual update/delta signal.
+- Future rerun should preserve the matched-medium design, but should first fix
+  the mixer output and add a regression test that distinguishes full-state readout
+  from delta readout.
+
 ## Closed, Pending, and Incomplete Branches
 
 Closed by result:

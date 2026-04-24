@@ -65,6 +65,10 @@ def test_training_config_defaults_match_stronger_experiment_baseline() -> None:
     assert config.normalization_type == "frobenius"
     assert config.post_growth_cooldown_checks == 0
     assert config.post_growth_cooldown_threshold_scale == pytest.approx(1.5)
+    assert config.prune_threshold == pytest.approx(0.08)
+    assert config.prune_sustain_steps == 4
+    assert config.prune_min_steps == 300
+    assert config.block_layout is None
     assert config.num_layers == 1
 
 
@@ -329,6 +333,7 @@ def test_train_model_invokes_step_callback_each_step() -> None:
         val_losses,
         train_metrics,
         val_metrics,
+        residual_diagnostics,
         device,
     ) -> None:
         seen_steps.append(step)
@@ -336,6 +341,7 @@ def test_train_model_invokes_step_callback_each_step() -> None:
         assert callback_config is config
         assert len(train_losses) == step
         assert len(train_metrics) == step
+        assert isinstance(residual_diagnostics, list)
 
     train_model(config, dataset=dataset, step_callback=callback)
 

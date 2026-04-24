@@ -136,9 +136,9 @@ class TrainingConfig:
     track_chunk_drift: bool = False
     min_checks_before_first_growth: int = 0
     rank_growth_loss_ceiling: float = 1.5
-    prune_threshold: float = 0.4
-    prune_sustain_steps: int = 1
-    prune_min_steps: int = 50
+    prune_threshold: float = 0.08
+    prune_sustain_steps: int = 4
+    prune_min_steps: int = 300
     mode_init: str = "zero"
     rank_init: str = "zero"
     generation_eval_samples: int = 0
@@ -150,6 +150,7 @@ class TrainingConfig:
     benchmark_new_tokens: int = 128
     seed: int = 0
     stateful_training: bool = True
+    block_layout: Optional[Tuple[str, ...]] = None
     attention_every_k: int = 0
     attention_num_heads: int = 8
     attention_window: int = 256
@@ -223,6 +224,7 @@ TrainingStepCallback = Callable[
         list[Tuple[int, float]],
         list[Tuple[int, TrainingMetrics]],
         list[Tuple[int, TrainingMetrics]],
+        list[dict],
         torch.device,
     ],
     None,
@@ -2125,6 +2127,7 @@ def _build_model_from_config(
         attention_num_heads=config.attention_num_heads,
         attention_window=config.attention_window,
         attention_position=config.attention_position,
+        block_layout=config.block_layout,
     ).to(device)
 
 
@@ -2545,6 +2548,24 @@ def _validate_training_config(config: TrainingConfig) -> None:
         raise ValueError("benchmark_prompt_lengths must contain only positive integers.")
     if config.benchmark_prompt_lengths and config.benchmark_new_tokens <= 0:
         raise ValueError("benchmark_new_tokens must be positive when benchmarking is enabled.")
+    if config.block_layout is not None:
+        if not config.block_layout:
+            raise ValueError("block_layout must contain at least one block.")
+        if any(block not in {"attention", "reciprocator"} for block in config.block_layout):
+            raise ValueError("block_layout entries must be 'attention' or 'reciprocator'.")
+        if "attention" in config.block_layout and config.hidden_size % config.attention_num_heads != 0:
+            raise ValueError(
+                f"hidden_size ({config.hidden_size}) must be divisible by attention_num_heads "
+                f"({config.attention_num_heads}) when block_layout contains attention."
+            )
+        if "reciprocator" not in config.block_layout and (
+            config.dynamic_mode_growth
+            or config.dynamic_rank_growth
+            or config.dynamic_mode_pruning
+            or config.dynamic_rank_pruning
+            or config.enable_cross_layer_state
+        ):
+            raise ValueError("reciprocator-only features require at least one reciprocator block.")
     if config.attention_every_k > 0 and config.attention_position not in {"before", "after"}:
         raise ValueError("attention_position must be 'before' or 'after'.")
     if config.attention_every_k > 0 and config.hidden_size % config.attention_num_heads != 0:
@@ -2705,7 +2726,7 @@ def train_model(
             config,
             post_growth_cooldown_checks_remaining,
         )
-        if growth_check_due:
+        if growth_check_due and any(hasattr(block, "mixer") for block in model.blocks):
             recent_chunk_drift_mean = None
             recent_chunk_drift_max = None
             if config.track_chunk_drift and len(chunk_drift_history) >= config.growth_check_interval:
@@ -2996,6 +3017,7 @@ def train_model(
                 val_losses,
                 train_metrics,
                 val_metrics,
+                residual_diagnostics,
                 device,
             )
 

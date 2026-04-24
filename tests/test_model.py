@@ -97,6 +97,19 @@ def test_lm_forward_returns_logits_and_block_states() -> None:
     assert model.token_lift.token_phase == "semantic"
 
 
+def test_lm_supports_explicit_block_layout() -> None:
+    model = ReciprocatorLM(
+        vocab_size=13,
+        hidden_size=8,
+        state_shape=(2, 3),
+        block_layout=("attention", "reciprocator"),
+        attention_num_heads=2,
+    )
+
+    assert [type(block).__name__ for block in model.blocks] == ["LocalAttentionBlock", "ReciprocatorBlock"]
+    assert model.num_layers == 1
+
+
 def test_phase_aware_readout_preserves_output_shape_and_anchor_direction() -> None:
     readout = PhaseAwareReadout(hidden_size=5, vocab_size=7)
     hidden = random_complex(2, 3, 5)

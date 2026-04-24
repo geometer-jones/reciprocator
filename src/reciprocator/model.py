@@ -444,13 +444,14 @@ class ReciprocatorLM(nn.Module):
         attention_num_heads: int = 8,
         attention_window: int = 256,
         attention_position: str = "after",
+        block_layout: Optional[Sequence[str]] = None,
     ) -> None:
         super().__init__()
         self.vocab_size = vocab_size
         self.hidden_size = hidden_size
         self.state_shape = tuple(int(dim) for dim in state_shape)
         self.M_state = math.prod(self.state_shape)
-        self.num_layers = num_layers
+        self.block_layout = None if block_layout is None else tuple(block_layout)
         self.readout_type = readout_type
         self.enable_self_relation = enable_self_relation
         self.dynamic_gains = dynamic_gains
@@ -473,31 +474,60 @@ class ReciprocatorLM(nn.Module):
         if attention_every_k > 0 and attention_position not in {"before", "after"}:
             raise ValueError("attention_position must be 'before' or 'after'.")
         blocks: list[nn.Module] = []
-        for i in range(num_layers):
-            if attention_every_k > 0 and attention_position == "before" and i % attention_every_k == 0:
-                blocks.append(LocalAttentionBlock(hidden_size, attention_num_heads, attention_window))
-            blocks.append(
-                ReciprocatorBlock(
-                    hidden_size=hidden_size,
-                    state_shape=self.state_shape,
-                    ffn_expansion_factor=ffn_expansion_factor,
-                    enable_self_relation=enable_self_relation,
-                    dynamic_gains=dynamic_gains,
-                    gain_projector_rank=gain_projector_rank,
-                    coupling_type=self.coupling_type,
-                    low_frequency_gain=low_frequency_gain,
-                    low_frequency_sigma=low_frequency_sigma,
-                    high_frequency_gain=high_frequency_gain,
-                    high_frequency_cutoff=high_frequency_cutoff,
-                    dynamic_spectral_gains=dynamic_spectral_gains,
-                    anisotropic_spectral_gains=anisotropic_spectral_gains,
-                    wavelet_levels=wavelet_levels,
-                    normalization_type=self.normalization_type,
+        if self.block_layout is not None:
+            for block_kind in self.block_layout:
+                if block_kind == "attention":
+                    blocks.append(LocalAttentionBlock(hidden_size, attention_num_heads, attention_window))
+                    continue
+                if block_kind == "reciprocator":
+                    blocks.append(
+                        ReciprocatorBlock(
+                            hidden_size=hidden_size,
+                            state_shape=self.state_shape,
+                            ffn_expansion_factor=ffn_expansion_factor,
+                            enable_self_relation=enable_self_relation,
+                            dynamic_gains=dynamic_gains,
+                            gain_projector_rank=gain_projector_rank,
+                            coupling_type=self.coupling_type,
+                            low_frequency_gain=low_frequency_gain,
+                            low_frequency_sigma=low_frequency_sigma,
+                            high_frequency_gain=high_frequency_gain,
+                            high_frequency_cutoff=high_frequency_cutoff,
+                            dynamic_spectral_gains=dynamic_spectral_gains,
+                            anisotropic_spectral_gains=anisotropic_spectral_gains,
+                            wavelet_levels=wavelet_levels,
+                            normalization_type=self.normalization_type,
+                        )
+                    )
+                    continue
+                raise ValueError("block_layout entries must be 'attention' or 'reciprocator'.")
+        else:
+            for i in range(num_layers):
+                if attention_every_k > 0 and attention_position == "before" and i % attention_every_k == 0:
+                    blocks.append(LocalAttentionBlock(hidden_size, attention_num_heads, attention_window))
+                blocks.append(
+                    ReciprocatorBlock(
+                        hidden_size=hidden_size,
+                        state_shape=self.state_shape,
+                        ffn_expansion_factor=ffn_expansion_factor,
+                        enable_self_relation=enable_self_relation,
+                        dynamic_gains=dynamic_gains,
+                        gain_projector_rank=gain_projector_rank,
+                        coupling_type=self.coupling_type,
+                        low_frequency_gain=low_frequency_gain,
+                        low_frequency_sigma=low_frequency_sigma,
+                        high_frequency_gain=high_frequency_gain,
+                        high_frequency_cutoff=high_frequency_cutoff,
+                        dynamic_spectral_gains=dynamic_spectral_gains,
+                        anisotropic_spectral_gains=anisotropic_spectral_gains,
+                        wavelet_levels=wavelet_levels,
+                        normalization_type=self.normalization_type,
+                    )
                 )
-            )
-            if attention_every_k > 0 and attention_position == "after" and (i + 1) % attention_every_k == 0 and i < num_layers - 1:
-                blocks.append(LocalAttentionBlock(hidden_size, attention_num_heads, attention_window))
+                if attention_every_k > 0 and attention_position == "after" and (i + 1) % attention_every_k == 0 and i < num_layers - 1:
+                    blocks.append(LocalAttentionBlock(hidden_size, attention_num_heads, attention_window))
         self.blocks = nn.ModuleList(blocks)
+        self.num_layers = sum(isinstance(block, ReciprocatorBlock) for block in self.blocks)
         cross_layer_feature_size = 3 * self.M_state
         if self.enable_cross_layer_state:
             self.cross_layer_beta = nn.ParameterList(

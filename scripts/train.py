@@ -65,6 +65,28 @@ def parse_coupling_type(raw: str) -> str:
         raise argparse.ArgumentTypeError(str(error)) from error
 
 
+def parse_block_layout(raw: str) -> Tuple[str, ...]:
+    aliases = {
+        "a": "attention",
+        "attn": "attention",
+        "attention": "attention",
+        "r": "reciprocator",
+        "recip": "reciprocator",
+        "reciprocator": "reciprocator",
+    }
+    compact = raw.strip().lower()
+    if compact and "," not in compact and all(char in {"a", "r"} for char in compact):
+        pieces = tuple(compact)
+    else:
+        pieces = tuple(piece.strip().lower() for piece in raw.split(",") if piece.strip())
+    layout = tuple(aliases.get(piece, "") for piece in pieces)
+    if not layout or any(not piece for piece in layout):
+        raise argparse.ArgumentTypeError(
+            "block_layout must use entries from {'attention', 'reciprocator'} or compact forms like AR."
+        )
+    return layout
+
+
 def build_parser() -> argparse.ArgumentParser:
     corpora = [corpus.name for corpus in available_corpora()]
     parser = argparse.ArgumentParser(description="Run a character-level training loop.")
@@ -181,6 +203,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Insert a LocalAttentionBlock every k Reciprocator blocks. Use 0 to disable hybrid attention.",
     )
     parser.add_argument(
+        "--block-layout",
+        type=parse_block_layout,
+        default=None,
+        help="Explicit block layout, e.g. AR, RA, RR, AA, or attention,reciprocator.",
+    )
+    parser.add_argument(
         "--attention-num-heads",
         type=int,
         default=8,
@@ -268,19 +296,19 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--prune-threshold",
         type=float,
-        default=0.4,
+        default=0.08,
         help="Redundancy EMA level below which a mode/rank axis becomes a pruning candidate.",
     )
     parser.add_argument(
         "--prune-sustain-steps",
         type=int,
-        default=1,
+        default=4,
         help="Number of consecutive growth checks an axis must remain below prune_threshold before pruning.",
     )
     parser.add_argument(
         "--prune-min-steps",
         type=int,
-        default=50,
+        default=300,
         help="Minimum steps to wait after an axis's last growth event before pruning it.",
     )
     parser.add_argument("--mode-init", type=parse_mode_init, default="zero")
@@ -383,7 +411,7 @@ def load_checkpoint(path: Path) -> dict:
     return payload
 
 
-_TUPLE_CONFIG_FIELDS = {"state_shape", "max_state_shape", "benchmark_prompt_lengths"}
+_TUPLE_CONFIG_FIELDS = {"state_shape", "max_state_shape", "benchmark_prompt_lengths", "block_layout"}
 
 
 def training_config_from_checkpoint(payload: Mapping[str, Any]) -> TrainingConfig:
@@ -549,6 +577,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         benchmark_new_tokens=args.benchmark_new_tokens,
         seed=args.seed,
         stateful_training=args.stateful_training,
+        block_layout=args.block_layout,
         attention_every_k=args.attention_every_k,
         attention_num_heads=args.attention_num_heads,
         attention_window=args.attention_window,
@@ -595,6 +624,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         val_losses,
         train_metrics,
         val_metrics,
+        residual_diagnostics,
         device,
     ) -> None:
         nonlocal last_state_shape
@@ -642,6 +672,12 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
                 runtime_benchmarks=[],
             )
             save_checkpoint(run_dir / f"checkpoint_step_{step:06d}.pt", payload)
+            if args.record_residual_diagnostics:
+                if args.diagnostics_out is not None:
+                    diagnostics_path = Path(args.diagnostics_out)
+                else:
+                    diagnostics_path = run_dir / "residual_diagnostics.json"
+                write_residual_diagnostics(diagnostics_path, residual_diagnostics)
 
     result = train_model(config, step_callback=step_callback, resume_state=resume_state)
 

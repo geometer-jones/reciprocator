@@ -41,6 +41,7 @@ def test_build_parser_exposes_phase_and_growth_defaults() -> None:
     assert args.chunk_size is None
     assert args.track_chunk_drift is False
     assert args.attention_every_k == 0
+    assert args.block_layout is None
     assert args.attention_num_heads == 8
     assert args.attention_window == 256
     assert args.attention_position == "after"
@@ -68,9 +69,9 @@ def test_build_parser_exposes_phase_and_growth_defaults() -> None:
     assert args.diagnostics_out is None
     assert args.min_checks_before_first_growth == 0
     assert args.rank_growth_loss_ceiling == 1.5
-    assert args.prune_threshold == 0.4
-    assert args.prune_sustain_steps == 1
-    assert args.prune_min_steps == 50
+    assert args.prune_threshold == 0.08
+    assert args.prune_sustain_steps == 4
+    assert args.prune_min_steps == 300
     assert args.mode_init == "zero"
     assert args.rank_init == "zero"
     assert args.generation_eval_samples == 0
@@ -246,6 +247,13 @@ def test_build_parser_parses_hybrid_attention_and_stateless_flags() -> None:
     assert args.attention_window == 128
     assert args.attention_position == "before"
     assert args.stateful_training is False
+
+
+def test_build_parser_accepts_explicit_block_layout() -> None:
+    train_script = load_train_script()
+    args = train_script.build_parser().parse_args(["--block-layout", "AR"])
+
+    assert args.block_layout == ("attention", "reciprocator")
 
 
 def test_resume_helpers_restore_checkpoint_config_and_metrics() -> None:
