@@ -169,6 +169,42 @@ regime fires:
 The same signal can therefore produce completely different effects depending on
 the current state of the memory. Reception is always relational.
 
+### Cross-Mode Bilinear Correction
+
+The Hadamard product is elementwise: dimension i responds only to s[i] and S[i],
+never to s[j] or S[j] for j ≠ i. The relational product is separable — a
+product of per-dimensional operations.
+
+Separability imposes a structural ceiling. The coupling operator (§8) provides
+data-dependent per-mode attention, but coupling is a composition of per-axis
+maps, and a composition of separable maps remains separable. No improvement to
+per-mode mixing alone can create entanglement between modes. The ceiling is
+algebraic, not parametric.
+
+The escape is a non-separable correction that makes each dimension's response
+depend on the global direction of both signal and state — the full pattern of
+how all dimensions relate:
+
+    Z = s_t ⊙ S_{t-1} + Λ_cross · Bilinear(s_t, S_{t-1})
+
+The bilinear computes r cross-mode Hermitian features via learned complex
+projections U, V (state space → rank-r), then projects back through W:
+
+    γ_r = (U[:,r]ᴴ s_t)(V[:,r]ᴴ S_{t-1})*     for each rank r
+    Bilinear(s, S) = W(γ_1, ..., γ_r)
+
+Each γ_r is a genuine cross-mode interaction: a weighted inner product across
+*all* dimensions of both signal and state, entangling modes 0, 1, 2, ... in a
+single step. The gate Λ_cross is zero-initialized, so the correction is inert at
+training start and activates only when the optimizer discovers benefit.
+
+Normalization must be Frobenius (§5). The bilinear creates non-separable
+magnitude structure — its output magnitude at each element encodes how strongly
+a particular cross-mode correlation fired. Frobenius normalization preserves
+this with a single global constraint. Per-mode normalization would partially
+undo it by imposing separable per-axis magnitude constraints. The cost is O(M·r)
+where M = prod(state_shape).
+
 There is a second product. The state does not only meet the signal — it also
 meets itself. The engine computes the Hadamard product of the current state
 with a recent copy of itself:
@@ -330,6 +366,13 @@ after earlier modes have acted, making the operator fully data-dependent and
 strictly more expressive than independent low-rank products. The original
 low-rank intuition remains a useful mental model for why factorization is
 powerful; the actual mechanism is richer.
+
+The coupling's expressivity has a structural limit: a composition of per-axis
+maps, no matter how data-dependent, cannot entangle modes. The cross-mode
+bilinear correction in §6 lifts this ceiling by computing non-separable
+interactions before coupling receives its input. Coupling remains the best
+separable approximation of the signal-state interaction; the bilinear adds what
+separability cannot reach.
 
 ## 9. Growing the Rank: Adaptation Through Parameter-Space Residuals
 
@@ -546,10 +589,12 @@ optional self-relation (§7), and a gated return map (reciprocator.md §9).
 Normalization may be Frobenius or per-mode iterative. See reciprocator.md §6
 for the complete update rule.
 
-The full gated update with coupling (§8):
+The full gated update with coupling (§8) and cross-mode bilinear (§6):
 
     s_t      = normalize(W_mag, W_phi · input)            # project signal (polar form)
-    Z        = s_t ⊙ S_{t-1}                              # relational product
+    Z_local  = s_t ⊙ S_{t-1}                              # relational product
+    Z_cross  = W_back( (Uᴴ s_t) ⊙ (Vᴴ S_{t-1})* )          # non-separable correction
+    Z        = Z_local + sigmoid(Λ_cross) · Z_cross        # gated relational product
     R        = Cpl(Z)                                     # coupled reception (per-mode mixing)
     S̃        = D ⊙ S_{t-1} + A ⊙ s_t + B ⊙ R             # entrywise gains
     S_new    = Normalize(S̃)                                # compression

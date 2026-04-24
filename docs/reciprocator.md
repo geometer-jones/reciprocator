@@ -221,8 +221,8 @@ iteration is unrolled to a fixed depth (default 8 sweeps).
 ## 6. Mixer Dynamics
 
 Each layer contains a single mixer that maintains one tensor state
-`S_t^{(\ell)}`. The mixer operates in three phases: signal projection, coupling,
-and gated update.
+`S_t^{(\ell)}`. The mixer operates in three phases: signal projection, routed
+relational coupling, and gated update.
 
 ### Base gain fields
 
@@ -313,15 +313,32 @@ parameter.
 ### Relational product and coupling
 
 The signal meets the previous state through the elementwise Hadamard product,
-then the coupling operator redistributes energy across modes:
+then the routed recurrent term redistributes energy across modes:
 
 ```math
 Z_t^{(\ell)} = s_t^{(\ell)} odot S_{t-1}^{(\ell)}
-R_t^{(\ell)} = Cpl^{(\ell)}( Z_t^{(\ell)} )
+R_t^{(\ell)} = Cpl^{(\ell)}( Z_t^{(\ell)} ) + CDB^{(\ell)}( Z_t^{(\ell)} )
 ```
 
-`Cpl` is the only non-diagonal operator in the update. Its form depends on the
-coupling type (§8).
+`Cpl` is the separable coupling backend. Its form depends on the coupling type
+(§8). `CDB` is a low-rank complex bilinear residual that is enabled by default
+and zero-initialized at its output head, so the mixer is functionally identical
+to the coupling-only system at initialization.
+
+For `z_t = vec(Z_t)` and `k = cross_bilinear_rank`:
+
+```math
+p_t     = U z_t                         in C^k
+q_t     = V z_t                         in C^k
+gamma_t = p_t odot conjugate(q_t)        in C^k
+CDB(Z_t) = reshape( W gamma_t, (M_1, ..., M_r) )
+```
+
+`U`, `V`, and `W` are complex linear maps. Only `W` is zero-initialized; `U`
+and `V` keep their default nonzero initialization so `W` receives nonzero
+gradient immediately, and `U`/`V` become live after the output head moves. This
+residual is non-separable across tensor coordinates, but it is purely additive
+inside the coupling step and leaves the Hadamard phase-sum semantics unchanged.
 
 ### Update
 
@@ -371,8 +388,10 @@ has shifted, torque or interference correct.
 
 ## 8. Mode Coupling
 
-`Cpl^{(\ell)}` is the coupling operator that redistributes energy across tensor
-modes. Five coupling types are supported.
+`Cpl^{(\ell)}` is the separable coupling backend that redistributes energy
+across tensor modes. Five coupling types are supported. The cross-dimensional
+bilinear residual from §6 is not a sixth backend; it runs in parallel with any
+backend and can be disabled with `enable_cross_bilinear=False`.
 
 ### Sequential mode coupling
 
@@ -753,7 +772,7 @@ For a chunk beginning at position `c`:
 
 ```math
 Z_c         = s_c odot S_{c-1}
-R_c         = Cpl( Z_c )
+R_c         = Cpl( Z_c ) + CDB( Z_c )
 S_c         = N( D_c odot S_{c-1} + A_c odot s_c + B_c odot R_c )
 ```
 
@@ -761,7 +780,7 @@ S_c         = N( D_c odot S_{c-1} + A_c odot s_c + B_c odot R_c )
 
 ```math
 Z_t^{stale} = s_t odot S_c                              (parallel over t)
-R_t^{stale} = Cpl( Z_t^{stale} )                        (parallel over t)
+R_t^{stale} = Cpl( Z_t^{stale} ) + CDB( Z_t^{stale} )   (parallel over t)
 S_t         = N( D_t odot S_{t-1} + A_t odot s_t + B_t odot R_t^{stale} )
 ```
 
@@ -775,7 +794,10 @@ recurrence.
 
 If dynamic gains are enabled, `D_t`, `A_t`, and `B_t` are still recomputed from
 each token's own `s_t` inside the chunk. The approximation remains isolated to
-the coupling input `Z_t^{stale}` rather than the gain modulation path.
+the routed recurrent input `Z_t^{stale}` rather than the gain modulation path.
+The cross-dimensional bilinear residual uses the same stale `Z_t^{stale}` input
+as the selected coupling backend, so `K = 1` still exactly reproduces sequential
+stepping.
 
 If cross-layer state injection is enabled, layer `\ell` forms its donated
 correction from the chunk-end state `S_{tau,end}^{(\ell)}` and broadcasts that
@@ -795,6 +817,9 @@ whole-span end state, so strict token-level causality still requires
   `wavelet_packet_max_gauge`) are equally compatible. Each backend operates on
   per-token tensors of shape `(M_1, ..., M_r)`, and the chunked form simply
   evaluates the backend on a batch of `B * (K-1)` such tensors at once.
+- The cross-dimensional bilinear residual is also chunk-compatible: the
+  chunked path flattens each stale relational tensor, applies the same complex
+  bilinear map, and reshapes the result back before the recurrent update.
 - The coupling is never absent during training — it is approximated, not
   dropped. There is no train/inference mismatch.
 - The gate in the return map (§9) retains full per-token fidelity inside
@@ -893,6 +918,9 @@ at inference time.
 - optional self-relation gain field `Lambda_self` (zero-initialized)
 - coupling type: `sequential`, `fft`, `dwt`, `wavelet_packet`, or
   `wavelet_packet_max_gauge`
+- cross-dimensional bilinear residual: `enable_cross_bilinear` (default
+  `True`) with `cross_bilinear_rank` (default `8`); output head
+  zero-initialized
 - spectral filter parameters: `low_frequency_gain`, `low_frequency_sigma`,
   `high_frequency_gain`, `high_frequency_cutoff`, `wavelet_levels`
 - optional dynamic spectral gain projector: `dynamic_spectral_gains` with
@@ -999,21 +1027,30 @@ signal itself carries the accumulated history of all prior updates.
 
 ### State-dependent coupling rank
 
-The coupling's expressivity is bounded by the CP rank of the current state. For
-a rank-1 state `S = u_1 (x) ... (x) u_r`, each mode unfolding `Z_m` is rank 1,
-so `Score_m = W_m Z_m Z_m^T` is rank 1, and the routing matrix `T_m` is
-determined by a single direction in mode-`m` space. The coupling degenerates to
-rank-1 routing regardless of `M_m`.
+The separable coupling backend's expressivity is bounded by the CP rank of the
+current state. For a rank-1 state `S = u_1 (x) ... (x) u_r`, each mode
+unfolding `Z_m` is rank 1, so `Score_m = W_m Z_m Z_m^T` is rank 1, and the
+routing matrix `T_m` is determined by a single direction in mode-`m` space.
+The backend degenerates to rank-1 routing regardless of `M_m`.
 
 More generally, a state of CP rank `R` supports coupling matrices of effective
-rank up to `R`. This is a genuine capacity constraint: the coupling expressivity
-grows with the tensor rank of the state. Early in the sequence, the coupling
-expressivity is limited by the CP rank already present in the learned initial
-prior. Because that prior is trainable and unit-normalized rather than zero,
-the model begins with a nontrivial relational seed and a usable global gauge.
-This softens the cold-start problem, but does not eliminate it: context-specific
-rank must still accumulate online from the input stream, whereas attention is at
-full expressivity from position 1.
+rank up to `R`. This is a genuine capacity constraint for separable coupling:
+its expressivity grows with the tensor rank of the state. Early in the sequence,
+the backend expressivity is limited by the CP rank already present in the
+learned initial prior. Because that prior is trainable and unit-normalized
+rather than zero, the model begins with a nontrivial relational seed and a
+usable global gauge. This softens the cold-start problem, but does not eliminate
+it: context-specific rank must still accumulate online from the input stream,
+whereas attention is at full expressivity from position 1.
+
+The cross-dimensional bilinear residual is the rank-bottleneck escape hatch. It
+sees the same Hadamard relational tensor `Z_t`, but flattens all state
+coordinates and applies a Hermitian low-rank complex bilinear before projecting
+back to the full state shape. Because that map is not a product of mode-wise
+operators or a separable spectral filter, it can inject non-separable
+coordinate interactions in parallel with the backend. The residual is
+zero-output at initialization, so this extra capacity is available to gradient
+learning without changing the initial function.
 
 The state accumulates CP rank over time as inputs perturb it away from rank-1
 structure. Normalization modulates this: Frobenius normalization favors unit-norm
@@ -1194,6 +1231,11 @@ TrainingConfig(
 
 To enable relational gain modulation, add `dynamic_gains=True`. The low-rank
 projector width is controlled by `gain_projector_rank` (default `8`).
+
+At the mixer-constructor level, the cross-dimensional bilinear residual is
+enabled by default. To run the coupling-only ablation, construct
+`ReciprocatorMixer` with `enable_cross_bilinear=False`. Its width is controlled
+by `cross_bilinear_rank` (default `8`).
 
 To enable adaptive spectral filters, use a spectral `coupling_type` and set
 `dynamic_spectral_gains=True`; the CLI flag is `--dynamic-spectral-gains`. This

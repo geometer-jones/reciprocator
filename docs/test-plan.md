@@ -780,6 +780,66 @@ in logs, since larger phase ranges may improve expressivity but destabilize opti
 
 ---
 
+## Phase 4.3: Cross-mode bilinear rank sweep
+
+**8 runs** (4 configs × 2 seeds). Steps = 500. No growth. Uses the best static winner as
+the base. Frobenius normalization only — the bilinear creates non-separable structure that
+per-mode normalization would partially undo with separable per-axis magnitude constraints.
+
+**Purpose:** determine the effective rank of the cross-mode bilinear correction. The
+bilinear adds a non-separable term to the relational product that the existing separable
+coupling (per-mode attention, data-dependent) cannot express. The correction is
+zero-initialized (W weights start at zero), so the baseline run with
+`enable_cross_bilinear=False` is the direct control.
+
+The minimum meaningful rank for a K-mode state is K(K−1)/2 (one feature per mode pair).
+For `state_shape=(2,3,4)` (K=3), that floor is 3. The default is 8. This sweep tests
+whether the data supports ranks above, at, or below the pairwise floor.
+
+| Run   | enable_cross_bilinear | cross_bilinear_rank | What it tests                                     |
+|-------|-----------------------|---------------------|---------------------------------------------------|
+| 4.3a  | False                 | —                   | Direct baseline: no bilinear, pure Hadamard       |
+| 4.3b  | True                  | 2                   | Below pairwise floor: compressed cross-mode signal |
+| 4.3c  | True                  | 4                   | Above pairwise floor with headroom                 |
+| 4.3d  | True                  | 8                   | Default generous setting                            |
+
+**Diagnostics (log for every run):**
+
+1. **Gate magnitude.** The bilinear's W weights are zero-initialized. Track the Frobenius
+   norm of `W.weight_real` and `W.weight_imag` at each eval checkpoint. If the norm stays
+   near zero across training, the model did not use the bilinear and rank does not matter.
+   If it rises, the model discovered cross-mode structure.
+
+2. **Singular-value tail of coupling output.** At the final checkpoint, compute the SVD of
+   `routed = coupling(Z)` (flattened to `[B, M]` over the validation batch) for both the
+   bilinear-enabled and baseline runs. Compare the tail singular values. A rising tail in
+   the bilinear run means the bilinear is feeding cross-mode structure into the proposal
+   that coupling alone could not produce.
+
+3. **Phase coherence of bilinear features.** For each rank r, compute `|gamma[r]|` averaged
+   over the validation batch at the final checkpoint. If some ranks have near-zero magnitude
+   throughout training, they are unused and the effective rank is lower than the configured
+   rank.
+
+**Decision rule:**
+
+- If 4.3a (no bilinear) beats all bilinear runs: the separable coupling is sufficient at
+  this state size. Disable the bilinear by default and do not carry it forward.
+- If any bilinear run beats 4.3a by > 0.02 bpc: adopt the bilinear. Use the lowest rank
+  that achieves the best (within 0.01 bpc of the sweep winner) result as the default. This
+  avoids overparameterizing the bilinear beyond what the data requires.
+- If all bilinear ranks tie 4.3a within 0.02 bpc but gate magnitudes are nonzero: the
+  bilinear is being used but the benefit is below the detection threshold. Extend to 1000
+  steps on the strongest candidate before concluding — the bilinear may need more training
+  to convert cross-mode structure into loss improvement.
+
+**Extension for larger states:** if Phase 8 later explores `state_shape=(4,4,4)` (K=3,
+M=64) or `(4,4,4,4)` (K=4, M=256), rerun this sweep at the new state size. The effective
+rank may increase with state dimensionality. Do not assume the Phase 4.3 winner transfers
+to different state shapes.
+
+---
+
 ## Phase 5: Axis isolation — per-mode norm
 
 Full replication of Phase 1 under per-mode state normalization. Frobenius norm treats
@@ -1031,6 +1091,7 @@ range.
 | 4     | Ablations                            | ≤6      | 2     | ≤12   |            |
 | 4.2   | Multi-layer growth sanity check      | 2       | 2     | 4     |            |
 | 4.1   | Projector / FFN hyperparams          | 4       | 2     | 8     |            |
+| 4.3   | Cross-mode bilinear rank sweep       | 4       | 2     | 8     |            |
 | 5     | Axis isolation (per-mode norm)       | 6       | 3     | 18    |            |
 | 6     | Combination (per-mode norm)          | ≤3      | 3     | ≤9    |            |
 | 7     | Optimization protocol validation     | 5       | 3     | 15    |            |
@@ -1039,7 +1100,7 @@ range.
 | 9.1   | Streaming benchmark (post-hoc)       | promoted checkpoints | n/a | 0 |     |
 | 9.2   | Generation quality eval (post-hoc)   | promoted checkpoints | n/a | 0 |     |
 | 10    | Hidden size scaling                  | 6       | 3     | 18    |            |
-| **Total** |                                  |         |       | **≤251** |         |
+| **Total** |                                  |         |       | **≤259** |         |
 
 ---
 
@@ -1285,6 +1346,7 @@ Mamba is the key competitor for efficiency claims. If Mamba matches the Reciproc
 | 4     | Ablations                            | ≤6      | 2     | ≤12   |            |
 | 4.2   | Multi-layer growth sanity check      | 2       | 2     | 4     |            |
 | 4.1   | Projector / FFN hyperparams          | 4       | 2     | 8     |            |
+| 4.3   | Cross-mode bilinear rank sweep       | 4       | 2     | 8     |            |
 | 5     | Axis isolation (per-mode norm)       | 6       | 3     | 18    |            |
 | 6     | Combination (per-mode norm)          | ≤3      | 3     | ≤9    |            |
 | 7     | Optimization protocol validation     | 5       | 3     | 15    |            |
@@ -1297,7 +1359,7 @@ Mamba is the key competitor for efficiency claims. If Mamba matches the Reciproc
 | 12    | Small production scale (hidden=512)  | 1       | 2     | 2     |            |
 | 13    | Medium scale check (18 layers)       | 2       | 2     | 4     |            |
 | B     | Baseline comparisons (Transformer, Mamba) | 6  | 2     | 12    |            |
-| **Total** |                                  |         |       | **≤272** |         |
+| **Total** |                                  |         |       | **≤280** |         |
 
 ---
 
