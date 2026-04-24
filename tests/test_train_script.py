@@ -16,10 +16,21 @@ def test_build_parser_exposes_phase_and_growth_defaults() -> None:
 
     args = train_script.build_parser().parse_args([])
 
+    assert args.corpus == "greek_classics"
+    assert args.max_chars == 100000
+    assert args.batch_size == 8
+    assert args.seq_len == 128
+    assert args.steps == 2000
+    assert args.eval_every == 100
+    assert args.eval_batches == 4
+    assert args.lr == 1e-3
+    assert args.hidden_size == 256
+    assert args.state_shape == (4, 4, 4)
     assert args.token_magnitude_type == "inverse_frequency_learned"
     assert args.token_phase == "semantic"
     assert args.readout_type == "phase_aware"
     assert args.coupling_type == "sequential"
+    assert args.enable_self_relation is True
     assert args.low_frequency_gain == 0.5
     assert args.low_frequency_sigma == 0.35
     assert args.high_frequency_gain == 0.5
@@ -81,6 +92,7 @@ def test_build_parser_parses_max_state_shape_like_state_shape() -> None:
             "semantic_virtual_offset",
             "--enable-anticipator-relation",
             "--enable-cross-layer-state",
+            "--disable-self-relation",
             "--coupling-type",
             "wavelet-packet-phase",
             "--low-frequency-gain",
@@ -162,6 +174,7 @@ def test_build_parser_parses_max_state_shape_like_state_shape() -> None:
     assert args.token_phase == "semantic_virtual_offset"
     assert args.enable_anticipator_relation is True
     assert args.enable_cross_layer_state is True
+    assert args.enable_self_relation is False
     assert args.coupling_type == "wavelet_packet_max_gauge"
     assert args.low_frequency_gain == 0.8
     assert args.low_frequency_sigma == 0.2

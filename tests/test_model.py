@@ -149,6 +149,18 @@ def test_lm_supports_phase_aware_readout() -> None:
     assert isinstance(model.readout, PhaseAwareReadout)
 
 
+def test_lm_computes_cross_memory_residual_from_attention_cache_and_states() -> None:
+    K = torch.ones(2, 3, 2, 2, dtype=torch.cfloat)
+    V = 2 * torch.ones(2, 3, 2, 2, dtype=torch.cfloat)
+    state = torch.ones(2, 2, 2, dtype=torch.cfloat)
+
+    residual = ReciprocatorLM._compute_cross_memory_residual((K, V), (state,))
+    residual_with_attention_state = ReciprocatorLM._compute_cross_memory_residual((K, V), ((K, V), state))
+
+    assert torch.isclose(torch.tensor(residual), torch.sqrt(torch.tensor(12.0)))
+    assert residual_with_attention_state == residual
+
+
 def test_lm_returns_chunk_drift_stats_when_requested() -> None:
     model = ReciprocatorLM(vocab_size=13, hidden_size=8, state_shape=(2, 3), num_layers=2)
     token_ids = torch.tensor([[1, 2, 3, 4], [4, 3, 2, 1]])

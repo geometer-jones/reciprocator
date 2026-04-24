@@ -1,4 +1,5 @@
 import math
+from dataclasses import replace
 
 import pytest
 import torch
@@ -39,14 +40,25 @@ def test_training_module_exports_lisp_grpo_helpers() -> None:
     assert callable(train_lisp_grpo)
 
 
-def test_training_config_defaults_match_promoted_static_recipe() -> None:
+def test_training_config_defaults_match_stronger_experiment_baseline() -> None:
     config = TrainingConfig()
 
+    assert config.corpus_name == "greek_classics"
+    assert config.max_chars == 100000
+    assert config.batch_size == 8
+    assert config.seq_len == 128
+    assert config.steps == 2000
+    assert config.eval_every == 100
+    assert config.eval_batches == 4
+    assert config.learning_rate == pytest.approx(1e-3)
+    assert config.hidden_size == 256
+    assert config.state_shape == (4, 4, 4)
     assert config.readout_type == "phase_aware"
     assert config.token_magnitude_type == "inverse_frequency_learned"
     assert config.phase_type == "rope"
     assert config.token_phase == "semantic"
     assert config.coupling_type == "sequential"
+    assert config.enable_self_relation is True
     assert config.dynamic_spectral_gains is False
     assert config.anisotropic_spectral_gains is False
     assert config.normalization_type == "frobenius"
@@ -100,6 +112,12 @@ def test_train_model_smoke_runs() -> None:
     assert torch.isfinite(torch.tensor([loss for _, loss in result.val_losses])).all()
     assert all(0.0 <= metrics.accuracy <= 1.0 for _, metrics in result.train_metrics)
     assert all(0.0 <= metrics.accuracy <= 1.0 for _, metrics in result.val_metrics)
+    assert [row["step"] for row in result.residual_diagnostics] == [1, 2, 3]
+    assert all(row["state_shape"] == [2, 2] for row in result.residual_diagnostics)
+    assert all(row["growth_event_history"] == [] for row in result.residual_diagnostics)
+    assert all(row["cross_memory_residual"] == pytest.approx(0.0) for row in result.residual_diagnostics)
+    assert all(row["token_count"] == config.seq_len for row in result.residual_diagnostics)
+    assert all("mean_phase_variance" in row for row in result.residual_diagnostics)
 
     last_train_metrics = result.train_metrics[-1][1]
     last_val_metrics = result.val_metrics[-1][1]
@@ -469,6 +487,35 @@ def test_train_model_respects_min_checks_before_first_growth_before_attempting_d
     assert growth_attempt_steps == [4, 6]
 
 
+def test_train_model_logs_growth_event_history_at_validation(monkeypatch) -> None:
+    dataset = build_text_dataset("abcde " * 20, val_fraction=0.2, min_split_tokens=16)
+    config = TrainingConfig(
+        steps=2,
+        eval_every=1,
+        eval_batches=1,
+        batch_size=4,
+        seq_len=8,
+        hidden_size=12,
+        state_shape=(2, 2),
+        num_layers=1,
+        device="cpu",
+        dynamic_mode_growth=True,
+        growth_check_interval=1,
+        seed=0,
+    )
+    grown_config = replace(config, state_shape=(3, 2))
+    grown_model = training._build_model_from_config(grown_config, dataset, torch.device("cpu"))
+    growth_results = iter([(grown_model, grown_config), (None, None)])
+
+    monkeypatch.setattr(training, "_compute_mode_residual_norms", lambda model, token_ids: torch.tensor([1.0, 1.0]))
+    monkeypatch.setattr(training, "_try_dynamic_growth", lambda *args, **kwargs: next(growth_results))
+
+    result = train_model(config, dataset=dataset)
+
+    assert result.residual_diagnostics[0]["growth_event_history"] == [(1, [2, 2], [3, 2])]
+    assert result.residual_diagnostics[-1]["growth_event_history"] == [(1, [2, 2], [3, 2])]
+
+
 def test_train_model_records_residual_diagnostics_on_growth_check_cadence(monkeypatch) -> None:
     dataset = build_text_dataset("abcde " * 20, val_fraction=0.2, min_split_tokens=16)
     config = TrainingConfig(
@@ -532,17 +579,20 @@ def test_train_model_records_residual_diagnostics_on_growth_check_cadence(monkey
     assert residual_call_count == 2
     assert redundancy_call_count == 2
     assert slice_variance_call_count == 2
-    assert [row["step"] for row in result.residual_diagnostics] == [2, 4]
-    assert result.residual_diagnostics[0]["mode_residual_ema"] == pytest.approx([1.0, 0.5])
-    assert result.residual_diagnostics[1]["mode_residual_ema"] == pytest.approx([0.95, 0.525])
-    assert result.residual_diagnostics[0]["mode_redundancy_ema"] == pytest.approx([0.25, 0.75])
-    assert result.residual_diagnostics[1]["mode_redundancy_ema"] == pytest.approx([0.2625, 0.7125])
-    assert result.residual_diagnostics[0]["mode_slice_activation_variance_ema"][0] == pytest.approx([0.1, 0.2])
-    assert result.residual_diagnostics[0]["mode_slice_activation_variance_ema"][1] == pytest.approx([0.3, 0.4])
-    assert result.residual_diagnostics[1]["mode_slice_activation_variance_ema"][0] == pytest.approx([0.12, 0.22])
-    assert result.residual_diagnostics[1]["mode_slice_activation_variance_ema"][1] == pytest.approx([0.32, 0.42])
-    assert result.residual_diagnostics[0]["prune_candidate_streaks"] == [1, 0]
-    assert result.residual_diagnostics[1]["prune_candidate_streaks"] == [2, 0]
+    assert [row["step"] for row in result.residual_diagnostics] == [1, 2, 4]
+    rows_by_step = {row["step"]: row for row in result.residual_diagnostics}
+    assert rows_by_step[2]["mode_residual_ema"] == pytest.approx([1.0, 0.5])
+    assert rows_by_step[4]["mode_residual_ema"] == pytest.approx([0.95, 0.525])
+    assert rows_by_step[2]["mode_redundancy_ema"] == pytest.approx([0.25, 0.75])
+    assert rows_by_step[4]["mode_redundancy_ema"] == pytest.approx([0.2625, 0.7125])
+    assert rows_by_step[2]["mode_slice_activation_variance_ema"][0] == pytest.approx([0.1, 0.2])
+    assert rows_by_step[2]["mode_slice_activation_variance_ema"][1] == pytest.approx([0.3, 0.4])
+    assert rows_by_step[4]["mode_slice_activation_variance_ema"][0] == pytest.approx([0.12, 0.22])
+    assert rows_by_step[4]["mode_slice_activation_variance_ema"][1] == pytest.approx([0.32, 0.42])
+    assert rows_by_step[2]["prune_candidate_streaks"] == [1, 0]
+    assert rows_by_step[4]["prune_candidate_streaks"] == [2, 0]
+    assert rows_by_step[1]["cross_memory_residual"] == pytest.approx(0.0)
+    assert rows_by_step[4]["val_bpc"] == pytest.approx(result.val_metrics[-1][1].bpc)
 
 
 def test_train_model_records_layer_mode_residual_diagnostics_for_multilayer_models(monkeypatch) -> None:
@@ -580,14 +630,15 @@ def test_train_model_records_layer_mode_residual_diagnostics_for_multilayer_mode
 
     result = train_model(config, dataset=dataset)
 
-    assert result.residual_diagnostics[0]["layer_mode_residual_norms"][0] == pytest.approx([1.0, 0.5])
-    assert result.residual_diagnostics[0]["layer_mode_residual_norms"][1] == pytest.approx([0.2, 0.3])
-    assert result.residual_diagnostics[0]["layer_mode_residual_ema"][0] == pytest.approx([1.0, 0.5])
-    assert result.residual_diagnostics[0]["layer_mode_residual_ema"][1] == pytest.approx([0.2, 0.3])
-    assert result.residual_diagnostics[1]["layer_mode_residual_norms"][0] == pytest.approx([0.0, 1.0])
-    assert result.residual_diagnostics[1]["layer_mode_residual_norms"][1] == pytest.approx([0.8, 0.6])
-    assert result.residual_diagnostics[1]["layer_mode_residual_ema"][0] == pytest.approx([0.95, 0.525])
-    assert result.residual_diagnostics[1]["layer_mode_residual_ema"][1] == pytest.approx([0.23, 0.315])
+    rows_by_step = {row["step"]: row for row in result.residual_diagnostics}
+    assert rows_by_step[2]["layer_mode_residual_norms"][0] == pytest.approx([1.0, 0.5])
+    assert rows_by_step[2]["layer_mode_residual_norms"][1] == pytest.approx([0.2, 0.3])
+    assert rows_by_step[2]["layer_mode_residual_ema"][0] == pytest.approx([1.0, 0.5])
+    assert rows_by_step[2]["layer_mode_residual_ema"][1] == pytest.approx([0.2, 0.3])
+    assert rows_by_step[4]["layer_mode_residual_norms"][0] == pytest.approx([0.0, 1.0])
+    assert rows_by_step[4]["layer_mode_residual_norms"][1] == pytest.approx([0.8, 0.6])
+    assert rows_by_step[4]["layer_mode_residual_ema"][0] == pytest.approx([0.95, 0.525])
+    assert rows_by_step[4]["layer_mode_residual_ema"][1] == pytest.approx([0.23, 0.315])
 
 
 def test_train_model_records_residual_diagnostics_for_hybrid_attention_models() -> None:
@@ -616,6 +667,8 @@ def test_train_model_records_residual_diagnostics_for_hybrid_attention_models() 
     assert any(not hasattr(block, "mixer") for block in result.model.blocks)
     assert [row["step"] for row in result.residual_diagnostics] == [1, 2]
     assert len(result.residual_diagnostics[0]["layer_mode_residual_norms"]) == 2
+    assert math.isfinite(result.residual_diagnostics[0]["cross_memory_residual"])
+    assert result.residual_diagnostics[0]["cross_memory_residual"] >= 0.0
     assert [len(mode_variances) for mode_variances in result.residual_diagnostics[0]["mode_slice_activation_variance_ema"]] == [2, 2]
     assert all(
         math.isfinite(value) and value >= 0.0

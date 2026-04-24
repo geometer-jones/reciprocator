@@ -5,7 +5,7 @@ import re
 import sys
 import time
 import warnings
-from dataclasses import dataclass, replace
+from dataclasses import asdict, dataclass, replace
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
 try:
@@ -27,8 +27,9 @@ from .rl.training import (
     build_lisp_tokenizer,
     train_lisp_grpo,
 )
+from .rl.phase_monitor import PhaseTrajectoryMonitor
 from .mixer import canonicalize_coupling_type, phase_aware_feature_map
-from .model import ReciprocatorLM
+from .model import LocalAttentionBlock, ReciprocatorLM
 
 CHUNK_DRIFT_WARN_THRESHOLD = 0.05
 
@@ -82,21 +83,21 @@ class TextDataset:
 @dataclass(frozen=True)
 class TrainingConfig:
     corpus_name: str = "greek_classics"
-    max_chars: Optional[int] = 20000
+    max_chars: Optional[int] = 100000
     val_fraction: float = 0.1
     batch_size: int = 8
-    seq_len: int = 64
-    steps: int = 200
-    eval_every: int = 20
+    seq_len: int = 128
+    steps: int = 2000
+    eval_every: int = 100
     eval_batches: int = 4
-    learning_rate: float = 3e-3
+    learning_rate: float = 1e-3
     lr_warmup_steps: int = 0
     lr_decay_style: str = "constant"
     min_lr_scale: float = 0.1
     grad_clip_norm: Optional[float] = None
     weight_decay: float = 0.0
-    hidden_size: int = 32
-    state_shape: Tuple[int, ...] = (2, 2)
+    hidden_size: int = 256
+    state_shape: Tuple[int, ...] = (4, 4, 4)
     max_state_shape: Optional[Tuple[int, ...]] = None
     num_layers: int = 1
     ffn_expansion_factor: int = 2
@@ -104,7 +105,7 @@ class TrainingConfig:
     token_magnitude_type: str = "inverse_frequency_learned"
     phase_type: str = "rope"
     token_phase: str = "semantic"
-    enable_self_relation: bool = False
+    enable_self_relation: bool = True
     dynamic_gains: bool = False
     dynamic_spectral_gains: bool = False
     anisotropic_spectral_gains: bool = False
@@ -1972,6 +1973,135 @@ def _compute_batch_metrics(
     return loss, _build_metrics(float(loss.item()), accuracy), next_states, drift_stats
 
 
+def _record_residual_diagnostic_row(residual_diagnostics: list[dict], row: dict) -> None:
+    step = row["step"]
+    for existing in reversed(residual_diagnostics):
+        if existing.get("step") == step:
+            existing.update(row)
+            return
+    residual_diagnostics.append(row)
+
+
+def _reciprocator_state_tensors(states: Sequence[object]) -> Tuple[Tensor, ...]:
+    return tuple(state for state in states if isinstance(state, Tensor))
+
+
+def _compute_validation_cross_memory_residual(
+    model: ReciprocatorLM,
+    token_ids: Tensor,
+    *,
+    states: Sequence[object],
+) -> float:
+    captured_kv: list[Tuple[Tensor, Tensor]] = []
+    handles = []
+
+    def capture_attention_cache(_module, _inputs, output) -> None:
+        if not isinstance(output, tuple) or len(output) != 2:
+            return
+        kv_cache = output[1]
+        if (
+            isinstance(kv_cache, tuple)
+            and len(kv_cache) == 2
+            and isinstance(kv_cache[0], Tensor)
+            and isinstance(kv_cache[1], Tensor)
+        ):
+            captured_kv.append((kv_cache[0].detach(), kv_cache[1].detach()))
+
+    for block in model.blocks:
+        if isinstance(block, LocalAttentionBlock):
+            handles.append(block.register_forward_hook(capture_attention_cache))
+
+    if not handles:
+        return 0.0
+
+    training = model.training
+    model.eval()
+    try:
+        with torch.no_grad():
+            outputs = model(token_ids, states=states)
+    finally:
+        for handle in handles:
+            handle.remove()
+        model.train(training)
+
+    next_states = outputs[1]
+    tensor_states = _reciprocator_state_tensors(next_states)
+    if not captured_kv or not tensor_states:
+        return 0.0
+
+    residuals = [
+        model._compute_cross_memory_residual(kv_cache, tensor_states)
+        for kv_cache in captured_kv
+    ]
+    return float(sum(residuals) / len(residuals))
+
+
+def _initial_validation_states(
+    model: ReciprocatorLM,
+    *,
+    batch_size: int,
+    device: torch.device,
+    carry_states: Optional[Sequence[object]],
+) -> Tuple[object, ...]:
+    if carry_states is None:
+        return model.initial_state(batch_size, device=device, dtype=torch.cfloat)
+    return tuple(_detach_state_element(state) for state in carry_states)
+
+
+def _format_growth_event_history(
+    growth_event_history: Sequence[Tuple[int, Tuple[int, ...], Tuple[int, ...]]],
+) -> list[tuple[int, list[int], list[int]]]:
+    return [
+        (int(event_step), list(old_shape), list(new_shape))
+        for event_step, old_shape, new_shape in growth_event_history
+    ]
+
+
+def _build_validation_diagnostic_row(
+    model: ReciprocatorLM,
+    tokens: Tensor,
+    *,
+    step: int,
+    val_metric: TrainingMetrics,
+    config: TrainingConfig,
+    carry_states: Optional[Sequence[object]],
+    growth_event_history: Sequence[Tuple[int, Tuple[int, ...], Tuple[int, ...]]],
+    device: torch.device,
+) -> dict:
+    with torch.random.fork_rng():
+        sample_inputs, _ = sample_causal_lm_batch(
+            tokens,
+            config.batch_size,
+            config.seq_len,
+            device=device,
+        )
+
+    diagnostic_states = _initial_validation_states(
+        model,
+        batch_size=sample_inputs.shape[0],
+        device=device,
+        carry_states=carry_states,
+    )
+    cross_memory_residual = _compute_validation_cross_memory_residual(
+        model,
+        sample_inputs,
+        states=diagnostic_states,
+    )
+    phase_stats = PhaseTrajectoryMonitor().record(model, sample_inputs)
+
+    return {
+        "step": step,
+        "state_shape": list(config.state_shape),
+        "growth_event_history": _format_growth_event_history(growth_event_history),
+        "val_loss": val_metric.loss,
+        "val_accuracy": val_metric.accuracy,
+        "val_perplexity": val_metric.perplexity,
+        "val_bpc": val_metric.bpc,
+        "cross_memory_residual": cross_memory_residual,
+        **asdict(phase_stats),
+    }
+
+
 def _build_model_from_config(
     config: TrainingConfig,
     dataset: TextDataset,
@@ -2493,6 +2623,7 @@ def train_model(
     mode_slice_activation_variance_ema = None
     prune_candidate_streaks = [0] * len(config.state_shape)
     mode_last_growth_steps = [0] * len(config.state_shape)
+    growth_event_history: list[Tuple[int, Tuple[int, ...], Tuple[int, ...]]] = []
     state_axis_kinds = ["mode"] * len(config.state_shape)
 
     train_losses: list[float] = []
@@ -2594,7 +2725,8 @@ def train_model(
                 )
 
             if config.record_residual_diagnostics:
-                residual_diagnostics.append(
+                _record_residual_diagnostic_row(
+                    residual_diagnostics,
                     {
                         "step": step,
                         "state_shape": list(config.state_shape),
@@ -2629,7 +2761,7 @@ def train_model(
                         "prune_candidate_streaks": list(prune_candidate_streaks),
                         "recent_chunk_drift_mean": recent_chunk_drift_mean,
                         "recent_chunk_drift_max": recent_chunk_drift_max,
-                    }
+                    },
                 )
 
         # Dynamic growth check (mode-size and/or rank), using EMA-smoothed residual norms.
@@ -2676,6 +2808,9 @@ def train_model(
                     previous_shape,
                     tuple(config.state_shape),
                 )
+                new_shape = tuple(config.state_shape)
+                if new_shape != previous_shape:
+                    growth_event_history.append((step, previous_shape, new_shape))
                 if config.stateful_training:
                     carry_states = tuple(None for _ in model.blocks)
                 force_exact_steps = config.growth_check_interval
@@ -2785,6 +2920,19 @@ def train_model(
             )
             val_losses.append((step, val_metric.loss))
             val_metrics.append((step, val_metric))
+            _record_residual_diagnostic_row(
+                residual_diagnostics,
+                _build_validation_diagnostic_row(
+                    model,
+                    dataset.val_tokens,
+                    step=step,
+                    val_metric=val_metric,
+                    config=config,
+                    carry_states=carry_states,
+                    growth_event_history=growth_event_history,
+                    device=device,
+                ),
+            )
 
         if step_callback is not None:
             step_callback(

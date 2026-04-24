@@ -67,16 +67,16 @@ def parse_coupling_type(raw: str) -> str:
 
 def build_parser() -> argparse.ArgumentParser:
     corpora = [corpus.name for corpus in available_corpora()]
-    parser = argparse.ArgumentParser(description="Run a minimal character-level training loop.")
+    parser = argparse.ArgumentParser(description="Run a character-level training loop.")
     parser.add_argument("--corpus", choices=corpora, default="greek_classics")
-    parser.add_argument("--max-chars", type=int, default=20000)
+    parser.add_argument("--max-chars", type=int, default=100000)
     parser.add_argument("--val-fraction", type=float, default=0.1)
     parser.add_argument("--batch-size", type=int, default=8)
-    parser.add_argument("--seq-len", type=int, default=64)
-    parser.add_argument("--steps", type=int, default=200)
-    parser.add_argument("--eval-every", type=int, default=20)
+    parser.add_argument("--seq-len", type=int, default=128)
+    parser.add_argument("--steps", type=int, default=2000)
+    parser.add_argument("--eval-every", type=int, default=100)
     parser.add_argument("--eval-batches", type=int, default=4)
-    parser.add_argument("--lr", type=float, default=3e-3)
+    parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--lr-warmup-steps", type=int, default=0)
     parser.add_argument(
         "--lr-decay-style",
@@ -87,8 +87,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--min-lr-scale", type=float, default=0.1)
     parser.add_argument("--grad-clip-norm", type=float, default=None)
     parser.add_argument("--weight-decay", type=float, default=0.0)
-    parser.add_argument("--hidden-size", type=int, default=32)
-    parser.add_argument("--state-shape", type=parse_state_shape, default=(2, 2))
+    parser.add_argument("--hidden-size", type=int, default=256)
+    parser.add_argument("--state-shape", type=parse_state_shape, default=(4, 4, 4))
     parser.add_argument(
         "--max-state-shape",
         type=parse_state_shape,
@@ -115,10 +115,19 @@ def build_parser() -> argparse.ArgumentParser:
         default="frobenius",
         help="Tensor-state normalization: frobenius or per_mode.",
     )
-    parser.add_argument(
+    self_relation_group = parser.add_mutually_exclusive_group()
+    self_relation_group.add_argument(
         "--enable-self-relation",
+        dest="enable_self_relation",
         action="store_true",
-        help="Add the optional prior-state × tentative-present Hadamard self-relation term.",
+        default=True,
+        help="Add the optional prior-state × tentative-present Hadamard self-relation term (enabled by default).",
+    )
+    self_relation_group.add_argument(
+        "--disable-self-relation",
+        dest="enable_self_relation",
+        action="store_false",
+        help="Disable the prior-state × tentative-present Hadamard self-relation term.",
     )
     parser.add_argument(
         "--dynamic-spectral-gains",

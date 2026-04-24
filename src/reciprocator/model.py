@@ -532,6 +532,39 @@ class ReciprocatorLM(nn.Module):
         features = phase_aware_feature_map(state, batch_dim=True)
         return features.reshape(state.shape[0], -1)
 
+    @staticmethod
+    def _compute_cross_memory_residual(
+        kv_cache: Tuple[Tensor, Tensor],
+        states: Tuple[Optional[Tensor], ...],
+    ) -> float:
+        K, V = kv_cache
+        if K.numel() == 0 or V.numel() == 0:
+            return 0.0
+
+        kv_summary = torch.cat([K, V], dim=-1).mean(dim=(0, 1)).reshape(-1)
+        state_summaries = []
+        for state in states:
+            if state is None or not isinstance(state, Tensor):
+                continue
+            features = phase_aware_feature_map(state, batch_dim=True)
+            state_summaries.append(features.mean(dim=0).reshape(-1))
+
+        if not state_summaries:
+            return 0.0
+
+        tensor_summary = torch.cat(state_summaries).to(device=kv_summary.device)
+        if torch.is_complex(kv_summary) and not torch.is_complex(tensor_summary):
+            tensor_summary = torch.complex(tensor_summary, torch.zeros_like(tensor_summary))
+        else:
+            tensor_summary = tensor_summary.to(dtype=kv_summary.dtype)
+
+        compare_size = min(kv_summary.numel(), tensor_summary.numel())
+        if compare_size == 0:
+            return 0.0
+
+        residual = kv_summary[:compare_size] - tensor_summary[:compare_size]
+        return float(torch.linalg.vector_norm(residual).item())
+
     def _inject_cross_layer_state(
         self,
         hidden: Tensor,
