@@ -688,6 +688,18 @@ one of four strategies:
   itself, rescaled to match the typical norm of existing slices. Unlike
   `orthogonal`, this does not project out overlap with the existing basis.
 
+After any mode or rank growth event, `post_growth_cooldown_checks` can raise the
+effective mode-growth threshold for the next few growth-check intervals:
+
+```math
+effective_threshold = growth_residual_threshold * post_growth_cooldown_threshold_scale
+```
+
+The default cooldown length is `0`, preserving the original trigger behavior. A
+typical stabilizing setting is two or three checks with a scale around `1.5` to
+`1.8`, giving newly added slices time to absorb signal before the mode-growth
+trigger returns to its baseline sensitivity.
+
 ### Rank growth
 
 When `dynamic_rank_growth` is enabled, all mode residuals are below

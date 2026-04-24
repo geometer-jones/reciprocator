@@ -153,6 +153,8 @@ If you want to experiment with attention today, do it programmatically through
 - `--max-rank`
 - `--growth-check-interval`
 - `--growth-residual-threshold`
+- `--post-growth-cooldown-checks`
+- `--post-growth-cooldown-threshold-scale`
 - `--residual-saturate-threshold`
 - `--growth-residual-ema-decay`
 - `--min-checks-before-first-growth`
@@ -168,6 +170,14 @@ If you want to experiment with attention today, do it programmatically through
 These are research features rather than stable production controls. When used
 with `--record-residual-diagnostics`, the run can emit a JSON diagnostics file
 describing residual and redundancy signals across growth checks.
+
+`--post-growth-cooldown-checks` temporarily raises the mode-growth trigger after
+any mode or rank growth event. The raised threshold applies for that many later
+growth-check intervals, using:
+`growth_residual_threshold * post_growth_cooldown_threshold_scale`. For example,
+`--post-growth-cooldown-checks 2 --post-growth-cooldown-threshold-scale 1.5`
+makes the next two growth checks use a +50% mode-growth threshold before
+returning to the baseline.
 
 ## Generation and benchmark outputs
 

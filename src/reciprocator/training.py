@@ -128,6 +128,8 @@ class TrainingConfig:
     max_rank: Optional[int] = None
     growth_check_interval: int = 50
     growth_residual_threshold: float = 0.4
+    post_growth_cooldown_checks: int = 0
+    post_growth_cooldown_threshold_scale: float = 1.5
     residual_saturate_threshold: float = 0.4
     growth_residual_ema_decay: float = 0.95
     record_residual_diagnostics: bool = False
@@ -512,17 +514,32 @@ def _update_pruning_candidate_streaks(
     return updated_streaks
 
 
+def _effective_growth_residual_threshold(
+    config: TrainingConfig,
+    post_growth_cooldown_checks_remaining: int,
+) -> float:
+    threshold = float(config.growth_residual_threshold)
+    if post_growth_cooldown_checks_remaining <= 0:
+        return threshold
+    return threshold * float(config.post_growth_cooldown_threshold_scale)
+
+
 def _select_dynamic_growth_action(
     config: TrainingConfig,
     smoothed_mode_residual_norms: Tensor,
     recent_losses: Sequence[float],
+    effective_growth_residual_threshold: Optional[float] = None,
 ) -> Optional[Tuple[str, int]]:
     current_shape = tuple(config.state_shape)
     current_rank = len(current_shape)
     if smoothed_mode_residual_norms.shape != (current_rank,):
         raise ValueError("smoothed_mode_residual_norms must have shape [rank].")
 
-    threshold = config.growth_residual_threshold
+    threshold = (
+        config.growth_residual_threshold
+        if effective_growth_residual_threshold is None
+        else effective_growth_residual_threshold
+    )
     residual_saturate_threshold = config.residual_saturate_threshold
     max_rank = config.max_rank or current_rank + 2
     max_shape = _effective_max_state_shape(config)
@@ -2147,6 +2164,7 @@ def _try_dynamic_growth(
     recent_losses: List[float],
     smoothed_mode_residual_norms: Tensor,
     reference_token_ids: Optional[Tensor] = None,
+    effective_growth_residual_threshold: Optional[float] = None,
 ) -> Tuple[Optional[ReciprocatorLM], Optional[TrainingConfig]]:
     if not config.dynamic_mode_growth and not config.dynamic_rank_growth:
         return None, None
@@ -2155,6 +2173,7 @@ def _try_dynamic_growth(
         config,
         smoothed_mode_residual_norms,
         recent_losses,
+        effective_growth_residual_threshold=effective_growth_residual_threshold,
     )
     if growth_action is None:
         return None, None
@@ -2515,6 +2534,10 @@ def _validate_training_config(config: TrainingConfig) -> None:
         raise ValueError("gain_projector_rank must be positive.")
     if config.growth_residual_threshold < 0:
         raise ValueError("growth_residual_threshold must be non-negative.")
+    if config.post_growth_cooldown_checks < 0:
+        raise ValueError("post_growth_cooldown_checks must be non-negative.")
+    if config.post_growth_cooldown_threshold_scale < 1.0:
+        raise ValueError("post_growth_cooldown_threshold_scale must be at least 1.0.")
     if config.residual_saturate_threshold < 0:
         raise ValueError("residual_saturate_threshold must be non-negative.")
     if not 0.0 <= config.growth_residual_ema_decay < 1.0:
@@ -2635,6 +2658,7 @@ def train_model(
     residual_diagnostics: list[dict] = []
     chunk_drift_history: list[dict] = []
     force_exact_steps = 0
+    post_growth_cooldown_checks_remaining = 0
 
     # Stateful training: B independent corpus streams, state carried across chunks.
     carry_states: Optional[Tuple[Optional[Tensor], ...]] = None
@@ -2667,6 +2691,10 @@ def train_model(
                 device=device,
             )
         growth_check_due = step > 0 and step % config.growth_check_interval == 0
+        effective_growth_residual_threshold = _effective_growth_residual_threshold(
+            config,
+            post_growth_cooldown_checks_remaining,
+        )
         if growth_check_due:
             recent_chunk_drift_mean = None
             recent_chunk_drift_max = None
@@ -2733,6 +2761,8 @@ def train_model(
                         "axis_kinds": list(state_axis_kinds),
                         "mode_residual_norms": current_mode_residual_norms.tolist(),
                         "mode_residual_ema": mode_residual_ema.tolist(),
+                        "effective_growth_residual_threshold": effective_growth_residual_threshold,
+                        "post_growth_cooldown_checks_remaining": post_growth_cooldown_checks_remaining,
                         "layer_mode_residual_norms": (
                             []
                             if current_layer_mode_residual_norms is None
@@ -2767,6 +2797,7 @@ def train_model(
         # Dynamic growth check (mode-size and/or rank), using EMA-smoothed residual norms.
         previous_shape = tuple(config.state_shape)
         shape_changed = False
+        post_growth_cooldown_reset = False
         growth_check_ready = (
             growth_check_due and step // config.growth_check_interval >= config.min_checks_before_first_growth
         )
@@ -2783,6 +2814,7 @@ def train_model(
                 train_losses,
                 mode_residual_ema,
                 reference_token_ids=inputs,
+                effective_growth_residual_threshold=effective_growth_residual_threshold,
             )
             if new_model is not None:
                 model = new_model
@@ -2811,6 +2843,8 @@ def train_model(
                 new_shape = tuple(config.state_shape)
                 if new_shape != previous_shape:
                     growth_event_history.append((step, previous_shape, new_shape))
+                    post_growth_cooldown_checks_remaining = config.post_growth_cooldown_checks
+                    post_growth_cooldown_reset = True
                 if config.stateful_training:
                     carry_states = tuple(None for _ in model.blocks)
                 force_exact_steps = config.growth_check_interval
@@ -2875,6 +2909,13 @@ def train_model(
                 if config.stateful_training:
                     carry_states = tuple(None for _ in model.blocks)
                 force_exact_steps = config.growth_check_interval
+
+        if (
+            growth_check_due
+            and post_growth_cooldown_checks_remaining > 0
+            and not post_growth_cooldown_reset
+        ):
+            post_growth_cooldown_checks_remaining -= 1
 
         model.train()
         optimizer.zero_grad()

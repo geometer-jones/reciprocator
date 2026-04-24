@@ -62,6 +62,8 @@ def test_training_config_defaults_match_stronger_experiment_baseline() -> None:
     assert config.dynamic_spectral_gains is False
     assert config.anisotropic_spectral_gains is False
     assert config.normalization_type == "frobenius"
+    assert config.post_growth_cooldown_checks == 0
+    assert config.post_growth_cooldown_threshold_scale == pytest.approx(1.5)
     assert config.num_layers == 1
 
 
@@ -398,6 +400,8 @@ def test_configure_tensor_dynamic_growth_skips_non_cuda_or_disabled(monkeypatch)
         ("residual_saturate_threshold", -0.1),
         ("growth_residual_ema_decay", -0.1),
         ("growth_residual_ema_decay", 1.0),
+        ("post_growth_cooldown_checks", -1),
+        ("post_growth_cooldown_threshold_scale", 0.99),
         ("chunk_size", 0),
         ("min_checks_before_first_growth", -1),
         ("rank_growth_loss_ceiling", -0.1),
@@ -476,6 +480,7 @@ def test_train_model_respects_min_checks_before_first_growth_before_attempting_d
         recent_losses,
         smoothed_mode_residual_norms,
         reference_token_ids=None,
+        effective_growth_residual_threshold=None,
     ):
         growth_attempt_steps.append(len(recent_losses) + 1)
         return None, None
@@ -514,6 +519,52 @@ def test_train_model_logs_growth_event_history_at_validation(monkeypatch) -> Non
 
     assert result.residual_diagnostics[0]["growth_event_history"] == [(1, [2, 2], [3, 2])]
     assert result.residual_diagnostics[-1]["growth_event_history"] == [(1, [2, 2], [3, 2])]
+
+
+def test_train_model_applies_post_growth_cooldown_threshold_for_next_checks(monkeypatch) -> None:
+    dataset = build_text_dataset("abcde " * 20, val_fraction=0.2, min_split_tokens=16)
+    config = TrainingConfig(
+        steps=4,
+        eval_every=10,
+        eval_batches=1,
+        batch_size=4,
+        seq_len=8,
+        hidden_size=12,
+        state_shape=(2, 2),
+        num_layers=1,
+        device="cpu",
+        dynamic_mode_growth=True,
+        growth_check_interval=1,
+        growth_residual_threshold=0.4,
+        post_growth_cooldown_checks=2,
+        post_growth_cooldown_threshold_scale=1.5,
+        seed=0,
+    )
+    grown_config = replace(config, state_shape=(3, 2))
+    grown_model = training._build_model_from_config(grown_config, dataset, torch.device("cpu"))
+    effective_thresholds = []
+
+    def fake_try_dynamic_growth(
+        model,
+        callback_config,
+        callback_dataset,
+        device,
+        recent_losses,
+        smoothed_mode_residual_norms,
+        reference_token_ids=None,
+        effective_growth_residual_threshold=None,
+    ):
+        effective_thresholds.append(effective_growth_residual_threshold)
+        if len(effective_thresholds) == 1:
+            return grown_model, grown_config
+        return None, None
+
+    monkeypatch.setattr(training, "_compute_mode_residual_norms", lambda model, token_ids: torch.tensor([1.0, 1.0]))
+    monkeypatch.setattr(training, "_try_dynamic_growth", fake_try_dynamic_growth)
+
+    train_model(config, dataset=dataset)
+
+    assert effective_thresholds == pytest.approx([0.4, 0.6, 0.6, 0.4])
 
 
 def test_train_model_records_residual_diagnostics_on_growth_check_cadence(monkeypatch) -> None:
@@ -1322,6 +1373,24 @@ def test_select_dynamic_growth_action_prefers_mode_growth_when_residual_threshol
     )
 
     assert action == ("mode", 0)
+
+
+def test_select_dynamic_growth_action_respects_effective_cooldown_threshold() -> None:
+    config = TrainingConfig(
+        state_shape=(2, 3, 4),
+        max_state_shape=(3, 4, 4),
+        dynamic_mode_growth=True,
+        growth_residual_threshold=0.25,
+    )
+
+    action = training._select_dynamic_growth_action(
+        config,
+        smoothed_mode_residual_norms=torch.tensor([0.3, 0.2, 0.1]),
+        recent_losses=[3.0] * 50,
+        effective_growth_residual_threshold=0.35,
+    )
+
+    assert action is None
 
 
 def test_select_dynamic_growth_action_uses_rank_growth_when_mode_residuals_are_saturated_and_loss_is_high() -> None:

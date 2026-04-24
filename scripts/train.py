@@ -232,6 +232,18 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-rank", type=int, default=None)
     parser.add_argument("--growth-check-interval", type=int, default=50)
     parser.add_argument("--growth-residual-threshold", type=float, default=0.4)
+    parser.add_argument(
+        "--post-growth-cooldown-checks",
+        type=int,
+        default=0,
+        help="Number of growth-check intervals after a growth event that use an elevated growth threshold.",
+    )
+    parser.add_argument(
+        "--post-growth-cooldown-threshold-scale",
+        type=float,
+        default=1.5,
+        help="Multiplier applied to growth_residual_threshold during post-growth cooldown checks.",
+    )
     parser.add_argument("--residual-saturate-threshold", type=float, default=0.4)
     parser.add_argument("--growth-residual-ema-decay", type=float, default=0.95)
     parser.add_argument(
@@ -416,6 +428,8 @@ def main() -> None:
         max_rank=args.max_rank,
         growth_check_interval=args.growth_check_interval,
         growth_residual_threshold=args.growth_residual_threshold,
+        post_growth_cooldown_checks=args.post_growth_cooldown_checks,
+        post_growth_cooldown_threshold_scale=args.post_growth_cooldown_threshold_scale,
         residual_saturate_threshold=args.residual_saturate_threshold,
         growth_residual_ema_decay=args.growth_residual_ema_decay,
         record_residual_diagnostics=args.record_residual_diagnostics,

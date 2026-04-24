@@ -61,6 +61,8 @@ def test_build_parser_exposes_phase_and_growth_defaults() -> None:
     assert args.max_state_shape is None
     assert args.growth_check_interval == 50
     assert args.growth_residual_threshold == 0.4
+    assert args.post_growth_cooldown_checks == 0
+    assert args.post_growth_cooldown_threshold_scale == 1.5
     assert args.residual_saturate_threshold == 0.4
     assert args.growth_residual_ema_decay == 0.95
     assert args.record_residual_diagnostics is False
@@ -116,6 +118,10 @@ def test_build_parser_parses_max_state_shape_like_state_shape() -> None:
             "--dynamic-rank-pruning",
             "--growth-residual-threshold",
             "0.35",
+            "--post-growth-cooldown-checks",
+            "3",
+            "--post-growth-cooldown-threshold-scale",
+            "1.8",
             "--residual-saturate-threshold",
             "0.12",
             "--growth-residual-ema-decay",
@@ -190,6 +196,8 @@ def test_build_parser_parses_max_state_shape_like_state_shape() -> None:
     assert args.dynamic_mode_pruning is True
     assert args.dynamic_rank_pruning is True
     assert args.growth_residual_threshold == 0.35
+    assert args.post_growth_cooldown_checks == 3
+    assert args.post_growth_cooldown_threshold_scale == 1.8
     assert args.residual_saturate_threshold == 0.12
     assert args.growth_residual_ema_decay == 0.9
     assert args.lr_warmup_steps == 25
