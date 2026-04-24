@@ -409,6 +409,124 @@ def test_self_relation_flag_changes_update_when_gain_is_nonzero() -> None:
     assert not torch.allclose(self_related_state, next_state, atol=1e-5)
 
 
+def test_cross_bilinear_disabled_matches_baseline() -> None:
+    torch.manual_seed(0)
+    mixer = ReciprocatorMixer(
+        hidden_size=6,
+        state_shape=(2, 2),
+        enable_cross_bilinear=False,
+    )
+    torch.manual_seed(0)
+    cross_mixer = ReciprocatorMixer(
+        hidden_size=6,
+        state_shape=(2, 2),
+        enable_cross_bilinear=True,
+        cross_bilinear_rank=3,
+    )
+    hidden = random_complex(2, 4, 6)
+
+    with torch.no_grad():
+        mixer.recurrent_logit.fill_(1.0)
+        cross_mixer.recurrent_logit.fill_(1.0)
+
+    delta, state = mixer(hidden)
+    cross_delta, cross_state = cross_mixer(hidden)
+
+    assert mixer.cross_bilinear is None
+    assert cross_mixer.cross_bilinear is not None
+    assert torch.allclose(cross_delta, delta, atol=0.0, rtol=0.0)
+    assert torch.allclose(cross_state, state, atol=0.0, rtol=0.0)
+
+
+def test_cross_bilinear_is_enabled_by_default() -> None:
+    mixer = ReciprocatorMixer(hidden_size=6, state_shape=(2, 2))
+
+    assert mixer.enable_cross_bilinear is True
+    assert mixer.cross_bilinear is not None
+
+
+def test_cross_bilinear_gradients_flow() -> None:
+    torch.manual_seed(0)
+    mixer = ReciprocatorMixer(
+        hidden_size=6,
+        state_shape=(2, 2),
+        enable_cross_bilinear=True,
+        cross_bilinear_rank=3,
+    )
+    assert mixer.cross_bilinear is not None
+    bilinear = mixer.cross_bilinear
+    optimizer = torch.optim.SGD(bilinear.parameters(), lr=0.1)
+    z_flat = random_complex(5, mixer.state_size)
+    target = random_complex(5, mixer.state_size)
+
+    loss = (bilinear(z_flat) - target).abs().square().sum()
+    loss.backward()
+
+    assert bilinear.W.weight_real.grad is not None
+    assert bilinear.W.weight_real.grad.abs().sum().item() > 0.0
+
+    optimizer.step()
+    optimizer.zero_grad()
+
+    second_target = random_complex(5, mixer.state_size)
+    second_loss = (bilinear(z_flat) - second_target).abs().square().sum()
+    second_loss.backward()
+
+    for projection in (bilinear.U, bilinear.V, bilinear.W):
+        grad_magnitude = projection.weight_real.grad.abs().sum()
+        grad_magnitude = grad_magnitude + projection.weight_imag.grad.abs().sum()
+        assert grad_magnitude.item() > 0.0
+
+
+def test_cross_bilinear_chunked_matches_sequential() -> None:
+    torch.manual_seed(0)
+    mixer = ReciprocatorMixer(
+        hidden_size=8,
+        state_shape=(2, 3),
+        enable_cross_bilinear=True,
+        cross_bilinear_rank=4,
+    )
+    assert mixer.cross_bilinear is not None
+    hidden = random_complex(2, 8, 8)
+
+    with torch.no_grad():
+        mixer.recurrent_logit.fill_(1.0)
+        mixer.cross_bilinear.W.weight_real.normal_(mean=0.0, std=0.02)
+        mixer.cross_bilinear.W.weight_imag.normal_(mean=0.0, std=0.02)
+
+    out_seq, state_seq = mixer(hidden)
+    out_k1, state_k1 = mixer(hidden, chunk_size=1)
+
+    assert torch.allclose(out_k1, out_seq, atol=0.0)
+    assert torch.allclose(state_k1, state_seq, atol=0.0)
+
+
+@pytest.mark.parametrize("state_shape", [(4,), (3, 4), (2, 3, 4)])
+def test_cross_bilinear_shapes(state_shape: tuple[int, ...]) -> None:
+    torch.manual_seed(0)
+    mixer = ReciprocatorMixer(
+        hidden_size=8,
+        state_shape=state_shape,
+        enable_cross_bilinear=True,
+        cross_bilinear_rank=4,
+    )
+    assert mixer.cross_bilinear is not None
+    hidden = random_complex(2, 5, 8)
+
+    with torch.no_grad():
+        mixer.recurrent_logit.fill_(1.0)
+        mixer.cross_bilinear.W.weight_real.normal_(mean=0.0, std=0.02)
+        mixer.cross_bilinear.W.weight_imag.normal_(mean=0.0, std=0.02)
+
+    out, state = mixer(hidden)
+    chunked_out, chunked_state = mixer(hidden, chunk_size=2)
+
+    assert out.shape == hidden.shape
+    assert state.shape == (hidden.shape[0], *state_shape)
+    assert chunked_out.shape == hidden.shape
+    assert chunked_state.shape == (hidden.shape[0], *state_shape)
+
+
 def test_return_map_features_are_phase_invariant_and_compact() -> None:
     mixer = ReciprocatorMixer(hidden_size=6, state_shape=(2, 3))
     state = random_complex(2, 2, 3)

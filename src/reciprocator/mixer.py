@@ -9,6 +9,7 @@ import torch.nn.functional as F
 from torch import Tensor, nn
 
 from .complex_ops import (
+    ComplexLinear,
     ComplexLayerNorm,
     RealToComplexLinear,
     canonicalize_normalization_type,
@@ -620,6 +621,24 @@ class WaveletPacketSpectralCoupling(_WaveletCouplingBase):
         return self._reshape(reconstructed, original_shape).to(tensor.dtype)
 
 
+class CrossDimensionalBilinear(nn.Module):
+    def __init__(self, state_size: int, rank: int = 8) -> None:
+        super().__init__()
+        self.U = ComplexLinear(state_size, rank, bias=False)
+        self.V = ComplexLinear(state_size, rank, bias=False)
+        self.W = ComplexLinear(rank, state_size, bias=False)
+        # Zero only the output head: the residual is inert at init, while U/V
+        # remain live once W receives its first gradient update.
+        nn.init.zeros_(self.W.weight_real)
+        nn.init.zeros_(self.W.weight_imag)
+
+    def forward(self, z_flat: Tensor) -> Tensor:
+        p = self.U(z_flat)
+        q = self.V(z_flat)
+        gamma = p * q.conj()
+        return self.W(gamma)
+
+
 class ReciprocatorMixer(nn.Module):
     def __init__(
         self,
@@ -638,6 +657,8 @@ class ReciprocatorMixer(nn.Module):
         wavelet_levels: Optional[int] = None,
         phase_scale: float = math.pi,
         normalization_type: str = "frobenius",
+        enable_cross_bilinear: bool = True,
+        cross_bilinear_rank: int = 8,
         eps: float = 1e-8,
     ) -> None:
         super().__init__()
@@ -651,6 +672,8 @@ class ReciprocatorMixer(nn.Module):
         self.dynamic_spectral_gains = dynamic_spectral_gains
         self.anisotropic_spectral_gains = anisotropic_spectral_gains
         self.normalization_type = canonicalize_normalization_type(normalization_type)
+        self.enable_cross_bilinear = enable_cross_bilinear
+        self.cross_bilinear_rank = cross_bilinear_rank
         self.eps = eps
 
         self.pre_norm = ComplexLayerNorm(hidden_size, eps=eps)
@@ -743,6 +766,13 @@ class ReciprocatorMixer(nn.Module):
                 eps=self.eps,
             ).squeeze(0)
         )
+        if self.enable_cross_bilinear:
+            self.cross_bilinear = CrossDimensionalBilinear(
+                self.state_size,
+                rank=self.cross_bilinear_rank,
+            )
+        else:
+            self.cross_bilinear = None
 
     def initial_state(self, batch_size: int, *, device: torch.device, dtype: torch.dtype) -> Tensor:
         """Return the learned initial state prior, broadcast over the batch."""
@@ -794,6 +824,9 @@ class ReciprocatorMixer(nn.Module):
         decay_logit, input_logit, recurrent_logit = self._gain_logits(signal)
         relational = signal * state
         routed = self.coupling(relational)
+        if self.cross_bilinear is not None:
+            z_flat = relational.reshape(relational.shape[0], -1)
+            routed = routed + self.cross_bilinear(z_flat).reshape(relational.shape)
         state_dims = tuple(range(1, state.ndim))
 
         proposal = (
@@ -897,6 +930,11 @@ class ReciprocatorMixer(nn.Module):
                 )
                 Z_flat = s_flat * stale_flat
                 routed_flat = self.coupling(Z_flat)  # [B*L_rest, *state_shape]
+                if self.cross_bilinear is not None:
+                    z_flat = Z_flat.reshape(Z_flat.shape[0], -1)
+                    routed_flat = routed_flat + self.cross_bilinear(z_flat).reshape(
+                        Z_flat.shape
+                    )
                 routed_stale = routed_flat.reshape(B, L_rest, *state_shape)
 
                 if self.enable_dynamic_gains:
